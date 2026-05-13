@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Directory | Street Lamp</title>
+  <style>
+    @import url('https://use.typekit.net/wby1ytb.css');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #020202; --text: #f5f0e8; --text-dim: rgba(245,240,232,0.5);
+      --text-faint: rgba(245,240,232,0.22); --rule: rgba(245,240,232,0.1);
+      --gold: #cc9900; --youth: #cc3399; --community: #00aa99;
+      --font: 'komet','Jost',sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; padding: 60px 40px 100px; max-width: 900px; margin: 0 auto; }
+    header { display: flex; align-items: center; gap: 20px; margin-bottom: 64px; }
+    header svg { width: 44px; opacity: 0.6; }
+    header h1 { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.45em; text-transform: uppercase; color: var(--text-dim); }
+    .section { margin-bottom: 48px; }
+    .section-heading { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.45em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+    .link-grid { display: flex; flex-direction: column; gap: 2px; }
+    .link-item { display: flex; align-items: baseline; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--text); transition: color 0.15s; }
+    .link-item:last-child { border-bottom: none; }
+    .link-item:hover { color: var(--gold); }
+    .link-item:hover .link-url { color: var(--gold); }
+    .link-label { font-size: 0.9rem; font-weight: 400; letter-spacing: 0.04em; min-width: 220px; }
+    .link-url { font-size: 0.65rem; font-weight: 300; letter-spacing: 0.08em; color: var(--text-faint); font-family: 'Courier New', monospace; }
+    .link-tag { font-size: 0.45rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; padding: 3px 8px; border: 1px solid; margin-left: auto; flex-shrink: 0; }
+    .tag-squarespace { color: var(--text-faint); border-color: var(--rule); }
+    .tag-github { color: var(--gold); border-color: rgba(204,153,0,0.35); }
+    .tag-appscript { color: var(--community); border-color: rgba(0,170,153,0.35); }
+    @media (max-width: 600px) { body { padding: 40px 20px 80px; } .link-label { min-width: 0; } .link-url { display: none; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="https://streetlamp.org">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+      <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+      <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+      <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+    </svg>
+  </a>
+  <h1>Street Lamp · Site Directory</h1>
+</header>
+
+<div class="section">
+  <p class="section-heading">Main Site (Squarespace)</p>
+  <div class="link-grid">
+    <a class="link-item" href="https://streetlamp.org" target="_blank">
+      <span class="link-label">Homepage</span>
+      <span class="link-url">streetlamp.org</span>
+      <span class="link-tag tag-squarespace">Squarespace</span>
+    </a>
+    <a class="link-item" href="https://streetlamp.org/community-theatre" target="_blank">
+      <span class="link-label">Community Theatre</span>
+      <span class="link-url">streetlamp.org/community-theatre</span>
+      <span class="link-tag tag-squarespace">Squarespace</span>
+    </a>
+    <a class="link-item" href="https://streetlamp.org/meet-our-staff" target="_blank">
+      <span class="link-label">Meet Our Staff</span>
+      <span class="link-url">streetlamp.org/meet-our-staff</span>
+      <span class="link-tag tag-squarespace">Squarespace</span>
+    </a>
+    <a class="link-item" href="https://streetlamp.org/board-of-directors" target="_blank">
+      <span class="link-label">Board of Directors</span>
+      <span class="link-url">streetlamp.org/board-of-directors</span>
+      <span class="link-tag tag-squarespace">Squarespace</span>
+    </a>
+    <a class="link-item" href="https://streetlamp.org/past-productions" target="_blank">
+      <span class="link-label">Past Productions</span>
+      <span class="link-url">streetlamp.org/past-productions</span>
+      <span class="link-tag tag-squarespace">Squarespace</span>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-heading">Youth Productions (GitHub Pages)</p>
+  <div class="link-grid">
+    <a class="link-item" href="https://youth.streetlamp.org" target="_blank">
+      <span class="link-label">Youth Landing Page</span>
+      <span class="link-url">youth.streetlamp.org</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://youth.streetlamp.org/program.html?loc=rs" target="_blank">
+      <span class="link-label">Rising Sun Program Page</span>
+      <span class="link-url">youth.streetlamp.org/program.html?loc=rs</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://youth.streetlamp.org/program.html?loc=ksq" target="_blank">
+      <span class="link-label">Kennett Square Program Page</span>
+      <span class="link-url">youth.streetlamp.org/program.html?loc=ksq</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://youth.streetlamp.org/summercamp" target="_blank">
+      <span class="link-label">Summer Camps</span>
+      <span class="link-url">youth.streetlamp.org/summercamp</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-heading">Community Theatre (GitHub Pages)</p>
+  <div class="link-grid">
+    <a class="link-item" href="https://community.streetlamp.org" target="_blank">
+      <span class="link-label">Community Theatre Page</span>
+      <span class="link-url">community.streetlamp.org</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-heading">Shows (GitHub Pages)</p>
+  <div class="link-grid">
+    <a class="link-item" href="https://shows.streetlamp.org" target="_blank">
+      <span class="link-label">Show Detail Pages</span>
+      <span class="link-url">shows.streetlamp.org/?id=show-slug</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://programs.streetlamp.org" target="_blank">
+      <span class="link-label">Digital Programs</span>
+      <span class="link-url">programs.streetlamp.org</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-heading">Cast Portal (GitHub Pages + Apps Script)</p>
+  <div class="link-grid">
+    <a class="link-item" href="https://portal.streetlamp.org" target="_blank">
+      <span class="link-label">Portal Landing / Universal Login</span>
+      <span class="link-url">portal.streetlamp.org</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://portal.streetlamp.org/show" target="_blank">
+      <span class="link-label">Cast Portal</span>
+      <span class="link-url">portal.streetlamp.org/show/?show=show-id</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://portal.streetlamp.org/admin" target="_blank">
+      <span class="link-label">Admin Portal</span>
+      <span class="link-url">portal.streetlamp.org/admin/?show=show-id</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-heading">Tools & Displays</p>
+  <div class="link-grid">
+    <a class="link-item" href="https://signage.streetlamp.org" target="_blank">
+      <span class="link-label">Lobby Digital Signage</span>
+      <span class="link-url">signage.streetlamp.org</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://qr.streetlamp.org" target="_blank">
+      <span class="link-label">QR Code Generator</span>
+      <span class="link-url">qr.streetlamp.org</span>
+      <span class="link-tag tag-github">GitHub</span>
+    </a>
+    <a class="link-item" href="https://streetlamp.org/capital-campaign" target="_blank">
+      <span class="link-label">Capital Campaign Page</span>
+      <span class="link-url">streetlamp.org/capital-campaign</span>
+      <span class="link-tag tag-squarespace">Squarespace</span>
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-heading">Data Sources</p>
+  <div class="link-grid">
+    <a class="link-item" href="https://docs.google.com/spreadsheets/d/1VxRtcPkjGXuMVqRxBCxLCXDX7g3a9R6oE0KaQUFMrJw/edit" target="_blank">
+      <span class="link-label">Main Google Sheet</span>
+      <span class="link-url">Events · Auditions · Camps · Sponsors · Staff · Board · etc.</span>
+      <span class="link-tag tag-appscript">Sheets</span>
+    </a>
+    <a class="link-item" href="https://docs.google.com/spreadsheets/d/14jbCH54SOYvkBfuBdRxI-HyE5azGHucCJuGwAJFKx5M/edit" target="_blank">
+      <span class="link-label">Portal Google Sheet</span>
+      <span class="link-url">Shows · Posts · Resources</span>
+      <span class="link-tag tag-appscript">Sheets</span>
+    </a>
+    <a class="link-item" href="https://script.google.com/macros/s/AKfycbwR37bDfrzlr8gXWUHwr_Z36U5J6_XcFlIZKv7tIBBNg282AsmHL2BLG4zZpHpEY_v1eQ/exec" target="_blank">
+      <span class="link-label">Portal Apps Script</span>
+      <span class="link-url">Contact form + Portal backend</span>
+      <span class="link-tag tag-appscript">Apps Script</span>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
