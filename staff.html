@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meet Our Staff — Street Lamp Productions</title>
+<style>
+  @import url('https://use.typekit.net/wby1ytb.css');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #020202;
+    --text:      #f5f0e8;
+    --text-dim:  rgba(245,240,232,0.5);
+    --text-faint:rgba(245,240,232,0.28);
+    --card-bg:   #0d0d0d;
+    --card-border:rgba(245,240,232,0.1);
+    --accent-rs: #cc3399;
+    --accent-ks: #00aa99;
+    --font:      'komet', 'Jost', sans-serif;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Page wrapper ── */
+  #staff-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+  }
+
+  /* ── Header ── */
+  #staff-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+
+  #staff-logo {
+    width: clamp(160px, 22vw, 260px);
+    margin-bottom: 16px;
+    cursor: pointer;
+    opacity: 0.92;
+    transition: opacity 0.2s;
+  }
+  #staff-logo:hover { opacity: 1; }
+
+  #staff-title {
+    font-weight: 700;
+    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ── Loading / error states ── */
+  #staff-status {
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  #staff-status:not(:empty) {
+    padding: 60px 0;
+  }
+
+  .staff-skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(245,240,232,0.03) 0%,
+      rgba(245,240,232,0.07) 50%,
+      rgba(245,240,232,0.03) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 2px;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Grid ── */
+  #staff-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  /* ── Card scaffold (flip container) ── */
+  .staff-card {
+    position: relative;
+    cursor: pointer;
+    aspect-ratio: 2 / 3;
+    outline: none;
+  }
+
+  /* The card inner — no 3D, just a positioning context */
+  .staff-card-inner {
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+  }
+
+  /* Shared face styles */
+  .staff-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  /* Front visible by default — on top via z-index */
+  .staff-front {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 2;
+  }
+
+  /* Back hidden by default — underneath */
+  .staff-back-face {
+    opacity: 0;
+    transform: scale(0.97);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Flipped state — back comes on top */
+  .staff-card.flipped .staff-front {
+    opacity: 0;
+    transform: scale(0.97);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .staff-card.flipped .staff-back-face {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    z-index: 2;
+  }
+
+  /* ── Front face ── */
+  .staff-front {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    overflow: hidden;
+  }
+
+  .staff-photo-wrap {
+    position: relative;
+    flex: 1 1 0;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .staff-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+    transition: transform 0.4s ease;
+    filter: grayscale(100%);
+  }
+
+  /* Hover cue overlay */
+  .staff-photo-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 55%,
+      rgba(2,2,2,0.55) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  /* Name / position strip */
+  .staff-info {
+    padding: 12px 14px 13px;
+    border-top: 1px solid var(--card-border);
+    flex-shrink: 0;
+  }
+
+  .staff-name {
+    font-weight: 600;
+    font-size: clamp(0.68rem, 1.1vw, 0.8rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .staff-position {
+    margin-top: 3px;
+    font-weight: 300;
+    font-size: clamp(0.55rem, 0.85vw, 0.65rem);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Back face ── */
+  .staff-back {
+    background: var(--card-bg);
+    border: 1px solid rgba(245,240,232,0.18);
+    display: flex;
+    flex-direction: column;
+    padding: 18px 16px 16px;
+    overflow: hidden;
+  }
+
+  .staff-bio-scroll {
+    flex: 1 1 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    min-height: 0;
+    /* thin scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(245,240,232,0.2) transparent;
+  }
+  .staff-bio-scroll::-webkit-scrollbar { width: 3px; }
+  .staff-bio-scroll::-webkit-scrollbar-track { background: transparent; }
+  .staff-bio-scroll::-webkit-scrollbar-thumb { background: rgba(245,240,232,0.2); border-radius: 2px; }
+
+  .staff-bio-text {
+    font-weight: 300;
+    font-size: clamp(0.6rem, 0.95vw, 0.72rem);
+    line-height: 1.7;
+    letter-spacing: 0.04em;
+    color: rgba(245,240,232,0.8);
+  }
+
+  .staff-bio-text p + p { margin-top: 0.85em; }
+
+  /* Close / flip back cue */
+  .staff-back-close {
+    margin-top: 10px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 0.5rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-top: 8px;
+    border-top: 1px solid rgba(245,240,232,0.07);
+  }
+
+  /* ── Skeleton cards ── */
+  .staff-card-skeleton {
+    aspect-ratio: 2 / 3;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 2px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .staff-card-skeleton .sk-photo {
+    flex: 1;
+  }
+  .staff-card-skeleton .sk-info {
+    padding: 12px 14px 13px;
+    border-top: 1px solid var(--card-border);
+  }
+  .staff-card-skeleton .sk-name {
+    height: 11px;
+    width: 70%;
+    margin-bottom: 7px;
+  }
+  .staff-card-skeleton .sk-pos {
+    height: 9px;
+    width: 50%;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    #staff-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    #staff-page { padding: 48px 24px 64px; }
+  }
+  @media (max-width: 620px) {
+    #staff-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    #staff-page { padding: 36px 16px 56px; }
+  }
+
+  /* Hover effects only on devices that actually have hover (not touch) */
+  @media (hover: hover) {
+    .staff-card:hover .staff-photo { transform: scale(1.04); }
+    .staff-card:hover .staff-photo-wrap::after { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="staff-page">
+  <div id="staff-header">
+    <a href="https://streetlamp.org" target="_top">
+      <svg id="staff-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500" aria-label="Street Lamp Productions">
+        <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+        <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+        <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+        <g fill="#f5f0e8">
+          <path d="M194.02,1383.57c4.76,3.02,9.68,5.31,14.76,6.88,5.08,1.57,9.97,2.35,14.67,2.35,1.97,0,3.67-.13,5.1-.39,1.42-.26,2.6-.64,3.53-1.13.93-.49,1.6-1.12,2-1.87.41-.75.61-1.62.61-2.61,0-1.62-.73-3.08-2.18-4.35-1.45-1.28-3.35-2.51-5.7-3.7-2.35-1.19-5.05-2.41-8.1-3.66-3.05-1.25-6.14-2.67-9.27-4.27-3.13-1.6-6.23-3.44-9.27-5.53-3.05-2.09-5.75-4.56-8.1-7.4-2.35-2.84-4.25-6.17-5.7-9.97-1.45-3.8-2.18-8.2-2.18-13.19,0-5.98,1.09-11.38,3.27-16.2,2.18-4.82,5.3-8.93,9.36-12.32,4.06-3.4,8.98-6.01,14.76-7.84,5.78-1.83,12.29-2.74,19.55-2.74s13.34.73,18.94,2.18c5.6,1.45,10.87,3.57,15.81,6.36l-8.17,29.61c-4.11-2.15-8.31-3.9-12.6-5.27-4.29-1.36-8.63-2.05-13.04-2.05-1.51,0-2.86.12-4.04.35s-2.19.58-3,1.04c-.81.47-1.43,1.04-1.87,1.74s-.65,1.51-.65,2.44c0,1.51.72,2.86,2.17,4.05,1.45,1.19,3.35,2.35,5.69,3.48,2.35,1.13,5.03,2.31,8.04,3.53,3.01,1.22,6.1,2.61,9.26,4.18,3.16,1.57,6.24,3.4,9.26,5.49,3.01,2.09,5.69,4.59,8.04,7.49,2.35,2.9,4.25,6.27,5.69,10.1,1.45,3.83,2.17,8.3,2.17,13.41,0,6.04-1.19,11.51-3.57,16.41-2.38,4.91-5.7,9.1-9.97,12.58-4.27,3.48-9.38,6.18-15.33,8.1-5.95,1.92-12.5,2.87-19.64,2.87-7.9,0-14.89-.87-20.99-2.61-6.1-1.74-11.76-4.32-16.98-7.75l7.66-29.78Z"/>
+          <path d="M368.44,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+          <path d="M380.2,1297.79c5.46-.29,10.84-.52,16.15-.7,5.31-.17,10.58-.26,15.81-.26,10.85,0,20.46,1,28.82,3,8.36,2,15.4,4.89,21.12,8.67,5.72,3.77,10.06,8.38,13.02,13.8,2.96,5.43,4.44,11.57,4.44,18.42,0,3.43-.38,6.66-1.13,9.71-.75,3.05-1.87,5.91-3.35,8.58-1.48,2.67-3.29,5.17-5.44,7.49-2.15,2.32-4.61,4.44-7.4,6.36,3.6,7.08,7.15,14.7,10.67,22.86,3.51,8.16,6.92,16.76,10.23,25.82h-41.89c-2.03-5.92-4.3-11.94-6.79-18.07-2.5-6.12-5.23-12.24-8.19-18.33-1.29.17-2.57.3-3.83.39-1.26.09-2.57.19-3.92.3v35.7h-38.32v-123.75ZM418.52,1356.66h1.4c3.32,0,6.25-.33,8.79-1,2.54-.67,4.66-1.61,6.38-2.82,1.72-1.22,3.02-2.72,3.89-4.52.87-1.79,1.31-3.82,1.31-6.08,0-2.14-.44-4.07-1.31-5.77s-2.17-3.17-3.89-4.38c-1.72-1.21-3.85-2.14-6.38-2.78-2.54-.64-5.46-.96-8.79-.96h-1.4v28.3Z"/>
+          <path d="M574.22,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+          <path d="M670.01,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+          <path d="M777.21,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+          <path d="M870.83,1389.41h36.05v32.13h-74.37v-123.75h38.32v91.61Z"/>
+          <path d="M994.2,1297.79c7.61,20.38,14.41,41,20.39,61.87,5.98,20.87,10.72,41.49,14.21,61.87h-39.45c-.47-3.13-.95-6.28-1.44-9.45-.5-3.16-1.03-6.31-1.61-9.45h-33.34c-.58,3.25-1.12,6.43-1.61,9.54-.5,3.11-.97,6.23-1.44,9.36h-38.32c3.48-20.38,8.22-41,14.23-61.87,6-20.87,12.81-41.5,20.41-61.87h47.98ZM979.92,1372.86c-1.46-6.1-3.06-12.19-4.8-18.29-1.75-6.1-3.55-12.13-5.41-18.11-1.98,5.98-3.84,12.02-5.59,18.11-1.75,6.1-3.35,12.19-4.8,18.29h20.6Z"/>
+          <path d="M1191.98,1297.79c1.8,11.26,3.34,22.21,4.62,32.83,1.28,10.62,2.32,21.05,3.14,31.26.81,10.22,1.44,20.28,1.87,30.17.43,9.9.77,19.73,1,29.48h-38.49c-.23-7.43-.5-14.86-.79-22.29-.29-7.43-.63-14.79-1.01-22.08-.38-7.28-.83-14.44-1.36-21.47-.53-7.02-1.14-13.85-1.85-20.47l-19.85,86.3h-40.49l-19.77-86.3c-.69,6.62-1.3,13.44-1.81,20.47-.52,7.02-.98,14.18-1.38,21.47-.4,7.29-.73,14.65-.99,22.08-.26,7.43-.5,14.86-.73,22.29h-37.45c.23-9.75.56-19.58,1-29.48.43-9.9,1.07-19.95,1.91-30.17.84-10.22,1.88-20.64,3.13-31.26,1.25-10.63,2.8-21.57,4.65-32.83h54.13l18.55,80.55,18.37-80.55h53.59Z"/>
+          <path d="M1217.51,1297.79c6.39-.41,12.08-.67,17.07-.78,4.99-.12,9.78-.17,14.37-.17,10.57,0,19.99,1.06,28.26,3.18,8.27,2.12,15.27,5.2,20.99,9.23,5.72,4.04,10.09,8.96,13.11,14.76,3.02,5.81,4.53,12.4,4.53,19.77s-1.37,13.77-4.1,19.55c-2.73,5.78-6.67,10.75-11.82,14.94-5.15,4.18-11.39,7.52-18.75,10.01-7.36,2.5-15.63,4.06-24.81,4.7h-.52v28.56h-38.32v-123.75ZM1255.82,1361.28h1.22c2.97,0,5.66-.38,8.05-1.13,2.39-.75,4.43-1.83,6.12-3.22,1.69-1.39,3-3.11,3.94-5.14.93-2.03,1.4-4.35,1.4-6.97,0-2.44-.41-4.63-1.22-6.57-.82-1.94-2.04-3.61-3.67-5.01-1.63-1.39-3.67-2.45-6.12-3.18-2.45-.72-5.28-1.09-8.48-1.09h-1.22v32.31Z"/>
+        </g>
+      </svg>
+    </a>
+    <p id="staff-title">Meet Our Staff</p>
+  </div>
+
+  <div id="staff-status"></div>
+  <div id="staff-grid"></div>
+</div>
+
+<script>
+(function() {
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1840359733&single=true&output=csv';
+
+  const grid   = document.getElementById('staff-grid');
+  const status = document.getElementById('staff-status');
+
+  // ── CSV parser ──────────────────────────────────────────────
+  function driveImgUrl(raw) {
+    if (!raw) return '';
+    var m = raw.match(/\/file\/d\/([^\/\?&]+)/) || raw.match(/[?&]id=([^&]+)/);
+    return m ? 'https://lh3.googleusercontent.com/d/' + m[1] : raw;
+  }
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+    const header = parseLine(lines[0]).map(function(h) { return h.toLowerCase().trim(); });
+    const results = [];
+    for (var i = 1; i < lines.length; i++) {
+      const cols = parseLine(lines[i]);
+      var obj = {};
+      header.forEach(function(key, idx) { obj[key] = (cols[idx] || '').trim(); });
+      if (obj.name) results.push(obj);
+    }
+    return results;
+  }
+
+  function parseLine(line) {
+    var cols = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        cols.push(cur);
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    cols.push(cur);
+    return cols;
+  }
+
+  // ── Bio formatter (|| = paragraph break) ────────────────────
+  function formatBio(raw) {
+    if (!raw) return '<p>No bio available.</p>';
+    return raw.split('||').map(function(p) {
+      return '<p>' + p.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>';
+    }).join('');
+  }
+
+  // ── Skeleton grid ────────────────────────────────────────────
+  function showSkeletons(n) {
+    grid.innerHTML = '';
+    for (var i = 0; i < n; i++) {
+      grid.innerHTML +=
+        '<div class="staff-card-skeleton">' +
+          '<div class="sk-photo staff-skeleton"></div>' +
+          '<div class="sk-info">' +
+            '<div class="sk-name staff-skeleton"></div>' +
+            '<div class="sk-pos staff-skeleton"></div>' +
+          '</div>' +
+        '</div>';
+    }
+  }
+
+  // ── Build a single card ──────────────────────────────────────
+  function buildCard(person, index) {
+    var card = document.createElement('div');
+    card.className = 'staff-card';
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', 'Read bio for ' + person.name);
+
+    var rawImg   = person.image_url || '';
+    var imgSrc   = driveImgUrl(rawImg);
+    var nameSafe = person.name.replace(/</g,'&lt;');
+    var posSafe  = (person.position || '').replace(/</g,'&lt;');
+    var bioHtml  = formatBio(person.bio);
+
+    // Staggered fade-in
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(16px)';
+    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+
+    card.innerHTML =
+      '<div class="staff-card-inner">' +
+        '<div class="staff-face staff-back staff-back-face">' +
+          '<div class="staff-bio-scroll">' +
+            '<div class="staff-bio-text">' + bioHtml + '</div>' +
+          '</div>' +
+          '<div class="staff-back-close">Click to close</div>' +
+        '</div>' +
+        '<div class="staff-face staff-front">' +
+          '<div class="staff-photo-wrap">' +
+            (imgSrc
+              ? '<img class="staff-photo" src="' + imgSrc + '" alt="' + nameSafe + '" loading="lazy">'
+              : '<div class="staff-photo" style="background:rgba(245,240,232,0.04);display:flex;align-items:center;justify-content:center;">'
+                + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(245,240,232,0.15)" stroke-width="1">'
+                + '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>')
+            +
+          '</div>' +
+          '<div class="staff-info">' +
+            '<div class="staff-name">' + nameSafe + '</div>' +
+            '<div class="staff-position">' + posSafe + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    // Flip toggle — ignore if user is scrolling the bio
+    function toggle(e) {
+      if (e.target && e.target.closest('.staff-bio-scroll')) return;
+      card.classList.toggle('flipped');
+      if (!card.classList.contains('flipped')) {
+        var scroll = card.querySelector('.staff-bio-scroll');
+        if (scroll) scroll.scrollTop = 0;
+      }
+    }
+
+    // Fully passive touch handling — never blocks scroll under any circumstances.
+    var touchStartY = 0;
+    var touchStartX = 0;
+    var lastTouchEnd = 0;
+
+    card.addEventListener('touchstart', function(e) {
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+
+    card.addEventListener('touchend', function(e) {
+      var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+      var dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+      if (dy > 10 || dx > 10) return;
+      lastTouchEnd = Date.now();
+      toggle(e);
+    }, { passive: true });
+
+    // Mouse only — skip if a touch just fired (within 500ms)
+    card.addEventListener('click', function(e) {
+      if (Date.now() - lastTouchEnd < 500) return;
+      toggle(e);
+    });
+
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(e); }
+    });
+
+    return card;
+  }
+
+  // ── Render ───────────────────────────────────────────────────
+  function render(people) {
+    grid.innerHTML = '';
+    if (!people.length) {
+      status.textContent = 'No staff found.';
+      return;
+    }
+    status.textContent = '';
+    people.forEach(function(person, idx) {
+      var card = buildCard(person, idx);
+      grid.appendChild(card);
+      // Staggered reveal
+      setTimeout(function() {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 60 + idx * 55);
+    });
+  }
+
+  // ── Load ─────────────────────────────────────────────────────
+  showSkeletons(8);
+  fetch(CSV_URL)
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function(text) {
+      var people = parseCSV(text);
+      // Split into fixed-order and shuffled groups
+      var fixed = [], rest = [];
+      people.forEach(function(p) {
+        var o = parseInt(p.order, 10);
+        if (!isNaN(o) && o > 0) fixed.push(p);
+        else rest.push(p);
+      });
+      // Sort fixed by their order number
+      fixed.sort(function(a, b) { return parseInt(a.order,10) - parseInt(b.order,10); });
+      // Shuffle the rest
+      for (var i = rest.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = rest[i]; rest[i] = rest[j]; rest[j] = t;
+      }
+      render(fixed.concat(rest));
+    })
+    .catch(function(err) {
+      console.warn('Street Lamp staff: fetch error', err);
+      grid.innerHTML = '';
+      status.textContent = 'Unable to load staff — please try again later.';
+    });
+})();
+</script>
+  <style>
+  #sl-footer {
+    width: 100%;
+    padding: 56px 40px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    font-family: 'komet', 'Jost', sans-serif;
+    background: #020202;
+    color: #f5f0e8;
+    -webkit-font-smoothing: antialiased;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  #sl-footer * { box-sizing: border-box; }
+  #sl-footer a { display: block; margin: 0 auto; }
+  #sl-footer-logo {
+    width: 48px;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    margin: 0 auto;
+  }
+  #sl-footer-logo:hover { opacity: 0.7; }
+  #sl-footer-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .sl-footer-link {
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: rgba(245,240,232,0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+    text-align: center;
+    width: 100%;
+  }
+  .sl-footer-link:hover { color: rgba(245,240,232,0.85); }
+  #sl-footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    align-items: center;
+  }
+  .sl-footer-social-link {
+    color: rgba(245,240,232,0.4);
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    width: auto;
+    margin: 0;
+  }
+  .sl-footer-social-link:hover { color: rgba(245,240,232,0.85); }
+  .sl-footer-social-link svg {
+    width: 20px;
+    height: 20px;
+  }
+  #sl-footer-rule {
+    width: 1px;
+    height: 20px;
+    background: rgba(245,240,232,0.12);
+    margin: 0 auto;
+  }
+  #sl-footer-legal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+  .sl-footer-legal-text {
+    font-size: 0.68rem;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    color: rgba(245,240,232,0.45);
+    text-align: center;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  @media (max-width: 600px) {
+    #sl-footer { padding: 48px 24px 40px; }
+    .sl-footer-legal-text { font-size: 0.58rem; }
+  }
+</style>
+<footer id="sl-footer">
+  <a href="https://streetlamp.org">
+    <svg id="sl-footer-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500" aria-label="Street Lamp Productions">
+      <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+      <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+      <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+    </svg>
+  </a>
+  <div id="sl-footer-contact">
+    <a class="sl-footer-link" href="https://maps.apple.com/place?coordinate=39.698696%2C-76.058442" target="_blank" rel="noopener">5 Valley View Drive &bull; Rising Sun, MD 21911</a>
+    <a class="sl-footer-link" href="tel:+14106585088">(410) 658&ndash;5088</a>
+  </div>
+  <div id="sl-footer-social">
+    <a class="sl-footer-social-link" href="https://www.facebook.com/streetlampproductions" target="_blank" rel="noopener" aria-label="Facebook">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    </a>
+    <a class="sl-footer-social-link" href="https://www.instagram.com/street.lamp.productions" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a class="sl-footer-social-link" href="https://www.tiktok.com/@slpblackbox" target="_blank" rel="noopener" aria-label="TikTok">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+    </a>
+  </div>
+  <div id="sl-footer-legal">
+    <p class="sl-footer-legal-text">Street Lamp Community Theatre is a Non-Profit 501(c)(3) organization.</p>
+    <p class="sl-footer-legal-text">Street Lamp welcomes volunteers and members of any race, color, national and ethnic origin to all the rights, privileges, programs, and activities generally accorded or made available to actors and participants of the theatre. The theatre does not discriminate on the basis of race, color, national and ethnic origin in administration of its educational policies, admission policies, and other theatre administered programs.</p>
+  </div>
+</footer>
+</body>
+</html>
