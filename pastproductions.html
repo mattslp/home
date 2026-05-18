@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Past Productions — Street Lamp Productions</title>
+<style>
+  @import url('https://use.typekit.net/wby1ytb.css');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #020202;
+    --text:        #f5f0e8;
+    --text-dim:    rgba(245,240,232,0.45);
+    --text-faint:  rgba(245,240,232,0.22);
+    --rule:        rgba(245,240,232,0.1);
+    --youth:       #cc3399;
+    --community:   #00aa99;
+    --font:        'komet', 'Jost', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Page ── */
+  #pp-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+  }
+
+  /* ── Header ── */
+  #pp-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 72px;
+  }
+
+  #pp-logo {
+    width: clamp(140px, 20vw, 220px);
+    margin-bottom: 20px;
+    opacity: 0.92;
+    transition: opacity 0.2s;
+  }
+  #pp-logo:hover { opacity: 1; }
+
+  #pp-title {
+    font-weight: 700;
+    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ── Status ── */
+  #pp-status {
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  #pp-status:not(:empty) { padding: 60px 0; }
+
+  /* ── Year group ── */
+  .pp-year-group {
+    margin-bottom: 56px;
+  }
+
+  .pp-year-group:last-child { margin-bottom: 0; }
+
+  /* Year heading */
+  .pp-year-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .pp-year-number {
+    font-weight: 700;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+
+  .pp-year-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+    margin-bottom: 4px;
+  }
+
+  .pp-year-count {
+    font-weight: 300;
+    font-size: 0.58rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
+
+  /* ── Show rows ── */
+  .pp-show {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    min-height: 72px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pp-show:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* Image — flush right, only present when image_url exists */
+  .pp-show-img {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 160px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .pp-show-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    opacity: 0.55;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Fade the image into the background on the left edge */
+  .pp-show-img::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, var(--bg) 0%, transparent 60%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .pp-show:hover .pp-show-img img { opacity: 0.75; }
+
+  /* Text content */
+  .pp-show-body {
+    flex: 1;
+    padding: 16px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* No image — no right padding needed */
+  .pp-show.no-image .pp-show-body {
+    padding-right: 0;
+  }
+
+  .pp-show-name {
+    font-weight: 600;
+    font-size: clamp(0.9rem, 2.2vw, 1.15rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .pp-show-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+  }
+
+  .pp-show-tag {
+    font-weight: 300;
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ── Year nav sidebar ── */
+  #pp-year-nav {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  #pp-year-nav.visible { opacity: 1; }
+
+  .pp-nav-year {
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    cursor: pointer;
+    padding: 2px 0 2px 8px;
+    border-right: 1px solid var(--text-faint);
+    transition: color 0.2s ease, border-color 0.2s ease;
+    user-select: none;
+    text-decoration: none;
+    display: block;
+    line-height: 1.4;
+  }
+
+  .pp-nav-year:hover {
+    color: var(--text-dim);
+    border-color: var(--text-dim);
+  }
+
+  .pp-nav-year.active {
+    color: var(--text);
+    border-color: var(--text);
+  }
+
+  /* Hide on narrow screens where it'd overlap content */
+  @media (max-width: 1000px) {
+    #pp-year-nav { display: none; }
+  }
+
+  /* ── Skeleton ── */
+  .pp-skeleton-group { margin-bottom: 56px; }
+
+  .pp-skeleton-year {
+    height: 56px;
+    width: 120px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+  }
+
+  .pp-skeleton-row {
+    height: 72px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .pp-skeleton-row:last-child { border-bottom: 1px solid var(--rule); }
+
+  .pp-skeleton-name {
+    height: 14px;
+    width: 55%;
+    border-radius: 2px;
+  }
+
+  .pp-skel {
+    background: linear-gradient(
+      90deg,
+      rgba(245,240,232,0.03) 0%,
+      rgba(245,240,232,0.08) 50%,
+      rgba(245,240,232,0.03) 100%
+    );
+    background-size: 200% 100%;
+    animation: pp-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pp-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    #pp-page { padding: 40px 20px 80px; }
+    #pp-header { margin-bottom: 48px; }
+    .pp-show-img { width: 160px; }
+    .pp-year-number { font-size: clamp(2rem, 10vw, 3rem); }
+  }
+</style>
+</head>
+<body>
+
+<div id="pp-page">
+  <div id="pp-header">
+    <a href="https://streetlamp.org" target="_top">
+      <svg id="pp-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500" aria-label="Street Lamp Productions">
+        <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+        <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+        <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+        <g fill="#f5f0e8">
+          <path d="M194.02,1383.57c4.76,3.02,9.68,5.31,14.76,6.88,5.08,1.57,9.97,2.35,14.67,2.35,1.97,0,3.67-.13,5.1-.39,1.42-.26,2.6-.64,3.53-1.13.93-.49,1.6-1.12,2-1.87.41-.75.61-1.62.61-2.61,0-1.62-.73-3.08-2.18-4.35-1.45-1.28-3.35-2.51-5.7-3.7-2.35-1.19-5.05-2.41-8.1-3.66-3.05-1.25-6.14-2.67-9.27-4.27-3.13-1.6-6.23-3.44-9.27-5.53-3.05-2.09-5.75-4.56-8.1-7.4-2.35-2.84-4.25-6.17-5.7-9.97-1.45-3.8-2.18-8.2-2.18-13.19,0-5.98,1.09-11.38,3.27-16.2,2.18-4.82,5.3-8.93,9.36-12.32,4.06-3.4,8.98-6.01,14.76-7.84,5.78-1.83,12.29-2.74,19.55-2.74s13.34.73,18.94,2.18c5.6,1.45,10.87,3.57,15.81,6.36l-8.17,29.61c-4.11-2.15-8.31-3.9-12.6-5.27-4.29-1.36-8.63-2.05-13.04-2.05-1.51,0-2.86.12-4.04.35s-2.19.58-3,1.04c-.81.47-1.43,1.04-1.87,1.74s-.65,1.51-.65,2.44c0,1.51.72,2.86,2.17,4.05,1.45,1.19,3.35,2.35,5.69,3.48,2.35,1.13,5.03,2.31,8.04,3.53,3.01,1.22,6.1,2.61,9.26,4.18,3.16,1.57,6.24,3.4,9.26,5.49,3.01,2.09,5.69,4.59,8.04,7.49,2.35,2.9,4.25,6.27,5.69,10.1,1.45,3.83,2.17,8.3,2.17,13.41,0,6.04-1.19,11.51-3.57,16.41-2.38,4.91-5.7,9.1-9.97,12.58-4.27,3.48-9.38,6.18-15.33,8.1-5.95,1.92-12.5,2.87-19.64,2.87-7.9,0-14.89-.87-20.99-2.61-6.1-1.74-11.76-4.32-16.98-7.75l7.66-29.78Z"/>
+          <path d="M368.44,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+          <path d="M380.2,1297.79c5.46-.29,10.84-.52,16.15-.7,5.31-.17,10.58-.26,15.81-.26,10.85,0,20.46,1,28.82,3,8.36,2,15.4,4.89,21.12,8.67,5.72,3.77,10.06,8.38,13.02,13.8,2.96,5.43,4.44,11.57,4.44,18.42,0,3.43-.38,6.66-1.13,9.71-.75,3.05-1.87,5.91-3.35,8.58-1.48,2.67-3.29,5.17-5.44,7.49-2.15,2.32-4.61,4.44-7.4,6.36,3.6,7.08,7.15,14.7,10.67,22.86,3.51,8.16,6.92,16.76,10.23,25.82h-41.89c-2.03-5.92-4.3-11.94-6.79-18.07-2.5-6.12-5.23-12.24-8.19-18.33-1.29.17-2.57.3-3.83.39-1.26.09-2.57.19-3.92.3v35.7h-38.32v-123.75ZM418.52,1356.66h1.4c3.32,0,6.25-.33,8.79-1,2.54-.67,4.66-1.61,6.38-2.82,1.72-1.22,3.02-2.72,3.89-4.52.87-1.79,1.31-3.82,1.31-6.08,0-2.14-.44-4.07-1.31-5.77s-2.17-3.17-3.89-4.38c-1.72-1.21-3.85-2.14-6.38-2.78-2.54-.64-5.46-.96-8.79-.96h-1.4v28.3Z"/>
+          <path d="M574.22,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+          <path d="M670.01,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+          <path d="M777.21,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+          <path d="M870.83,1389.41h36.05v32.13h-74.37v-123.75h38.32v91.61Z"/>
+          <path d="M994.2,1297.79c7.61,20.38,14.41,41,20.39,61.87,5.98,20.87,10.72,41.49,14.21,61.87h-39.45c-.47-3.13-.95-6.28-1.44-9.45-.5-3.16-1.03-6.31-1.61-9.45h-33.34c-.58,3.25-1.12,6.43-1.61,9.54-.5,3.11-.97,6.23-1.44,9.36h-38.32c3.48-20.38,8.22-41,14.23-61.87,6-20.87,12.81-41.5,20.41-61.87h47.98ZM979.92,1372.86c-1.46-6.1-3.06-12.19-4.8-18.29-1.75-6.1-3.55-12.13-5.41-18.11-1.98,5.98-3.84,12.02-5.59,18.11-1.75,6.1-3.35,12.19-4.8,18.29h20.6Z"/>
+          <path d="M1191.98,1297.79c1.8,11.26,3.34,22.21,4.62,32.83,1.28,10.62,2.32,21.05,3.14,31.26.81,10.22,1.44,20.28,1.87,30.17.43,9.9.77,19.73,1,29.48h-38.49c-.23-7.43-.5-14.86-.79-22.29-.29-7.43-.63-14.79-1.01-22.08-.38-7.28-.83-14.44-1.36-21.47-.53-7.02-1.14-13.85-1.85-20.47l-19.85,86.3h-40.49l-19.77-86.3c-.69,6.62-1.3,13.44-1.81,20.47-.52,7.02-.98,14.18-1.38,21.47-.4,7.29-.73,14.65-.99,22.08-.26,7.43-.5,14.86-.73,22.29h-37.45c.23-9.75.56-19.58,1-29.48.43-9.9,1.07-19.95,1.91-30.17.84-10.22,1.88-20.64,3.13-31.26,1.25-10.63,2.8-21.57,4.65-32.83h54.13l18.55,80.55,18.37-80.55h53.59Z"/>
+          <path d="M1217.51,1297.79c6.39-.41,12.08-.67,17.07-.78,4.99-.12,9.78-.17,14.37-.17,10.57,0,19.99,1.06,28.26,3.18,8.27,2.12,15.27,5.2,20.99,9.23,5.72,4.04,10.09,8.96,13.11,14.76,3.02,5.81,4.53,12.4,4.53,19.77s-1.37,13.77-4.1,19.55c-2.73,5.78-6.67,10.75-11.82,14.94-5.15,4.18-11.39,7.52-18.75,10.01-7.36,2.5-15.63,4.06-24.81,4.7h-.52v28.56h-38.32v-123.75ZM1255.82,1361.28h1.22c2.97,0,5.66-.38,8.05-1.13,2.39-.75,4.43-1.83,6.12-3.22,1.69-1.39,3-3.11,3.94-5.14.93-2.03,1.4-4.35,1.4-6.97,0-2.44-.41-4.63-1.22-6.57-.82-1.94-2.04-3.61-3.67-5.01-1.63-1.39-3.67-2.45-6.12-3.18-2.45-.72-5.28-1.09-8.48-1.09h-1.22v32.31Z"/>
+        </g>
+      </svg>
+    </a>
+    <p id="pp-title">Past Productions</p>
+  </div>
+
+  <div id="pp-year-nav"></div>
+  <div id="pp-status"></div>
+  <div id="pp-archive"></div>
+</div>
+
+<script>
+(function() {
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1781121514&single=true&output=csv';
+
+  const archive = document.getElementById('pp-archive');
+  const status  = document.getElementById('pp-status');
+  const yearNav = document.getElementById('pp-year-nav');
+
+  // ── CSV parser ──────────────────────────────────────────────
+  function parseLine(line) {
+    var cols = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+    cols.push(cur);
+    return cols;
+  }
+
+  function parseCSV(text) {
+    var lines = text.trim().split('\n');
+    if (lines.length < 2) return [];
+    var header = parseLine(lines[0]).map(function(h) { return h.toLowerCase().trim(); });
+    var results = [];
+    for (var i = 1; i < lines.length; i++) {
+      var cols = parseLine(lines[i]);
+      var obj = {};
+      header.forEach(function(key, idx) { obj[key] = (cols[idx] || '').trim(); });
+      if (obj.show_name) results.push(obj);
+    }
+    return results;
+  }
+
+  // ── Group by year, sort ascending ──────────────────────────
+  function groupByYear(shows) {
+    var map = {};
+    shows.forEach(function(s) {
+      var y = s.year || 'Unknown';
+      if (!map[y]) map[y] = [];
+      map[y].push(s);
+    });
+    // Sort years ascending
+    var years = Object.keys(map).sort(function(a, b) {
+      return parseInt(a) - parseInt(b);
+    });
+    return years.map(function(y) {
+      map[y].sort(function(a, b) {
+        return a.show_name.localeCompare(b.show_name);
+      });
+      return { year: y, shows: map[y] };
+    });
+  }
+
+  // ── Skeleton ────────────────────────────────────────────────
+  function showSkeleton() {
+    var html = '';
+    [3, 2, 4].forEach(function(count) {
+      html += '<div class="pp-skeleton-group">';
+      html += '<div class="pp-skeleton-year pp-skel"></div>';
+      for (var i = 0; i < count; i++) {
+        html += '<div class="pp-skeleton-row">';
+        html += '<div class="pp-skeleton-name pp-skel"></div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    archive.innerHTML = html;
+  }
+
+  // ── Render a company tag ────────────────────────────────────
+  function companyTag(raw) {
+    if (!raw || !raw.trim()) return '';
+    return '<span class="pp-show-tag">' + raw.trim().replace(/</g, '&lt;') + '</span>';
+  }
+
+  // ── Convert any Google Drive share link to a displayable URL ──
+  function driveImgUrl(raw) {
+    if (!raw) return '';
+    var url = raw.trim();
+    // Already a direct lh3 or other direct URL — use as-is
+    if (!url.includes('drive.google.com')) return url;
+    // Extract file ID from formats:
+    //   /file/d/FILE_ID/view
+    //   id=FILE_ID
+    //   open?id=FILE_ID
+    var m = url.match(/\/file\/d\/([^\/\?&]+)/)
+         || url.match(/[?&]id=([^&]+)/);
+    if (!m) return url; // unrecognised format, try as-is
+    return 'https://lh3.googleusercontent.com/d/' + m[1];
+  }
+
+  // ── Render ──────────────────────────────────────────────────
+  function render(shows) {
+    if (!shows.length) {
+      status.textContent = 'No productions found.';
+      archive.innerHTML = '';
+      return;
+    }
+
+    var groups = groupByYear(shows);
+    archive.innerHTML = '';
+    status.textContent = '';
+
+    groups.forEach(function(group, gi) {
+      var div = document.createElement('div');
+      div.className = 'pp-year-group';
+
+      // Staggered fade-in per group
+      div.style.opacity = '0';
+      div.style.transform = 'translateY(12px)';
+      div.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+
+      var showCount = group.shows.length;
+      var countLabel = showCount + ' production' + (showCount === 1 ? '' : 's');
+
+      var html = '<div class="pp-year-heading">'
+               + '<span class="pp-year-number">' + group.year + '</span>'
+               + '<span class="pp-year-rule"></span>'
+               + '<span class="pp-year-count">' + countLabel + '</span>'
+               + '</div>';
+
+      group.shows.forEach(function(show) {
+        var hasImg = show.image_url && show.image_url.trim();
+        var imgSrc = hasImg ? driveImgUrl(show.image_url) : '';
+        var nameSafe = (show.show_name || '').replace(/</g, '&lt;');
+        var tag = companyTag(show.company || '');
+
+        html += '<div class="pp-show' + (hasImg ? '' : ' no-image') + '">';
+        html += '<div class="pp-show-body">';
+        html += '<div class="pp-show-name">' + nameSafe + '</div>';
+        if (tag) {
+          html += '<div class="pp-show-meta">' + tag + '</div>';
+        }
+        html += '</div>';
+
+        if (hasImg) {
+          html += '<div class="pp-show-img">'
+               +  '<img src="' + imgSrc + '" alt="' + nameSafe + '" loading="lazy">'
+               +  '</div>';
+        }
+
+        html += '</div>';
+      });
+
+      div.innerHTML = html;
+      div.setAttribute('data-year', group.year);
+
+      // Start hidden for scroll reveal
+      div.style.opacity = '0';
+      div.style.transform = 'translateY(20px)';
+      div.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+      // Also hide individual show rows for staggered wipe
+      archive.appendChild(div);
+    });
+
+    // ── Build year nav ────────────────────────────────────────
+    yearNav.innerHTML = '';
+    groups.forEach(function(group) {
+      var a = document.createElement('a');
+      a.className = 'pp-nav-year';
+      a.textContent = group.year;
+      a.href = '#year-' + group.year;
+      // Smooth scroll to year group
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = archive.querySelector('[data-year="' + group.year + '"]');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      yearNav.appendChild(a);
+    });
+    yearNav.classList.add('visible');
+
+    // ── IntersectionObserver 1 — scroll reveal wipe ───────────
+    var yearGroups = archive.querySelectorAll('.pp-year-group');
+
+    if ('IntersectionObserver' in window) {
+      var revealObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var group = entry.target;
+
+          // Reveal the year group
+          group.style.opacity = '1';
+          group.style.transform = 'translateY(0)';
+
+          // Stagger individual show rows within the group
+          var rows = group.querySelectorAll('.pp-show');
+          rows.forEach(function(row, i) {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(10px)';
+            row.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+            setTimeout(function() {
+              row.style.opacity = '1';
+              row.style.transform = 'translateY(0)';
+            }, 100 + i * 60);
+          });
+
+          revealObserver.unobserve(group);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+
+      yearGroups.forEach(function(g) { revealObserver.observe(g); });
+
+      // ── IntersectionObserver 2 — nav highlight ────────────────
+      var navLinks = yearNav.querySelectorAll('.pp-nav-year');
+
+      var navObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var activeYear = entry.target.getAttribute('data-year');
+            navLinks.forEach(function(link) {
+              link.classList.toggle('active', link.textContent === activeYear);
+            });
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+
+      yearGroups.forEach(function(g) { navObserver.observe(g); });
+    }
+  }
+
+  // ── Load ────────────────────────────────────────────────────
+  showSkeleton();
+  fetch(CSV_URL)
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function(text) { render(parseCSV(text)); })
+    .catch(function(err) {
+      console.warn('Street Lamp productions: fetch error', err);
+      archive.innerHTML = '';
+      status.textContent = 'Unable to load productions — please try again later.';
+    });
+})();
+</script>
+</body>
+</html>
