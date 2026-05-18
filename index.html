@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 </head>
-<body>
+<body class="no-transition">
 <style>
 
   /* Page and canvas wrappers */
@@ -131,12 +131,14 @@
     background: transparent;
     cursor: pointer;
     margin-bottom: -8px;
-    transition: opacity 0.6s ease;
+    transform: translateY(0);
+    transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
   }
 
-  /* Fade logo in on reveal */
+  /* Once revealed, float logo up from center toward top */
   #sl-hero.revealed #sl-logo {
     opacity: 1;
+    transform: translateY(-60px);
   }
 
   #sl-logo rect, #sl-logo polygon {
@@ -1412,7 +1414,19 @@
   }
 
 
+  /* Suppress all transitions on initial page load */
+  .no-transition * { transition: none !important; animation-delay: 0s !important; }
+
 </style>
+
+<script>
+  // Remove no-transition class after first paint settles
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      document.body.classList.remove('no-transition');
+    });
+  });
+</script>
 
 <section id="sl-hero">
 
