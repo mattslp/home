@@ -1,0 +1,2792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Street Lamp Productions</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+</head>
+<body>
+<style>
+
+  /* Page and canvas wrappers */
+  #page, #content, #canvas,
+  .Main, .Site-inner, .sqs-site-wrapper,
+  .content-wrapper, .content-inner,
+  [data-content-field="main-content"],
+  .entry-content, article.entry-detail { padding: 0 !important; margin: 0 !important; }
+
+  /* Code block itself */
+  .sqs-layout,
+  .sqs-layout .sqs-row,
+  .sqs-layout .sqs-row .sqs-block,
+  .sqs-block-code,
+  .sqs-block-content,
+  .code-block { padding: 0 !important; margin: 0 !important; }
+
+  /* Fluid engine (newer Squarespace templates) */
+  .fluid-engine { padding: 0 !important; margin: 0 !important; }
+  [data-fluid-engine-block] { padding: 0 !important; margin: 0 !important; }
+
+  /* Section padding */
+  .page-section, [data-section-id] { padding: 0 !important; margin: 0 !important; }
+</style>
+
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  STREET LAMP — Scrolling Photo Collage Hero              ║
+  ║  Paste this into a Squarespace Code Block                ║
+  ║                                                          ║
+  ║  SETUP (do once):                                        ║
+  ║  1. Get a free Google API key:                           ║
+  ║     → https://console.cloud.google.com                   ║
+  ║     → Create project → Enable "Google Drive API"        ║
+  ║     → Credentials → Create API Key                      ║
+  ║     → Restrict key to "Google Drive API" + your domain  ║
+  ║                                                          ║
+  ║  2. Find your root folder ID:                            ║
+  ║     Open the folder in Drive → copy the ID from the URL ║
+  ║     drive.google.com/drive/folders/THIS_PART_HERE        ║
+  ║                                                          ║
+  ║  3. Replace the two values below and you're done.        ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
+
+<style>
+  /* Komet via Adobe Fonts — replace kit ID if yours differs */
+  @import url('https://use.typekit.net/wby1ytb.css');
+
+  #sl-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 540px;
+    max-height: 900px;
+    overflow: hidden;
+    background: #0a0a0a;
+    font-family: 'komet', 'Jost', sans-serif;
+  }
+
+  /* ── Collage stage ── */
+  #sl-stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .sl-row {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    will-change: transform;
+  }
+
+  .sl-tile {
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #0a0a0a;
+    position: relative;
+  }
+
+  .sl-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .sl-tile img.loaded {
+    opacity: 0.65;
+  }
+
+
+
+  /* ── Overlay ── */
+  #sl-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.72) 100%),
+      linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.6) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 5vh;
+    z-index: 10;
+  }
+
+  #sl-logo {
+    width: clamp(180px, 28vw, 340px);
+    height: auto;
+    opacity: 1;
+    background: transparent;
+    cursor: pointer;
+    margin-bottom: -8px;
+    transform: translateY(120px);
+    transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Once photos ready, float up to final position */
+  #sl-hero.revealed #sl-logo {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #sl-logo rect, #sl-logo polygon {
+    fill: transparent;
+  }
+
+  #sl-rule {
+    width: 120px;
+    height: 1px;
+    background: rgba(245,240,232,0.35);
+    margin: 32px 0 32px;
+    opacity: 0;
+    transition: opacity 1s ease 0.7s, width 1s ease 0.7s;
+    position: relative;
+    cursor: pointer;
+  }
+
+  #sl-rule::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -40px;
+    right: -40px;
+    bottom: -20px;
+  }
+
+  #sl-tagline {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.65rem, 1.6vw, 0.85rem);
+    color: rgba(245,240,232,0.55);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    margin: 0 0 40px;
+    opacity: 0;
+    transition: opacity 1s ease 0.9s;
+  }
+
+  #sl-cta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 1s ease 1.1s;
+    width: auto;
+  }
+
+  #sl-cta-group .sl-cta,
+  #sl-cta-group button.sl-cta {
+    width: auto;
+    display: inline-block;
+    box-sizing: border-box;
+  }
+
+  #sl-youth-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  #sl-boxoffice-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  #sl-auditions-wrap + #sl-boxoffice-wrap {
+    margin-top: 5px;
+  }
+
+  #sl-boxoffice-wrap + #sl-youth-wrap {
+    margin-top: 5px;
+  }
+
+  #sl-youth-wrap + .sl-cta {
+    margin-top: 0;
+  }
+
+  #sl-youth-wrap > .sl-cta,
+  #sl-boxoffice-wrap > .sl-cta { margin-bottom: 0; }
+
+  #sl-youth-locations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    justify-content: center;
+    padding: 0 10px;
+    will-change: max-height, opacity;
+  }
+
+  #sl-youth-locations.open {
+    max-height: 400px;
+    opacity: 1;
+  }
+
+  #sl-youth-locations .sl-cta,
+  #sl-boxoffice-locations .sl-cta {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  #sl-boxoffice-btn.active {
+    background: rgba(245,240,232,0.08);
+    border-color: rgba(245,240,232,0.7);
+  }
+
+  .sl-location {
+    font-size: 0.65rem !important;
+    padding: 10px 22px !important;
+    border-color: rgba(245,240,232,0.35) !important;
+    color: rgba(245,240,232,0.8) !important;
+  }
+
+  .sl-cta {
+    display: inline-block;
+    padding: 13px 30px;
+    border: 1px solid rgba(245,240,232,0.5);
+    color: #f5f0e8;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+  }
+
+  .sl-cta:hover {
+    background: rgba(245,240,232,0.1);
+    border-color: rgba(245,240,232,0.8);
+  }
+
+  #sl-youth-btn.active {
+    background: rgba(245,240,232,0.08);
+    border-color: rgba(245,240,232,0.7);
+  }
+
+  @media (max-width: 480px) {
+    #sl-youth-locations { flex-direction: column; }
+    #sl-youth-locations.open { max-height: 400px; }
+  }
+
+  /* Reveal class */
+  #sl-hero.revealed #sl-rule,
+  #sl-hero.revealed #sl-tagline,
+  #sl-hero.revealed #sl-cta-group {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Loading shimmer on tiles */
+  .sl-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #0a0a0a 25%, #141414 50%, #0a0a0a 75%);
+    background-size: 200% 100%;
+    animation: sl-shimmer 1.6s infinite;
+  }
+  .sl-tile.img-loaded::before { display: none; }
+
+  @keyframes sl-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Fallback if Drive photos fail — show colored tiles */
+  .sl-tile.fallback {
+    opacity: 0.5;
+  }
+
+  /* ── Event list ── */
+  #sl-events-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .sl-event-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 22px;
+    border: 1px solid rgba(245,240,232,0.35);
+    color: rgba(245,240,232,0.9);
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: #0a0a0a;
+    transition: background 0.2s, border-color 0.2s;
+    text-align: center;
+    min-width: 200px;
+  }
+
+  .sl-event-link:hover {
+    background: #0a0a0a;
+    border-color: rgba(245,240,232,0.7);
+  }
+
+  .sl-event-link.venue-rising-sun {
+    border-color: #cc3399;
+  }
+
+  .sl-event-link.venue-rising-sun:hover {
+    border-color: #ff44bb;
+  }
+
+  .sl-event-link.venue-kennett {
+    border-color: #00aa99;
+  }
+
+  .sl-event-link.venue-kennett:hover {
+    border-color: #00ddcc;
+  }
+
+  .sl-event-link.venue-offsite {
+    border-color: #cc9900;
+  }
+
+  .sl-event-link.venue-offsite:hover {
+    border-color: #ffcc00;
+  }
+
+  .sl-venue-heading {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.6);
+    margin: 20px 0 8px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .sl-venue-heading:first-child { margin-top: 0; }
+
+  .sl-event-date {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: rgba(245,240,232,0.45);
+    margin-top: 3px;
+  }
+
+  .sl-event-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: rgba(245,240,232,0.3);
+    margin-top: 2px;
+  }
+
+  .sl-event-loading, .sl-event-empty {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: rgba(245,240,232,0.3);
+    font-family: 'komet', 'Jost', sans-serif;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  /* Skeleton loading rows — mimic .sl-event-link shape */
+  .sl-skeleton-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 22px;
+    border: 1px solid rgba(245,240,232,0.12);
+    background: linear-gradient(
+      90deg,
+      rgba(245,240,232,0.03) 0%,
+      rgba(245,240,232,0.08) 50%,
+      rgba(245,240,232,0.03) 100%
+    );
+    background-size: 200% 100%;
+    min-width: 200px;
+    height: 36px;
+    box-sizing: border-box;
+    animation: sl-skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @keyframes sl-skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+
+
+  /* ── Staff panel ── */
+  #sl-staff-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,10,0.95);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  #sl-staff-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #sl-staff-back {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  #sl-staff-back:hover { color: rgba(245,240,232,0.9); }
+  #sl-staff-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+  #sl-staff-title {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.9);
+    margin-bottom: 32px;
+  }
+
+  #sl-staff-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sl-staff-link {
+    display: inline-block;
+    padding: 13px 38px;
+    border: 1px solid rgba(245,240,232,0.35);
+    color: #f5f0e8;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: #0a0a0a;
+    transition: background 0.2s, border-color 0.2s;
+    text-align: center;
+    white-space: nowrap;
+    min-width: 260px;
+  }
+
+  .sl-staff-link:hover {
+    background: rgba(245,240,232,0.08);
+    border-color: rgba(245,240,232,0.7);
+  }
+
+  /* ── Support overlay ── */
+  #sl-support-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background: rgba(2,2,2,0.98);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    padding: 72px 32px 40px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
+  #sl-support-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #sl-support-back {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  #sl-support-back:hover { color: rgba(245,240,232,0.9); }
+  #sl-support-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+  #sl-support-title {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.9);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  #sl-support-copy {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: rgba(245,240,232,0.5);
+    text-align: center;
+    max-width: 480px;
+    margin-bottom: 32px;
+  }
+
+  .sl-support-cta-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+
+  .sl-support-cta-btn {
+    display: inline-block;
+    padding: 13px 32px;
+    border: 1px solid rgba(245,240,232,0.4);
+    color: #f5f0e8;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 0.65rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .sl-support-cta-btn:hover {
+    background: rgba(245,240,232,0.08);
+    border-color: rgba(245,240,232,0.7);
+  }
+
+  #sl-support-tiers-heading {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.3);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  #sl-support-tiers {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .sl-ov-tier {
+    border: 1px solid rgba(245,240,232,0.1);
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .sl-ov-tier:hover { border-color: rgba(245,240,232,0.22); }
+  .sl-ov-tier.open  { border-color: rgba(245,240,232,0.2); }
+
+  .sl-ov-tier-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  .sl-ov-tier-name {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    flex: 1;
+  }
+
+  .sl-ov-tier-amount {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: rgba(245,240,232,0.4);
+    white-space: nowrap;
+  }
+
+  .sl-ov-tier-chevron {
+    width: 14px;
+    height: 14px;
+    stroke: rgba(245,240,232,0.3);
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+  }
+
+  .sl-ov-tier.open .sl-ov-tier-chevron {
+    transform: rotate(180deg);
+  }
+
+  .sl-ov-tier-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  .sl-ov-tier.open .sl-ov-tier-body {
+    max-height: 400px;
+  }
+
+  .sl-ov-tier-perks {
+    list-style: none;
+    padding: 0 20px 16px 20px;
+    border-top: 1px solid rgba(245,240,232,0.06);
+  }
+
+  .sl-ov-tier-perks li {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: rgba(245,240,232,0.5);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(245,240,232,0.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .sl-ov-tier-perks li:last-child { border-bottom: none; }
+
+  .sl-ov-tier-perks li::before {
+    content: '—';
+    opacity: 0.3;
+    flex-shrink: 0;
+  }
+
+  #sl-support-btn.active {
+    background: rgba(245,240,232,0.06);
+  }
+
+  /* ── Sponsors section ── */
+  #sl-sponsors-section {
+    width: 100%;
+    margin-top: 32px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(245,240,232,0.1);
+  }
+
+  #sl-sponsors-heading {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.35);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .sl-sponsor-tier-group {
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .sl-sponsor-tier-group:last-child { margin-bottom: 0; }
+
+  .sl-sponsor-tier-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.28);
+    margin-bottom: 8px;
+  }
+
+  .sl-sponsor-names {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 18px;
+  }
+
+  .sl-sponsor-name {
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    color: rgba(245,240,232,0.7);
+  }
+
+  /* Skeleton shimmer lines */
+  .sl-sponsors-skeleton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  .sl-skel-line {
+    height: 10px;
+    border-radius: 2px;
+    background: linear-gradient(
+      90deg,
+      rgba(245,240,232,0.04) 0%,
+      rgba(245,240,232,0.09) 50%,
+      rgba(245,240,232,0.04) 100%
+    );
+    background-size: 200% 100%;
+    animation: sl-skel-shimmer 1.6s ease-in-out infinite;
+  }
+
+  @keyframes sl-skel-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  #sl-sponsors-list {
+    transition: opacity 0.3s ease;
+  }
+
+  /* ── Social links ── */
+  #sl-contact-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 28px;
+  }
+
+  #sl-social-links {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .sl-social-link {
+    color: rgba(245,240,232,0.4);
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .sl-social-link:hover { color: rgba(245,240,232,0.85); }
+
+  .sl-social-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ── Contact overlay ── */
+  #sl-contact-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2,2,2,0.98);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    padding: 60px 24px;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  #sl-contact-overlay > *:not(#sl-contact-back):not(#sl-contact-success) {
+    width: 100%;
+    max-width: min(420px, 100%);
+    box-sizing: border-box;
+  }
+
+  #sl-contact-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #sl-contact-back {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  #sl-contact-back:hover { color: rgba(245,240,232,0.9); }
+  #sl-contact-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+  #sl-contact-title {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.9);
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+
+  #sl-contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: min(420px, 100%);
+    box-sizing: border-box;
+  }
+
+  .sl-contact-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sl-contact-label {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.4);
+  }
+
+  .sl-contact-label span {
+    color: rgba(245,240,232,0.2);
+    font-size: 0.55rem;
+    margin-left: 4px;
+  }
+
+  .sl-contact-input {
+    background: rgba(245,240,232,0.05);
+    border: 1px solid rgba(245,240,232,0.15);
+    color: #f5f0e8;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.85rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+    box-sizing: border-box;
+  }
+
+  .sl-contact-input:focus {
+    border-color: rgba(245,240,232,0.45);
+  }
+
+  textarea.sl-contact-input {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  #sl-contact-submit {
+    margin-top: 4px;
+    padding: 12px 32px;
+    border: 1px solid rgba(245,240,232,0.4);
+    color: #f5f0e8;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 0.65rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    align-self: flex-start;
+  }
+
+  #sl-contact-submit:hover {
+    background: rgba(245,240,232,0.08);
+    border-color: rgba(245,240,232,0.7);
+  }
+
+  #sl-contact-submit:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  #sl-contact-status {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: rgba(245,240,232,0.55);
+    min-height: 1.2em;
+    text-align: center;
+  }
+
+  #sl-contact-form {
+    transition: opacity 0.4s ease;
+  }
+
+  #sl-contact-form.fading {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #sl-contact-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+  }
+
+  #sl-contact-success.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #sl-contact-success-title {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+  }
+
+  #sl-contact-success-sub {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    color: rgba(245,240,232,0.45);
+  }
+
+  #sl-contact-btn.active {
+    background: rgba(245,240,232,0.06);
+  }
+
+  /* ── Story overlay ── */
+  #sl-story-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,10,0.94);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    padding: 0 32px;
+  }
+
+  #sl-story-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #sl-story-back {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  #sl-story-back:hover { color: rgba(245,240,232,0.9); }
+
+  #sl-story-back svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+  }
+
+  #sl-story-content {
+    max-width: 560px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+
+  #sl-story-text {
+    overflow-y: auto;
+    padding: 0 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #sl-story-title {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    margin-bottom: 28px;
+  }
+
+  #sl-story-text {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+    line-height: 1.9;
+    color: rgba(245,240,232,0.65);
+  }
+
+  #sl-story-text p + p { margin-top: 1.2em; }
+
+  #sl-bottom-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 13px;
+  }
+
+  #sl-bottom-row a,
+  #sl-bottom-row button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 24px;
+    border: 1px solid rgba(245,240,232,0.2);
+    color: rgba(245,240,232,0.75);
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 0.65rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: rgba(245,240,232,0.04);
+    cursor: pointer;
+    transition: background 0.25s, border-color 0.25s, color 0.25s;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    min-width: 110px;
+  }
+
+  #sl-bottom-row a:hover,
+  #sl-bottom-row button:hover {
+    background: rgba(245,240,232,0.1);
+    border-color: rgba(245,240,232,0.5);
+    color: #f5f0e8;
+  }
+
+
+
+  .sl-bottom-icon {
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.6;
+  }
+
+  #sl-story-btns {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  #sl-story-staff-btn, #sl-story-board-btn, #sl-story-productions-btn {
+    display: inline-block;
+    margin-top: 0;
+    padding: 13px 30px;
+    border: 1px solid rgba(245,240,232,0.5);
+    color: #f5f0e8;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: #0a0a0a;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+  }
+
+  #sl-story-staff-btn:hover, #sl-story-board-btn:hover, #sl-story-productions-btn:hover {
+    background: #0a0a0a;
+    border-color: rgba(245,240,232,0.8);
+  }
+
+  /* ── Box Office overlay ── */
+  #sl-auditions-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,10,0.92);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  #sl-auditions-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #sl-aud-back {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  #sl-aud-back:hover { color: rgba(245,240,232,0.9); }
+
+  .sl-aud-empty {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    letter-spacing: 0.05em;
+    color: rgba(245,240,232,0.7);
+    text-align: center;
+    padding: 0 24px;
+    line-height: 1.6;
+  }
+  #sl-aud-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+  #sl-aud-title {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.9);
+    margin-bottom: 28px;
+  }
+
+  #sl-auditions-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    padding: 0 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  #sl-auditions-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 5px;
+  }
+
+  #sl-auditions-btn.active {
+    background: rgba(245,240,232,0.08);
+    border-color: rgba(245,240,232,0.7);
+  }
+
+  #sl-boxoffice-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,10,0.92);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  #sl-boxoffice-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  #sl-bo-back {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  #sl-bo-back:hover { color: rgba(245,240,232,0.9); }
+
+  #sl-bo-back svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+  }
+
+  #sl-bo-title {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.9);
+    margin-bottom: 28px;
+  }
+
+  #sl-events-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    padding: 0 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  /* ── Easter egg: confetti ── */
+  .sl-confetti {
+    position: fixed;
+    top: -10px;
+    pointer-events: none;
+    z-index: 9999;
+    border-radius: 2px;
+    animation: sl-confetti-fall linear forwards;
+  }
+
+  @keyframes sl-confetti-fall {
+    0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg) translateX(var(--drift)); opacity: 0; }
+  }
+
+
+</style>
+
+<section id="sl-hero">
+
+  <div id="sl-stage">
+    <div class="sl-row" id="sl-row-a"></div>
+    <div class="sl-row" id="sl-row-b"></div>
+    <div class="sl-row" id="sl-row-c"></div>
+  </div>
+
+  <div id="sl-overlay">
+    <svg id="sl-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500" aria-label="Street Lamp">
+      <path id="sl-curtain-r" fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-565.82c0,-242.15,0,-430.39,0,-500.08l0,-74.2l0,-44.44c0,-20.91,0,-64.17,0,-118.9c0,-63.61,0,-121.71,0,-172.68l0,-45.99h565.82Z">
+        <animate id="sl-anim-r" attributeName="d"
+          from="M1315.82,76.28v956.28h-565.82c0,-242.15,0,-430.39,0,-500.08l0,-74.2l0,-44.44c0,-20.91,0,-64.17,0,-118.9c0,-63.61,0,-121.71,0,-172.68l0,-45.99h565.82Z"
+          to="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"
+          begin="0.8s" dur="1.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      </path>
+      <path id="sl-curtain-l" fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h565.83c0,-242.17,0,-430.39,0,-500.07l0,-74.2l0,-44.44c0,-20.91,0,-64.17,0,-118.89c0,-63.62,0,-121.72,0,-172.69l0,-45.98H184.18v956.28Z">
+        <animate id="sl-anim-l" attributeName="d"
+          from="M184.18,1032.56h565.83c0,-242.17,0,-430.39,0,-500.07l0,-74.2l0,-44.44c0,-20.91,0,-64.17,0,-118.89c0,-63.62,0,-121.72,0,-172.69l0,-45.98H184.18v956.28Z"
+          to="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"
+          begin="0.8s" dur="1.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
+      </path>
+      <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+      <!-- Wordmark -->
+      <g fill="#f5f0e8">
+        <path d="M194.02,1383.57c4.76,3.02,9.68,5.31,14.76,6.88,5.08,1.57,9.97,2.35,14.67,2.35,1.97,0,3.67-.13,5.1-.39,1.42-.26,2.6-.64,3.53-1.13.93-.49,1.6-1.12,2-1.87.41-.75.61-1.62.61-2.61,0-1.62-.73-3.08-2.18-4.35-1.45-1.28-3.35-2.51-5.7-3.7-2.35-1.19-5.05-2.41-8.1-3.66-3.05-1.25-6.14-2.67-9.27-4.27-3.13-1.6-6.23-3.44-9.27-5.53-3.05-2.09-5.75-4.56-8.1-7.4-2.35-2.84-4.25-6.17-5.7-9.97-1.45-3.8-2.18-8.2-2.18-13.19,0-5.98,1.09-11.38,3.27-16.2,2.18-4.82,5.3-8.93,9.36-12.32,4.06-3.4,8.98-6.01,14.76-7.84,5.78-1.83,12.29-2.74,19.55-2.74s13.34.73,18.94,2.18c5.6,1.45,10.87,3.57,15.81,6.36l-8.17,29.61c-4.11-2.15-8.31-3.9-12.6-5.27-4.29-1.36-8.63-2.05-13.04-2.05-1.51,0-2.86.12-4.04.35s-2.19.58-3,1.04c-.81.47-1.43,1.04-1.87,1.74s-.65,1.51-.65,2.44c0,1.51.72,2.86,2.17,4.05,1.45,1.19,3.35,2.35,5.69,3.48,2.35,1.13,5.03,2.31,8.04,3.53,3.01,1.22,6.1,2.61,9.26,4.18,3.16,1.57,6.24,3.4,9.26,5.49,3.01,2.09,5.69,4.59,8.04,7.49,2.35,2.9,4.25,6.27,5.69,10.1,1.45,3.83,2.17,8.3,2.17,13.41,0,6.04-1.19,11.51-3.57,16.41-2.38,4.91-5.7,9.1-9.97,12.58-4.27,3.48-9.38,6.18-15.33,8.1-5.95,1.92-12.5,2.87-19.64,2.87-7.9,0-14.89-.87-20.99-2.61-6.1-1.74-11.76-4.32-16.98-7.75l7.66-29.78Z"/>
+        <path d="M368.44,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+        <path d="M380.2,1297.79c5.46-.29,10.84-.52,16.15-.7,5.31-.17,10.58-.26,15.81-.26,10.85,0,20.46,1,28.82,3,8.36,2,15.4,4.89,21.12,8.67,5.72,3.77,10.06,8.38,13.02,13.8,2.96,5.43,4.44,11.57,4.44,18.42,0,3.43-.38,6.66-1.13,9.71-.75,3.05-1.87,5.91-3.35,8.58-1.48,2.67-3.29,5.17-5.44,7.49-2.15,2.32-4.61,4.44-7.4,6.36,3.6,7.08,7.15,14.7,10.67,22.86,3.51,8.16,6.92,16.76,10.23,25.82h-41.89c-2.03-5.92-4.3-11.94-6.79-18.07-2.5-6.12-5.23-12.24-8.19-18.33-1.29.17-2.57.3-3.83.39-1.26.09-2.57.19-3.92.3v35.7h-38.32v-123.75ZM418.52,1356.66h1.4c3.32,0,6.25-.33,8.79-1,2.54-.67,4.66-1.61,6.38-2.82,1.72-1.22,3.02-2.72,3.89-4.52.87-1.79,1.31-3.82,1.31-6.08,0-2.14-.44-4.07-1.31-5.77s-2.17-3.17-3.89-4.38c-1.72-1.21-3.85-2.14-6.38-2.78-2.54-.64-5.46-.96-8.79-.96h-1.4v28.3Z"/>
+        <path d="M574.22,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+        <path d="M670.01,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+        <path d="M777.21,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+        <path d="M870.83,1389.41h36.05v32.13h-74.37v-123.75h38.32v91.61Z"/>
+        <path d="M994.2,1297.79c7.61,20.38,14.41,41,20.39,61.87,5.98,20.87,10.72,41.49,14.21,61.87h-39.45c-.47-3.13-.95-6.28-1.44-9.45-.5-3.16-1.03-6.31-1.61-9.45h-33.34c-.58,3.25-1.12,6.43-1.61,9.54-.5,3.11-.97,6.23-1.44,9.36h-38.32c3.48-20.38,8.22-41,14.23-61.87,6-20.87,12.81-41.5,20.41-61.87h47.98ZM979.92,1372.86c-1.46-6.1-3.06-12.19-4.8-18.29-1.75-6.1-3.55-12.13-5.41-18.11-1.98,5.98-3.84,12.02-5.59,18.11-1.75,6.1-3.35,12.19-4.8,18.29h20.6Z"/>
+        <path d="M1191.98,1297.79c1.8,11.26,3.34,22.21,4.62,32.83,1.28,10.62,2.32,21.05,3.14,31.26.81,10.22,1.44,20.28,1.87,30.17.43,9.9.77,19.73,1,29.48h-38.49c-.23-7.43-.5-14.86-.79-22.29-.29-7.43-.63-14.79-1.01-22.08-.38-7.28-.83-14.44-1.36-21.47-.53-7.02-1.14-13.85-1.85-20.47l-19.85,86.3h-40.49l-19.77-86.3c-.69,6.62-1.3,13.44-1.81,20.47-.52,7.02-.98,14.18-1.38,21.47-.4,7.29-.73,14.65-.99,22.08-.26,7.43-.5,14.86-.73,22.29h-37.45c.23-9.75.56-19.58,1-29.48.43-9.9,1.07-19.95,1.91-30.17.84-10.22,1.88-20.64,3.13-31.26,1.25-10.63,2.8-21.57,4.65-32.83h54.13l18.55,80.55,18.37-80.55h53.59Z"/>
+        <path d="M1217.51,1297.79c6.39-.41,12.08-.67,17.07-.78,4.99-.12,9.78-.17,14.37-.17,10.57,0,19.99,1.06,28.26,3.18,8.27,2.12,15.27,5.2,20.99,9.23,5.72,4.04,10.09,8.96,13.11,14.76,3.02,5.81,4.53,12.4,4.53,19.77s-1.37,13.77-4.1,19.55c-2.73,5.78-6.67,10.75-11.82,14.94-5.15,4.18-11.39,7.52-18.75,10.01-7.36,2.5-15.63,4.06-24.81,4.7h-.52v28.56h-38.32v-123.75ZM1255.82,1361.28h1.22c2.97,0,5.66-.38,8.05-1.13,2.39-.75,4.43-1.83,6.12-3.22,1.69-1.39,3-3.11,3.94-5.14.93-2.03,1.4-4.35,1.4-6.97,0-2.44-.41-4.63-1.22-6.57-.82-1.94-2.04-3.61-3.67-5.01-1.63-1.39-3.67-2.45-6.12-3.18-2.45-.72-5.28-1.09-8.48-1.09h-1.22v32.31Z"/>
+      </g>
+    </svg>
+    <div id="sl-rule"></div>
+    <div id="sl-cta-group">
+      <div id="sl-auditions-wrap">
+        <button class="sl-cta" id="sl-auditions-btn" onclick="toggleAuditions()">Auditions</button>
+      </div>
+      <div id="sl-boxoffice-wrap">
+        <button class="sl-cta" id="sl-boxoffice-btn" onclick="toggleBoxOffice()">Box Office</button>
+      </div>
+      <div id="sl-youth-wrap">
+        <button class="sl-cta" id="sl-youth-btn" onclick="toggleYouth()">Performing Arts Academy</button>
+        <div id="sl-youth-locations">
+          <a class="sl-cta sl-location" id="sl-camps-btn" href="https://streetlamp.org/summercamps">Summer Camps</a>
+          <a class="sl-cta sl-location" href="https://youth.streetlamp.org/program.html?loc=rs">Rising Sun</a>
+          <a class="sl-cta sl-location" href="https://youth.streetlamp.org/program.html?loc=ksq">Kennett Square</a>
+        </div>
+      </div>
+      <a class="sl-cta" href="https://streetlamp.org/community-theatre">Community Productions</a>
+      <div id="sl-bottom-row">
+        <button id="sl-support-btn" onclick="toggleSupport()">Support Us</button>
+        <button id="sl-contact-btn" onclick="toggleContact()">Contact Us</button>
+        <button id="sl-story-btn" onclick="toggleStory()">Our Story</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff panel -->
+  <div id="sl-staff-overlay">
+    <button id="sl-staff-back" onclick="closeStaff()">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Back
+    </button>
+    <p id="sl-staff-title">Staff Links</p>
+    <div id="sl-staff-links">
+      <span class="sl-event-loading" id="sl-staff-loading">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Support overlay -->
+  <div id="sl-support-overlay">
+    <button id="sl-support-back" onclick="closeSupport()">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Back
+    </button>
+    <p id="sl-support-title">Support Street Lamp</p>
+    <p id="sl-support-copy">Street Lamp's mission is to provide cultural enrichment, quality education and exceptional performances while building confidence, and inspiring creativity through performing arts for people of all ages and abilities in our community. Your sponsorship makes our mission possible.</p>
+    <div class="sl-support-cta-row" id="sl-support-cta-row">
+      <span class="sl-event-loading" style="font-family:komet,Jost,sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:rgba(245,240,232,0.3)">Loading...</span>
+    </div>
+    <div id="sl-sponsors-section">
+      <p id="sl-sponsors-heading">Thank You to Our Sponsors</p>
+      <div id="sl-sponsors-list">
+        <div class="sl-sponsors-skeleton">
+          <div class="sl-skel-line" style="width:55%"></div>
+          <div class="sl-skel-line" style="width:40%"></div>
+          <div class="sl-skel-line" style="width:48%"></div>
+        </div>
+      </div>
+    </div>
+    <p id="sl-support-tiers-heading">Sponsorship Levels</p>
+    <div id="sl-support-tiers"></div>
+  </div>
+
+  <!-- Contact overlay -->
+  <div id="sl-contact-overlay">
+    <button id="sl-contact-back" onclick="closeContact()">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Back
+    </button>
+    <div id="sl-contact-header">
+      <p id="sl-contact-title">Get In Touch</p>
+      <div id="sl-social-links">
+        <a class="sl-social-link" href="https://www.facebook.com/streetlampproductions" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <a class="sl-social-link" href="https://www.instagram.com/street.lamp.productions" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a class="sl-social-link" href="https://www.tiktok.com/@slpblackbox" target="_blank" rel="noopener" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div id="sl-contact-form">
+      <div class="sl-contact-field">
+        <label class="sl-contact-label" for="sl-f-name">Name</label>
+        <input class="sl-contact-input" id="sl-f-name" type="text" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="sl-contact-field">
+        <label class="sl-contact-label" for="sl-f-email">Email</label>
+        <input class="sl-contact-input" id="sl-f-email" type="email" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="sl-contact-field">
+        <label class="sl-contact-label" for="sl-f-phone">Phone <span>optional</span></label>
+        <input class="sl-contact-input" id="sl-f-phone" type="tel" placeholder="(555) 555-5555" autocomplete="tel">
+      </div>
+      <div class="sl-contact-field">
+        <label class="sl-contact-label" for="sl-f-message">Message</label>
+        <textarea class="sl-contact-input" id="sl-f-message" placeholder="How can we help?"></textarea>
+      </div>
+      <button id="sl-contact-submit" onclick="submitContact()">Send Message</button>
+      <p id="sl-contact-status"></p>
+    </div>
+    <div id="sl-contact-success">
+      <p id="sl-contact-success-title">Message Sent</p>
+      <p id="sl-contact-success-sub">Thanks for reaching out — we'll be in touch soon.</p>
+    </div>
+  </div>
+
+  <!-- Our Story overlay -->
+  <div id="sl-story-overlay">
+    <button id="sl-story-back" onclick="closeStory()">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Back
+    </button>
+    <div id="sl-story-content">
+      <h2 id="sl-story-title">Our Story</h2>
+      <div id="sl-story-text">
+        <p>Street Lamp Productions was created in Rising Sun by founder Laura Woods. Our mission is to provide performing arts education and opportunities in our community and surrounding areas. This group first started doing annual shows and camps at a local church as fundraisers for American Cancer Society and the Muscular Dystrophy Association in 2012.</p>
+        <p>In August of 2015, the dream of having our own building was realized. We gutted a home interior retail store and created a lobby, classroom, offices, black box theatre, workshop, snack room, handicap restroom and entrances, and a dance room with a springboard floor. After many renovations, rebuilds, and paint, the black box stage was created and our first full show was Disney's Little Mermaid Jr in December 2015.</p>
+        <p>Street Lamp Productions is now home to Street Lamp Performing Arts Academy and Street Lamp Community Theatre. Street Lamp has students, talented performers, professional instructors, and guests from Maryland, Pennsylvania, Delaware, and New Jersey. We are a family run theatre and host a variety of performing arts classes, shows, and other community performances! All are welcome!</p>
+        <p>Street Lamp Performing Arts Academy is our children's performing arts education program. We offer group classes, shows, community performance opportunities, performing clubs, and private lessons to ages 5–20.</p>
+        <p>Street Lamp Community Theatre is our nonprofit community theatre specializing in adult and family performance and show opportunities.</p>
+      </div>
+      <div id="sl-story-btns">
+        <a id="sl-story-staff-btn" href="https://streetlamp.org/staff" target="_blank" rel="noopener">Meet Our Staff</a>
+        <a id="sl-story-board-btn" href="https://streetlamp.org/board" target="_blank" rel="noopener">Board of Directors</a>
+        <a id="sl-story-productions-btn" href="https://streetlamp.org/pastproductions" target="_blank" rel="noopener">Past Productions</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auditions overlay -->
+  <div id="sl-auditions-overlay">
+    <button id="sl-aud-back" onclick="closeAuditions()">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Back
+    </button>
+    <p id="sl-aud-title">Auditions</p>
+    <div id="sl-auditions-list">
+      <span class="sl-event-loading">Loading auditions...</span>
+    </div>
+  </div>
+
+  <!-- Box Office overlay -->
+  <div id="sl-boxoffice-overlay">
+    <button id="sl-bo-back" onclick="closeBoxOffice()">
+      <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Back
+    </button>
+    <p id="sl-bo-title">Box Office</p>
+    <div id="sl-events-list">
+      <span class="sl-event-loading">Loading events...</span>
+    </div>
+  </div>
+
+</section>
+
+<script>
+(function() {
+
+  /* ── CONFIG ── */
+  const API_KEY     = 'AIzaSyCIQYPSLXBH6HuRJ5IWdldLy0bfZdqgNkY';
+  const FOLDER_ID   = '19D6Hf1I_Q8exnD0_veAxajk6i00ApQI-';
+
+  // Folder names to exclude from the photo collage (case-insensitive)
+  // e.g. const EXCLUDED_FOLDERS = ['Headshots', 'Archive', 'Behind the Scenes'];
+  const EXCLUDED_FOLDERS = ['American Idiot | SLCT 2025', 'American Idiot | SLCT 2022', 'Twisted | SLCT', 'Heathers | SLP 2018', 'Headshots'];
+  /* ──────────── */
+
+  const TILE_HEIGHT_FRAC = 0.31; // each row is ~31% of hero height
+  const SPEED_A = 0.45;  // px per frame, row A (left)
+  const SPEED_B = 0.38;  // px per frame, row B (right, reversed)
+  const SPEED_C = 0.42;  // px per frame, row C (left, different speed)
+  const MAX_PHOTOS = 60; // cap to avoid hammering the API
+
+  // Widths in px for tile variety — pattern repeats
+  const WIDTHS_A = [220, 180, 260, 200, 240, 170, 290, 210, 190, 250, 175, 230];
+  const WIDTHS_B = [250, 195, 175, 265, 185, 245, 215, 180, 235, 200, 270, 190];
+
+  let rowA, rowB, rowC, animFrame;
+  let allIds = []; // array of {id, folder}
+  let posA = 0, posB = 0, posC = 0;
+  let widthA = 0, widthB = 0, widthC = 0;
+
+  /* ── 1. Fetch all image files from the folder (handles shortcuts) ── */
+  async function driveList(query, fields, pageSize = 200) {
+    const params = new URLSearchParams({
+      q: query,
+      fields: `files(${fields}),nextPageToken`,
+      key: API_KEY,
+      pageSize,
+      supportsAllDrives: 'true',
+      includeItemsFromAllDrives: 'true',
+    });
+    const res  = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`);
+    const data = await res.json();
+    if (data.error) {
+      console.error('Street Lamp Drive API error:', data.error.message);
+      return [];
+    }
+    return data.files || [];
+  }
+
+  async function fetchPhotos() {
+    // Level 1: get top-level subfolders (Productions + Community Theatre)
+    const level1 = await driveList(
+      `'${FOLDER_ID}' in parents and trashed=false`,
+      'id,name,mimeType,shortcutDetails'
+    );
+    console.log(`Street Lamp: root contains ${level1.length} items`);
+
+    const topFolders = level1.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
+
+    // Level 2: get contents of each top-level folder
+    const level2Results = await Promise.all(topFolders.map(f =>
+      driveList(
+        `'${f.id}' in parents and trashed=false`,
+        'id,name,mimeType,shortcutDetails'
+      ).then(items => ({ name: f.name, id: f.id, items }))
+    ));
+
+    // Collect photos per top-level folder separately so we can balance them
+    const poolsPerFolder = [];
+
+    for (const { name, items } of level2Results) {
+      console.log(`Street Lamp: subfolder "${name}" contains ${items.length} items`);
+      const folderFetches = [];
+      const directImages  = [];
+
+      for (const f of items) {
+        if (f.mimeType === 'application/vnd.google-apps.shortcut') {
+          const targetId = f.shortcutDetails?.targetId;
+          if (targetId) folderFetches.push(fetchImagesFromFolder(targetId, f.name));
+        } else if (f.mimeType === 'application/vnd.google-apps.folder') {
+          folderFetches.push(fetchImagesFromFolder(f.id, f.name));
+        } else if (f.mimeType?.startsWith('image/')) {
+          directImages.push({ id: f.id, folder: name });
+        }
+      }
+
+      const subResults = await Promise.all(folderFetches);
+      const allForFolder = [...directImages];
+      for (const objs of subResults) allForFolder.push(...objs);
+
+      console.log(`Street Lamp: "${name}" total photos: ${allForFolder.length}`);
+      if (allForFolder.length) poolsPerFolder.push(allForFolder);
+    }
+
+    if (!poolsPerFolder.length) return [];
+
+    // Balance: Productions gets 2x the photos of Community Theatre
+    // poolsPerFolder[0] = Productions, poolsPerFolder[1] = Community Theatre
+    // Find the smaller pool size, give Community Theatre that many, Productions 2x
+    const minSize = Math.min(...poolsPerFolder.map(p => p.length));
+    console.log(`Street Lamp: min pool size: ${minSize}`);
+
+    const balanced = poolsPerFolder.flatMap(function(pool, i) {
+      // First pool (Productions) gets 2x, others get 1x
+      const count = i === 0 ? Math.min(minSize * 2, pool.length) : minSize;
+      return shuffle(pool).slice(0, count);
+    });
+    console.log(`Street Lamp: total balanced images: ${balanced.length}`);
+    return balanced;
+  }
+
+  async function fetchImagesFromFolder(folderId, name = '') {
+    // Check against exclusion list
+    if (EXCLUDED_FOLDERS.length && EXCLUDED_FOLDERS.some(ex => ex.toLowerCase() === name.toLowerCase())) {
+      console.log(`Street Lamp: skipping excluded folder "${name}"`);
+      return [];
+    }
+    try {
+      // Fetch both images and subfolders in this folder
+      const items = await driveList(
+        `'${folderId}' in parents and trashed=false`,
+        'id,mimeType,name,shortcutDetails',
+        200
+      );
+
+      const imageObjs = [];
+      const subFetches = [];
+
+      for (const f of items) {
+        if (f.mimeType?.startsWith('image/')) {
+          imageObjs.push({ id: f.id, folder: name });
+        } else if (f.mimeType === 'application/vnd.google-apps.folder') {
+          subFetches.push(fetchImagesFromFolder(f.id, f.name));
+        } else if (f.mimeType === 'application/vnd.google-apps.shortcut') {
+          const targetId = f.shortcutDetails?.targetId;
+          if (targetId) subFetches.push(fetchImagesFromFolder(targetId, f.name));
+        }
+      }
+
+      // Recurse into subfolders
+      const subResults = await Promise.all(subFetches);
+      for (const objs of subResults) imageObjs.push(...objs);
+
+      console.log(`Street Lamp: folder "${name}" -> ${imageObjs.length} images (including subfolders)`);
+      return imageObjs;
+    } catch(e) {
+      console.warn(`Street Lamp: failed to fetch folder "${name}"`, e);
+      return [];
+    }
+  }
+
+  /* ── 2. Shuffle with no adjacent duplicates (same id or same folder) ── */
+  function shuffle(arr) {
+    // Basic Fisher-Yates first
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function shuffleNoAdjacent(objs) {
+    const shuffled = shuffle(objs);
+    // Make up to 3 passes trying to fix adjacencies
+    for (let pass = 0; pass < 3; pass++) {
+      let fixed = true;
+      for (let i = 1; i < shuffled.length; i++) {
+        const prev = shuffled[i - 1];
+        const curr = shuffled[i];
+        if (prev.id === curr.id || prev.folder === curr.folder) {
+          // Find a non-adjacent candidate to swap with
+          let swapped = false;
+          for (let j = i + 1; j < shuffled.length; j++) {
+            const cand = shuffled[j];
+            const prevPrev = shuffled[i - 2];
+            if (cand.id !== prev.id && cand.folder !== prev.folder &&
+                (!prevPrev || (cand.id !== prevPrev.id && cand.folder !== prevPrev.folder))) {
+              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+              swapped = true;
+              break;
+            }
+          }
+          if (!swapped) fixed = false;
+        }
+      }
+      if (fixed) break;
+    }
+    return shuffled;
+  }
+
+  /* ── 3. Build a row of tiles ── */
+  function makeTile(obj, tileH) {
+    const id     = typeof obj === 'object' ? obj.id     : obj;
+    const folder = typeof obj === 'object' ? obj.folder : '';
+    const tile = document.createElement('div');
+    tile.className = 'sl-tile';
+    tile.style.width  = tileH + 'px';
+    tile.style.height = tileH + 'px';
+    tile.dataset.folder = folder;
+    const img = document.createElement('img');
+    img.src = `https://lh3.googleusercontent.com/d/${id}=w600`;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.onload  = () => { img.classList.add('loaded'); tile.classList.add('img-loaded'); };
+    img.onerror = () => { tile.classList.add('img-loaded', 'fallback'); };
+    tile.appendChild(img);
+    return tile;
+  }
+
+  function buildRow(container, ids, widths, tileH) {
+    container.innerHTML = '';
+    const vpW      = window.innerWidth;
+    const tileStep = tileH + 10; // tile width + gap
+
+    // Figure out how many tiles fill the viewport
+    const tilesPerVP = Math.ceil(vpW / tileStep) + 1;
+    // Use at least tilesPerVP tiles per copy, rounded to ids.length for clean repeat
+    const copyLen = Math.ceil(tilesPerVP / ids.length) * ids.length;
+
+    // Build exactly 2 identical copies so the seam is perfect
+    for (let copy = 0; copy < 2; copy++) {
+      for (let i = 0; i < copyLen; i++) {
+        container.appendChild(makeTile(ids[i % ids.length], tileH));
+      }
+    }
+
+    // Loop width = exactly one copy
+    return copyLen * tileStep;
+  }
+
+  /* ── 4. Animation loop ── */
+  function animate() {
+    posA -= SPEED_A;
+    posB += SPEED_B;
+    posC -= SPEED_C;
+
+    if (posA < -widthA) posA = 0;
+    if (posB > 0)       posB = -widthB;
+    if (posC < -widthC) posC = 0;
+
+    rowA.style.transform = `translateX(${posA}px)`;
+    rowB.style.transform = `translateX(${posB}px)`;
+    rowC.style.transform = `translateX(${posC}px)`;
+
+    animFrame = requestAnimationFrame(animate);
+  }
+
+  /* ── 5. Random tile image swap ── */
+  function startTileSwapper() {
+    if (!allIds.length) return;
+
+    function swapRandomTile() {
+      const allTiles = Array.from(document.querySelectorAll('.sl-tile'));
+      if (!allTiles.length) return;
+
+      // Pick a random tile that's not currently transitioning
+      const candidates = allTiles.filter(t => !t.dataset.swapping);
+      if (!candidates.length) return;
+      const tile = candidates[Math.floor(Math.random() * candidates.length)];
+      const img  = tile.querySelector('img');
+      if (!img) return;
+
+      // Pick a random new image ID different from current
+      const currentSrc = img.src;
+      const currentFolder = tile.dataset.folder || '';
+      let newObj, attempts = 0;
+      do {
+        newObj = allIds[Math.floor(Math.random() * allIds.length)];
+        attempts++;
+      } while (attempts < 20 && (currentSrc.includes(newObj.id) || newObj.folder === currentFolder));
+      const newId = newObj.id;
+      tile.dataset.folder = newObj.folder;
+
+      tile.dataset.swapping = '1';
+
+      // Fade out
+      img.style.transition = 'opacity 0.6s ease';
+      img.style.opacity = '0';
+
+      setTimeout(() => {
+        img.src = `https://lh3.googleusercontent.com/d/${newId}=w600`;
+        img.onload = () => {
+          img.style.opacity = '0.65';
+          setTimeout(() => { delete tile.dataset.swapping; }, 700);
+        };
+        img.onerror = () => { delete tile.dataset.swapping; };
+      }, 650);
+    }
+
+    // Swap a tile every 2-4 seconds at random intervals
+    function scheduleNext() {
+      const delay = 600 + Math.random() * 800;
+      setTimeout(() => {
+        swapRandomTile();
+        scheduleNext();
+      }, delay);
+    }
+
+    scheduleNext();
+  }
+
+  /* ── 5. Build fallback tiles (colored blocks) if API fails ── */
+  function buildFallbackRow(container, widths, tileH, colors) {
+    container.innerHTML = '';
+    let totalW = 0;
+    const vpW = window.innerWidth;
+    let i = 0;
+    while (totalW < vpW * 2.5) {
+      const w = widths[i % widths.length];
+      const tile = document.createElement('div');
+      tile.className = 'sl-tile img-loaded fallback';
+      tile.style.width  = w + 'px';
+      tile.style.height = tileH + 'px';
+      tile.style.background = colors[i % colors.length];
+      container.appendChild(tile);
+      totalW += tileH + 10;
+      i++;
+    }
+    return totalW / 2;
+  }
+
+  /* ── 6. Init ── */
+  async function init() {
+    const hero  = document.getElementById('sl-hero');
+    rowA = document.getElementById('sl-row-a');
+    rowB = document.getElementById('sl-row-b');
+    rowC = document.getElementById('sl-row-c');
+
+    const heroH  = hero.offsetHeight;
+    const tileH  = Math.floor(heroH * TILE_HEIGHT_FRAC - 5);
+
+    const FALLBACK_COLORS = [
+      '#1c2020','#1e1c20','#20201c','#1c1e20','#201c1e',
+      '#181e1e','#1e1818','#181818','#1e1e18','#181c1e'
+    ];
+
+    let ids = [];
+
+    if (API_KEY !== 'YOUR_GOOGLE_API_KEY_HERE' && FOLDER_ID !== 'YOUR_DRIVE_FOLDER_ID_HERE') {
+      try {
+        ids = shuffleNoAdjacent(await fetchPhotos()).slice(0, MAX_PHOTOS);
+      } catch(e) {
+        console.warn('Street Lamp: Drive API error', e);
+      }
+    }
+
+    allIds = ids; // ids is now array of {id, folder} objects
+    if (ids.length >= 4) {
+      // Split IDs across rows, keep them different
+      const half = Math.ceil(ids.length / 2);
+      const idsA = ids.slice(0, half);
+      const idsB = ids.slice(half);
+      const splitA = Math.ceil(ids.length / 3);
+      const splitB = Math.ceil(ids.length * 2 / 3);
+      const idsA2  = ids.slice(0, splitA);
+      const idsB2  = ids.slice(splitA, splitB).length > 3 ? ids.slice(splitA, splitB) : idsA2;
+      const idsC2  = ids.slice(splitB).length > 3 ? ids.slice(splitB) : idsA2;
+      widthA = buildRow(rowA, idsA2, WIDTHS_A, tileH);
+      widthB = buildRow(rowB, idsB2, WIDTHS_B, tileH);
+      widthC = buildRow(rowC, idsC2, WIDTHS_A, tileH);
+      posB   = -widthB * 0.5;
+      posC   = -widthC * 0.25;
+    } else {
+      // Fallback: colored placeholder tiles
+      widthA = buildFallbackRow(rowA, WIDTHS_A, tileH, FALLBACK_COLORS);
+      widthB = buildFallbackRow(rowB, WIDTHS_B, tileH, FALLBACK_COLORS.slice(3));
+      widthC = buildFallbackRow(rowC, WIDTHS_A, tileH, FALLBACK_COLORS.slice(6));
+      posB   = -widthB * 0.5;
+      posC   = -widthC * 0.25;
+    }
+
+    animate();
+
+    // Check URL hash after page loads
+    handleHash();
+
+
+
+    // Start random tile image swapper
+    setTimeout(startTileSwapper, 3000);
+
+    // Pre-load Box Office and Auditions data in the background
+    setTimeout(function() {
+      // Summer Camps button is visible by default; hide only if any row has 'no' in active column
+      fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=778912244&single=true&output=csv')
+        .then(function(r) { return r.text(); })
+        .then(function(text) {
+          // Match ,no as a complete cell value (followed by comma, newline, or end-of-string)
+          var hasNo = /,no(?=,|\r|\n|$)/i.test(text);
+          var btn = document.getElementById('sl-camps-btn');
+          if (btn && hasNo) btn.style.display = 'none';
+        })
+        .catch(function() {});
+
+      eventsPreloading = true;
+      loadEvents();
+      auditionsPreloaded = true;
+      loadAuditions();
+      staffLinksLoaded = true;
+      loadStaffLinks();
+      supportLoaded = true;
+      loadSupportButtons();
+      sponsorsLoaded = true;
+      loadSponsors();
+    }, 1500);
+
+
+
+    // Pause animation when tab is hidden (perf)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(animFrame);
+      else animate();
+    });
+  }
+
+  // Expose youth toggle to global scope (onclick needs it)
+  /* ── Logo curtain colour tap ── */
+  (function() {
+    const colors = [
+      '#e63946','#f4a261','#e9c46a','#2a9d8f','#457b9d',
+      '#9b5de5','#f15bb5','#00bbf9','#00f5d4','#ff6b6b',
+      '#ffd166','#06d6a0','#118ab2','#ef476f','#8338ec',
+    ];
+    let lastCurtainColor = null;
+    let lastLampColor    = null;
+    let clickCount       = 0;
+    let lampInterval     = null;
+
+    // The lamp body path — third path in the SVG (index 2)
+    function getLampPath() {
+      return document.querySelector('#sl-logo path:nth-child(3)');
+    }
+
+    function randomColor(exclude, list) {
+      let c;
+      do { c = list[Math.floor(Math.random() * list.length)]; }
+      while (c === exclude);
+      return c;
+    }
+
+    function startLampCycle() {
+      if (lampInterval || window.__slRainbowRunning) return; // already running
+      window.__slRainbowRunning = true;
+      // Get all colorable elements: curtains, body path, wordmark group paths
+      var logo = document.getElementById('sl-logo');
+      if (!logo) return;
+      var curtainR = document.getElementById('sl-curtain-r');
+      var curtainL = document.getElementById('sl-curtain-l');
+      var bodyPath = logo.querySelector('path:nth-of-type(3)');
+      var wordmarkPaths = logo.querySelectorAll('g path');
+      var hue = 0;
+      lampInterval = requestAnimationFrame(function step() {
+        hue = (hue + 0.6) % 360; // ~6 sec per full rainbow cycle at 60fps
+        var color = 'hsl(' + hue + ', 85%, 65%)';
+        if (curtainR) curtainR.style.fill = color;
+        if (curtainL) curtainL.style.fill = color;
+        if (bodyPath) bodyPath.style.fill = color;
+        wordmarkPaths.forEach(function(p) { p.style.fill = color; });
+        lampInterval = requestAnimationFrame(step);
+      });
+    }
+
+    document.getElementById('sl-logo').addEventListener('click', function() {
+      clickCount++;
+
+      // Curtains change colour on every click (until rainbow takes over at 25)
+      if (clickCount < 25 && !window.__slRainbowRunning) {
+        const curtains = document.querySelectorAll('#sl-curtain-r, #sl-curtain-l');
+        lastCurtainColor = randomColor(lastCurtainColor, colors);
+        curtains.forEach(function(p) { p.style.fill = lastCurtainColor; });
+      }
+
+      // After 25 clicks, whole logo starts rainbow cycling
+      if (clickCount === 25) {
+        startLampCycle();
+      }
+    });
+  })();
+
+  window.toggleBoxOffice = function() {
+    document.getElementById('sl-boxoffice-overlay').classList.add('open');
+    document.getElementById('sl-boxoffice-btn').classList.add('active');
+  };
+
+  window.closeBoxOffice = function() {
+    document.getElementById('sl-boxoffice-overlay').classList.remove('open');
+    document.getElementById('sl-boxoffice-btn').classList.remove('active');
+  };
+
+  /* ── Staff panel — triple tap the rule ── */
+  (function() {
+    var tapCount = 0;
+    var tapTimer = null;
+    var rule = document.getElementById('sl-rule');
+
+    const STAFF_LINKS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1825551000&single=true&output=csv';
+    let staffLinksLoaded = false;
+
+    function openStaff() {
+      document.getElementById('sl-staff-overlay').classList.add('open');
+      if (!staffLinksLoaded) {
+        staffLinksLoaded = true;
+        loadStaffLinks();
+      }
+    }
+    window.openStaff = openStaff;
+
+    async function loadStaffLinks() {
+      const container = document.getElementById('sl-staff-links');
+      try {
+        const res  = await fetch(STAFF_LINKS_CSV);
+        const text = await res.text();
+        const rows = text.trim().split('\n').slice(1).filter(function(r) { return r.trim(); });
+        if (!rows.length) { container.innerHTML = '<span class="sl-event-empty">No links available</span>'; return; }
+        var html = '';
+        rows.forEach(function(row) {
+          var cols = [];
+          var cur = '', inQuote = false;
+          for (var i = 0; i < row.length; i++) {
+            var ch = row[i];
+            if (ch === '"') { inQuote = !inQuote; }
+            else if (ch === ',' && !inQuote) { cols.push(cur.trim()); cur = ''; }
+            else { cur += ch; }
+          }
+          cols.push(cur.trim());
+          var name = (cols[0] || '').replace(/^"|"$/g, '').trim();
+          var url  = (cols[1] || '').replace(/^"|"$/g, '').trim();
+          if (!name || name.toLowerCase() === 'name') return;
+          html += '<a class="sl-staff-link" href="' + (url || '#') + '" target="_blank" rel="noopener">' + name + '</a>';
+        });
+        container.innerHTML = html || '<span class="sl-event-empty">No links available</span>';
+      } catch(err) {
+        console.warn('Street Lamp: staff links load error', err);
+        container.innerHTML = '<span class="sl-event-empty">Unable to load links</span>';
+      }
+    }
+    window.loadStaffLinks = loadStaffLinks;
+
+    rule.style.cursor = 'pointer';
+
+    rule.addEventListener('click', function() {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(function() { tapCount = 0; }, 600);
+      if (tapCount >= 3) {
+        tapCount = 0;
+        clearTimeout(tapTimer);
+        openStaff();
+      }
+    });
+
+    rule.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(function() { tapCount = 0; }, 600);
+      if (tapCount >= 3) {
+        tapCount = 0;
+        clearTimeout(tapTimer);
+        openStaff();
+      }
+    });
+
+    document.getElementById('sl-staff-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeStaff();
+    });
+  })();
+
+  /* ── Contact form ── */
+  const CONTACT_URL = 'https://script.google.com/macros/s/AKfycbzyOgUeBbI-DdKGYB8_DQ1ck9bkZaT7CvDAO9AcxGxVisXskIUcrMkMVvkzrNnJVESs/exec';
+
+  /* ── Support overlay ── */
+  const SUPPORT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1751447197&single=true&output=csv';
+  const SPONSORS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1496411634&single=true&output=csv';
+  let supportLoaded = false;
+  let sponsorsLoaded = false;
+
+  window.toggleSupport = function() {
+    document.getElementById('sl-support-overlay').classList.add('open');
+    document.getElementById('sl-support-btn').classList.add('active');
+    if (!supportLoaded) {
+      supportLoaded = true;
+      loadSupportButtons();
+    }
+    if (!document.getElementById('sl-support-tiers').children.length) {
+      buildSupportTiers();
+    }
+    if (!sponsorsLoaded) {
+      sponsorsLoaded = true;
+      loadSponsors();
+    }
+  };
+
+  async function loadSupportButtons() {
+    var row = document.getElementById('sl-support-cta-row');
+    try {
+      var res  = await fetch(SUPPORT_CSV_URL);
+      var text = await res.text();
+      var lines = text.trim().split('\n').filter(function(l) { return l.trim(); });
+      var headers = lines[0].split(',').map(function(h) { return h.replace(/^"|"$/g,'').trim().toLowerCase(); });
+      var buttons = lines.slice(1).map(function(line) {
+        var cols = [], cur = '', inQ = false;
+        for (var i = 0; i < line.length; i++) {
+          var ch = line[i];
+          if (ch === '"') { inQ = !inQ; }
+          else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+          else { cur += ch; }
+        }
+        cols.push(cur.trim());
+        var r = {};
+        headers.forEach(function(h, i) { r[h] = (cols[i]||'').replace(/^"|"$/g,'').trim(); });
+        return r;
+      }).filter(function(r) { return r.name && r.name.toLowerCase() !== 'name'; });
+
+      if (!buttons.length) { row.innerHTML = ''; return; }
+      row.innerHTML = buttons.map(function(b) {
+        return '<a class="sl-support-cta-btn" href="' + (b.url||'#') + '" target="_blank" rel="noopener">' + b.name + '</a>';
+      }).join('');
+    } catch(e) {
+      row.innerHTML = '';
+      console.warn('Street Lamp: support buttons load error', e);
+    }
+  }
+
+  window.closeSupport = function() {
+    document.getElementById('sl-support-overlay').classList.remove('open');
+    document.getElementById('sl-support-btn').classList.remove('active');
+  };
+
+  document.getElementById('sl-support-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSupport();
+  });
+
+  function buildSupportTiers() {
+    var tiers = [
+      { name: 'Season Sponsor',   amount: '$10,000 and up',  perks: ['Four tickets to each show this season', 'Named as Season Sponsor in all marketing media for every show and event this season', 'Four free tickets to all events this season', 'Full page ad in all programs for this season'] },
+      { name: 'Show Sponsor',     amount: '$5,000 – $9,999', perks: ['Two tickets to each show this season', 'Headline Sponsor and name in all marketing media for select show this season', 'Two tickets to each opening night reception or season gala and all events this season', 'Full page ad in all programs for this season'] },
+      { name: 'Rights Sponsor',   amount: '$2,500 – $4,999', perks: ['Two tickets to each show this season', 'Headline Sponsor for select show this season', 'Two tickets to opening night reception for select show', 'Name in all programs this season'] },
+      { name: 'Music Sponsor',    amount: '$1,000 – $2,499', perks: ['Four tickets to the show of your choice', 'Name in all programs this season'] },
+      { name: 'Costumes Sponsor', amount: '$500 – $999',     perks: ['Two tickets to the show of your choice', 'Name in all programs this season'] },
+      { name: 'Props Sponsor',    amount: '$250 – $499',     perks: ['Name in all programs for this season'] },
+    ];
+    var container = document.getElementById('sl-support-tiers');
+    tiers.forEach(function(tier) {
+      var el = document.createElement('div');
+      el.className = 'sl-ov-tier';
+      el.innerHTML =
+        '<div class="sl-ov-tier-header">' +
+          '<span class="sl-ov-tier-name">' + tier.name + '</span>' +
+          '<span class="sl-ov-tier-amount">' + tier.amount + '</span>' +
+          '<svg class="sl-ov-tier-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>' +
+        '</div>' +
+        '<div class="sl-ov-tier-body">' +
+          '<ul class="sl-ov-tier-perks">' +
+            tier.perks.map(function(p) { return '<li>' + p + '</li>'; }).join('') +
+          '</ul>' +
+        '</div>';
+      el.querySelector('.sl-ov-tier-header').addEventListener('click', function() {
+        el.classList.toggle('open');
+      });
+      container.appendChild(el);
+    });
+  }
+
+  async function loadSponsors() {
+    if (SPONSORS_CSV_URL === 'SPONSORS_GID_PLACEHOLDER') return;
+    var section = document.getElementById('sl-sponsors-section');
+    var list    = document.getElementById('sl-sponsors-list');
+    var TIER_ORDER = ['Season Sponsor','Show Sponsor','Rights Sponsor','Music Sponsor','Costumes Sponsor','Props Sponsor'];
+
+    try {
+      var res  = await fetch(SPONSORS_CSV_URL);
+      var text = await res.text();
+      var lines = text.trim().split('\n').filter(function(l) { return l.trim(); });
+      if (lines.length < 2) { section.style.display = 'none'; return; }
+
+      var headers = lines[0].split(',').map(function(h) { return h.replace(/^"|"$/g,'').trim().toLowerCase(); });
+      var sponsors = lines.slice(1).map(function(line) {
+        var cols = [], cur = '', inQ = false;
+        for (var i = 0; i < line.length; i++) {
+          var ch = line[i];
+          if (ch === '"') { inQ = !inQ; }
+          else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+          else { cur += ch; }
+        }
+        cols.push(cur.trim());
+        var r = {};
+        headers.forEach(function(h, i) { r[h] = (cols[i]||'').replace(/^"|"$/g,'').trim(); });
+        return r;
+      }).filter(function(r) { return r.name && (r.active||'').toLowerCase() === 'yes'; });
+
+      if (!sponsors.length) { section.style.display = 'none'; return; }
+
+      var grouped = {};
+      sponsors.forEach(function(s) {
+        var t = s.tier || 'Other';
+        if (!grouped[t]) grouped[t] = [];
+        grouped[t].push(s.name);
+      });
+
+      var html = '';
+      TIER_ORDER.forEach(function(tier) {
+        if (!grouped[tier] || !grouped[tier].length) return;
+        html += '<div class="sl-sponsor-tier-group">'
+              + '<div class="sl-sponsor-tier-label">' + tier + '</div>'
+              + '<div class="sl-sponsor-names">'
+              + grouped[tier].map(function(n) { return '<span class="sl-sponsor-name">' + n.replace(/</g,'&lt;') + '</span>'; }).join('')
+              + '</div></div>';
+      });
+      Object.keys(grouped).forEach(function(tier) {
+        if (TIER_ORDER.indexOf(tier) > -1) return;
+        html += '<div class="sl-sponsor-tier-group">'
+              + '<div class="sl-sponsor-tier-label">' + tier + '</div>'
+              + '<div class="sl-sponsor-names">'
+              + grouped[tier].map(function(n) { return '<span class="sl-sponsor-name">' + n.replace(/</g,'&lt;') + '</span>'; }).join('')
+              + '</div></div>';
+      });
+
+      // Fade out skeleton, swap content, fade in
+      list.style.opacity = '0';
+      setTimeout(function() {
+        list.innerHTML = html;
+        list.style.opacity = '1';
+      }, 300);
+
+    } catch(e) {
+      section.style.display = 'none';
+      console.warn('Street Lamp: sponsors load error', e);
+    }
+  }
+
+  window.toggleContact = function() {
+    document.getElementById('sl-contact-overlay').classList.add('open');
+    document.getElementById('sl-contact-btn').classList.add('active');
+  };
+
+  window.closeContact = function() {
+    document.getElementById('sl-contact-overlay').classList.remove('open');
+    document.getElementById('sl-contact-btn').classList.remove('active');
+  };
+
+  document.getElementById('sl-contact-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeContact();
+  });
+
+  // Clear status message as soon as user starts editing again
+  ['sl-f-name','sl-f-email','sl-f-phone','sl-f-message'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function() {
+      var status = document.getElementById('sl-contact-status');
+      if (status) status.textContent = '';
+    });
+  });
+
+  window.submitContact = async function() {
+    const name    = document.getElementById('sl-f-name').value.trim();
+    const email   = document.getElementById('sl-f-email').value.trim();
+    const phone   = document.getElementById('sl-f-phone').value.trim();
+    const message = document.getElementById('sl-f-message').value.trim();
+    const status  = document.getElementById('sl-contact-status');
+    const btn     = document.getElementById('sl-contact-submit');
+
+    if (!name)    { status.textContent = 'Please enter your name.'; return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { status.textContent = 'Please enter a valid email address.'; return; }
+    if (!message) { status.textContent = 'Please enter a message.'; return; }
+
+    btn.disabled = true;
+    var origLabel = btn.textContent;
+    btn.textContent = 'Sending...';
+    status.textContent = '';
+
+    try {
+      const res = await fetch(CONTACT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ name, email, phone, message }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Fade form out, fade success in
+        var form = document.getElementById('sl-contact-form');
+        var success = document.getElementById('sl-contact-success');
+        form.classList.add('fading');
+        setTimeout(function() {
+          success.classList.add('visible');
+        }, 420);
+        // Reset form fields for next time
+        document.getElementById('sl-f-name').value    = '';
+        document.getElementById('sl-f-email').value   = '';
+        document.getElementById('sl-f-phone').value   = '';
+        document.getElementById('sl-f-message').value = '';
+        setTimeout(function() {
+          closeContact();
+          // Reset overlay state after close
+          setTimeout(function() {
+            form.classList.remove('fading');
+            success.classList.remove('visible');
+            btn.disabled = false;
+            btn.textContent = origLabel;
+            status.textContent = '';
+          }, 500);
+        }, 2800);
+      } else {
+        status.textContent = 'Something went wrong. Please try again.';
+        btn.disabled = false;
+        btn.textContent = origLabel;
+      }
+    } catch(err) {
+      status.textContent = 'Something went wrong. Please try again.';
+      btn.disabled = false;
+      btn.textContent = origLabel;
+    }
+  };
+
+  window.closeStaff = function() {
+    document.getElementById('sl-staff-overlay').classList.remove('open');
+  };
+
+  window.toggleStory = function() {
+    document.getElementById('sl-story-overlay').classList.add('open');
+    document.getElementById('sl-story-btn').classList.add('active');
+  };
+
+  window.closeStory = function() {
+    document.getElementById('sl-story-overlay').classList.remove('open');
+    document.getElementById('sl-story-btn').classList.remove('active');
+  };
+
+  // Tap backdrop to close story
+  document.getElementById('sl-story-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeStory();
+  });
+
+  // Tap outside to close
+  document.getElementById('sl-boxoffice-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeBoxOffice();
+  });
+
+  window.toggleYouth = function() {
+    const btn = document.getElementById('sl-youth-btn');
+    const locs = document.getElementById('sl-youth-locations');
+    const isOpen = locs.classList.contains('open');
+    locs.classList.toggle('open', !isOpen);
+    btn.classList.toggle('active', !isOpen);
+  };
+
+  /* ── Load Box Office events from Google Sheet Events tab ── */
+  const EVENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=2066707761&single=true&output=csv';
+
+  async function loadEvents() {
+    const list = document.getElementById('sl-events-list');
+    if (!list) return;
+
+    if (EVENTS_CSV_URL === 'YOUR_EVENTS_CSV_URL_HERE') {
+      list.innerHTML = '<span class="sl-event-empty">Events coming soon</span>';
+      return;
+    }
+
+    // Show skeleton rows while fetching (only if list is currently empty)
+    if (!list.children.length) {
+      list.innerHTML = '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>';
+    }
+
+    try {
+      console.log('Street Lamp: fetching events directly...');
+      const res  = await fetch(EVENTS_CSV_URL);
+      const text = await res.text();
+      console.log('Street Lamp: raw CSV full:', text);
+
+      const rows = text.trim().split('\n');
+      if (rows.length < 2) {
+        list.innerHTML = '<span class="sl-event-empty">No events currently on sale</span>';
+        return;
+      }
+
+      // Parse header row to find column indices
+      function parseCols(line) {
+        var cols = [], cur = '', inQ = false;
+        for (var i = 0; i < line.length; i++) {
+          var ch = line[i];
+          if (ch === '"') { inQ = !inQ; }
+          else if (ch === ',' && !inQ) { cols.push(cur.replace(/^"|"$/g,'').trim()); cur = ''; }
+          else cur += ch;
+        }
+        cols.push(cur.replace(/^"|"$/g,'').trim());
+        return cols;
+      }
+
+      var headers = parseCols(rows[0]).map(function(h) { return h.toLowerCase(); });
+      var nameIdx     = headers.indexOf('name');
+      var urlIdx      = headers.indexOf('url');
+      var labelIdx    = headers.indexOf('label');
+      var endDateIdx  = headers.indexOf('end_date');
+
+      var dataRows = rows.slice(1).filter(function(r) { return r.trim(); });
+      if (!dataRows.length) {
+        list.innerHTML = '<span class="sl-event-empty">No events currently on sale</span>';
+        return;
+      }
+
+      // Parse all rows into objects
+      var allEvents = [];
+      dataRows.forEach(function(row) {
+        var cols = parseCols(row);
+        var name     = nameIdx  > -1 ? (cols[nameIdx]  || '') : (cols[0] || '');
+        var url      = urlIdx   > -1 ? (cols[urlIdx]   || '') : (cols[1] || '');
+        var label    = labelIdx > -1 ? (cols[labelIdx] || '') : (cols[2] || '');
+        var end_date = endDateIdx > -1 ? (cols[endDateIdx] || '') : '';
+        if (!name || !url || name === 'name') return;
+        // Filter by end_date if present
+        if (end_date && end_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          var end = new Date(end_date + 'T00:00:00');
+          end.setDate(end.getDate() + 1);
+          if (end < new Date()) return;
+        }
+        allEvents.push({ name: name, url: url, label: label });
+      });
+
+      // Separate by venue
+      var rising = [], kennett = [], other = [];
+      allEvents.forEach(function(e) {
+        var l = e.label.toLowerCase();
+        if (l.indexOf('rising') > -1)   rising.push(e);
+        else if (l.indexOf('kennett') > -1) kennett.push(e);
+        else other.push(e);
+      });
+
+      // Sort each group alphabetically
+      var alpha = function(a, b) { return a.name.localeCompare(b.name); };
+      rising.sort(alpha);
+      kennett.sort(alpha);
+      other.sort(alpha);
+
+      function renderGroup(events, cssClass, heading) {
+        if (!events.length) return '';
+        var h = '<p class="sl-venue-heading">' + heading + '</p>';
+        events.forEach(function(e) {
+          h += '<a class="sl-event-link ' + cssClass + '" href="' + e.url + '" target="_blank" rel="noopener">';
+          h += '<span>' + e.name + '</span>';
+          h += '</a>';
+        });
+        return h;
+      }
+
+      var html = renderGroup(rising, 'venue-rising-sun', 'Rising Sun') +
+                 renderGroup(kennett, 'venue-kennett', 'Kennett Square') +
+                 renderGroup(other, 'venue-offsite', 'Off-Site');
+      list.innerHTML = html || '<span class="sl-event-empty">No events currently on sale</span>';
+    } catch(err) {
+      console.warn('Street Lamp: events load error', err);
+      list.innerHTML = '<a class="sl-event-link" href="https://slptickets.streetlamp.org" target="_blank" rel="noopener"><span>Performing Arts Academy</span><span class="sl-event-label">View all events</span></a>' +
+        '<a class="sl-event-link" href="https://slcttickets.streetlamp.org" target="_blank" rel="noopener"><span>Community Productions</span><span class="sl-event-label">View all events</span></a>';
+    }
+  }
+
+  // Pre-load events — fires in background after init
+  let eventsLoaded = false;
+  let eventsPreloading = false;
+  const _origToggleBoxOffice = window.toggleBoxOffice;
+  /* ── Logo curtain colour tap ── */
+  window.toggleBoxOffice = function() {
+    _origToggleBoxOffice();
+    // If preload is still in flight (or not yet started), show skeleton in the empty list
+    var list = document.getElementById('sl-events-list');
+    if (list && !list.children.length) {
+      list.innerHTML = '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>';
+    }
+    if (!eventsLoaded) {
+      eventsLoaded = true;
+      if (!eventsPreloading) loadEvents();
+    }
+  };
+
+  /* ── URL hash auto-open ── */
+  function handleHash() {
+    var hash = window.location.hash.toLowerCase().replace('#', '').trim();
+    if (!hash) return;
+    if (hash === 'box-office' || hash === 'boxoffice' || hash === 'tickets') {
+      setTimeout(function() { window.toggleBoxOffice(); }, 800);
+    } else if (hash === 'auditions' || hash === 'audition') {
+      setTimeout(function() { window.toggleAuditions(); }, 800);
+    } else if (hash === 'staff' || hash === 'admin') {
+      setTimeout(function() { window.openStaff && window.openStaff(); }, 800);
+    } else if (hash === 'support' || hash === 'donate') {
+      setTimeout(function() { window.toggleSupport(); }, 800);
+    } else if (hash === 'contact' || hash === 'contact-us') {
+      setTimeout(function() { window.toggleContact(); }, 800);
+    } else if (hash === 'our-story' || hash === 'story' || hash === 'about') {
+      setTimeout(function() { window.toggleStory(); }, 800);
+    } else if (hash === 'youth' || hash === 'youth-productions') {
+      setTimeout(function() { window.toggleYouth(); }, 800);
+    }
+  }
+
+  window.addEventListener('hashchange', handleHash);
+
+  // Wait for fonts + layout
+  // Fade logo in immediately, reveal (float up + buttons) after animation finishes
+  (function() {
+    var hero = document.getElementById('sl-hero');
+    if (hero) {
+      setTimeout(function() { hero.classList.add('revealed'); }, 2400);
+    }
+  })();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  /* ── Auditions overlay ── */
+  const AUDITIONS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1148275969&single=true&output=csv';
+  let auditionsLoaded = false;
+  let auditionsPreloaded = false;
+
+  window.toggleAuditions = function() {
+    document.getElementById('sl-auditions-overlay').classList.add('open');
+    document.getElementById('sl-auditions-btn').classList.add('active');
+    // If preload is still in flight (or not yet started), show skeleton in the empty list
+    var list = document.getElementById('sl-auditions-list');
+    if (list && !list.children.length) {
+      list.innerHTML = '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>';
+    }
+    if (!auditionsLoaded) {
+      auditionsLoaded = true;
+      if (!auditionsPreloaded) loadAuditions();
+      // If preload is in progress, loadAuditions will finish and render naturally
+    }
+  };
+
+  window.closeAuditions = function() {
+    document.getElementById('sl-auditions-overlay').classList.remove('open');
+    document.getElementById('sl-auditions-btn').classList.remove('active');
+  };
+
+  document.getElementById('sl-auditions-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAuditions();
+  });
+
+  async function loadAuditions() {
+    const list = document.getElementById('sl-auditions-list');
+
+    // Show skeleton rows while fetching (only if list is currently empty)
+    if (list && !list.children.length) {
+      list.innerHTML = '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>'
+                     + '<div class="sl-skeleton-row"></div>';
+    }
+
+    try {
+      const res  = await fetch(AUDITIONS_CSV_URL);
+      const text = await res.text();
+      console.log('Street Lamp: auditions CSV', text);
+
+      const rows = text.trim().split('\n').slice(1).filter(function(r) { return r.trim(); });
+      if (!rows.length) {
+        list.innerHTML = '<p class="sl-aud-empty">There are currently no auditions scheduled — check back soon!</p>';
+        return;
+      }
+
+      var allAuditions = [];
+      // Parse header row
+      var headerCols = [];
+      var headerRow = text.trim().split('\n')[0];
+      var hCur = '', hInQ = false;
+      for (var hi = 0; hi < headerRow.length; hi++) {
+        var hch = headerRow[hi];
+        if (hch === '"') { hInQ = !hInQ; }
+        else if (hch === ',' && !hInQ) { headerCols.push(hCur.trim().toLowerCase()); hCur = ''; }
+        else { hCur += hch; }
+      }
+      headerCols.push(hCur.trim().toLowerCase());
+
+      rows.forEach(function(row) {
+        var cols = [];
+        var cur = '', inQuote = false;
+        for (var i = 0; i < row.length; i++) {
+          var ch = row[i];
+          if (ch === '"') { inQuote = !inQuote; }
+          else if (ch === ',' && !inQuote) { cols.push(cur.trim()); cur = ''; }
+          else { cur += ch; }
+        }
+        cols.push(cur.trim());
+        var obj = {};
+        headerCols.forEach(function(h, i) { obj[h] = (cols[i] || '').replace(/^"|"$/g, '').trim(); });
+        if (!obj.name || obj.name === 'name') return;
+        if (obj.active && obj.active.toLowerCase() === 'no') return;
+        if (obj.end_date) {
+          var end = new Date(obj.end_date + 'T00:00:00'); end.setDate(end.getDate() + 1);
+          if (end < new Date()) return;
+        }
+        allAuditions.push({ name: obj.name, url: obj.url, label: obj.label, slug: obj.slug || '', soon: (obj.active || '').toLowerCase() === 'soon' });
+      });
+
+      var rising = [], kennett = [], other = [];
+      var risingSoon = [], kennettSoon = [], otherSoon = [];
+      allAuditions.forEach(function(e) {
+        var l = e.label.toLowerCase();
+        var bucket = e.soon
+          ? (l.indexOf('rising') > -1 ? risingSoon : l.indexOf('kennett') > -1 ? kennettSoon : otherSoon)
+          : (l.indexOf('rising') > -1 ? rising     : l.indexOf('kennett') > -1 ? kennett     : other);
+        bucket.push(e);
+      });
+
+      var alpha = function(a, b) { return a.name.localeCompare(b.name); };
+      rising.sort(alpha); kennett.sort(alpha); other.sort(alpha);
+      risingSoon.sort(alpha); kennettSoon.sort(alpha); otherSoon.sort(alpha);
+
+      function renderAudGroup(events, cssClass, heading) {
+        if (!events.length) return '';
+        var h = '<p class="sl-venue-heading">' + heading + '</p>';
+        events.forEach(function(e) {
+          if (e.soon) {
+            h += '<span class="sl-event-link ' + cssClass + '" style="opacity:0.5;cursor:default;">';
+            h += '<span>' + e.name + ' — Audition Info Coming Soon</span>';
+            h += '</span>';
+          } else {
+            var href = e.slug ? 'https://shows.streetlamp.org/?id=' + e.slug : (e.url || '#');
+            h += '<a class="sl-event-link ' + cssClass + '" href="' + href + '" target="_blank" rel="noopener">';
+            h += '<span>' + e.name + '</span>';
+            h += '</a>';
+          }
+        });
+        return h;
+      }
+
+      var html = renderAudGroup(rising.concat(risingSoon), 'venue-rising-sun', 'Rising Sun') +
+                 renderAudGroup(kennett.concat(kennettSoon), 'venue-kennett', 'Kennett Square') +
+                 renderAudGroup(other.concat(otherSoon), 'venue-offsite', 'Off-Site');
+
+      list.innerHTML = html || '<p class="sl-aud-empty">There are currently no auditions scheduled — check back soon!</p>';
+    } catch(err) {
+      console.warn('Street Lamp: auditions load error', err);
+      list.innerHTML = '<span class="sl-event-empty">Unable to load auditions</span>';
+    }
+  }
+
+
+
+
+  /* ── Easter egg: Konami code → confetti ── */
+  (function() {
+    const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    const COLORS  = ['#ff6b6b','#ffd166','#06d6a0','#118ab2','#9b5de5','#f15bb5','#00bbf9','#ff9f1c','#f5f0e8','#cc3399','#00aa99'];
+    let seq = [];
+
+    document.addEventListener('keydown', function(e) {
+      seq.push(e.key);
+      if (seq.length > KONAMI.length) seq.shift();
+      if (seq.join(',') === KONAMI.join(',')) {
+        seq = [];
+        launchConfetti();
+      }
+    });
+
+    function launchConfetti() {
+      for (var i = 0; i < 120; i++) {
+        (function(delay) {
+          setTimeout(function() {
+            var el       = document.createElement('div');
+            var size     = 6 + Math.random() * 8;
+            var drift    = (Math.random() - 0.5) * 300;
+            var duration = 2 + Math.random() * 2;
+            el.className = 'sl-confetti';
+            el.style.cssText = [
+              'left:'               + (Math.random() * 100) + 'vw',
+              'width:'              + size + 'px',
+              'height:'             + (size * (0.4 + Math.random() * 0.8)) + 'px',
+              'background:'         + COLORS[Math.floor(Math.random() * COLORS.length)],
+              'animation-duration:' + duration + 's',
+              '--drift:'            + drift + 'px',
+            ].join(';');
+            document.body.appendChild(el);
+            setTimeout(function() { el.remove(); }, duration * 1000 + 100);
+          }, delay);
+        })(Math.random() * 800);
+      }
+    }
+  })();
+
+})();
+</script>
+
+</body>
+</html>
