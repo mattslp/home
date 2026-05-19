@@ -503,10 +503,7 @@
     text-align: center;
   }
 
-  .slide-qr .slide-qr-content qr-code {
-    opacity: 0;
-    transition: opacity 1s ease;
-  }
+  .slide-qr-url {
     font-size: 1.4rem;
     font-weight: 300;
     letter-spacing: 0.2em;
@@ -518,19 +515,12 @@
 
   /* ── Persistent QR ── */
   #persistent-qr {
-    position: fixed !important;
-    bottom: 10px !important;
-    left: 10px !important;
-    top: auto !important;
-    right: auto !important;
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
     z-index: 610;
     opacity: 0.6;
     transition: opacity 0.8s ease;
-  }
-
-  #persistent-qr qr-code {
-    opacity: 1 !important;
-    transition: none !important;
   }
 
 </style>
@@ -879,17 +869,24 @@
       '    position-ring-color="#cc9900"',
       '    position-center-color="#ffffff"',
       '    mask-x-to-y-ratio="1.2"',
-      '    style="width:40vh;height:40vh;background:#000;opacity:0;transition:opacity 0.6s ease;"',
+      '    style="width:40vh;height:40vh;background:#000;"',
       '  ></qr-code>',
       '  <p class="slide-qr-title">Visit Our Website</p>',
       '  <p class="slide-qr-url">streetlamp.org</p>',
       '</div>',
     ].join('');
 
-    // Fade in QR code when slide becomes active — delay lets component finish rendering invisibly
+    // Animate and populate weather when slide becomes active
     slide.addEventListener('slideActivated', function() {
       var qr = slide.querySelector('qr-code');
-      if (qr) setTimeout(function() { qr.style.opacity = '1'; }, 300);
+      if (qr && qr.animateQRCode) {
+        qr.animateQRCode('RadialRippleIn');
+      } else if (qr) {
+        qr.addEventListener('codeRendered', function() {
+          qr.animateQRCode('RadialRippleIn');
+        }, { once: true });
+      }
+
     });
 
     return slide;
