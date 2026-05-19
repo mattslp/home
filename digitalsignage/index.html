@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="https://use.typekit.net/wby1ytb.css">
+<title>Street Lamp — Lobby Display</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #020202;
+    --text:     #f5f0e8;
+    --text-dim: rgba(245,240,232,0.5);
+    --youth:    #cc3399;
+    --community:#00aa99;
+    --gold:     #cc9900;
+    --font:     'komet', 'Jost', sans-serif;
+    --w: 1920px;
+    --h: 1080px;
+  }
+.slide-info-eyebrow,
+.slide-info-title,
+.slide-info-meta-label,
+.slide-info-meta-value,
+.slide-sponsor-heading,
+.slide-sponsor-tier-label,
+.slide-sponsor-names,
+#status-time,
+#status-weather,
+#status-holiday {
+  text-shadow: 0 2px 16px rgba(0,0,0,0.8), 0 1px 8px rgba(0,0,0,0.9);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+  html, body {
+    width: var(--w);
+    height: var(--h);
+    overflow: hidden;
+    background: var(--bg);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    color: var(--text);
+    cursor: none;
+  }
+
+  /* ── Grain overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* ── Status bar ── */
+  #status-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 96px;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    background: linear-gradient(to bottom, rgba(2,2,2,0.85) 0%, rgba(2,2,2,0) 100%);
+    font-family: var(--font);
+    pointer-events: none;
+  }
+
+  #status-time {
+    font-size: 2.4rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text);
+  }
+
+  #status-weather {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    font-size: 1.9rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    color: var(--text);
+  }
+
+  #status-weather-current {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  #status-weather-temp {
+    font-weight: 600;
+    font-size: 2.4rem;
+  }
+
+  #status-weather-desc {
+    color: var(--text-dim);
+  }
+
+  #status-weather-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(245,240,232,0.2);
+  }
+
+  /* ── Slideshow container ── */
+  #slideshow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* ── Individual slides ── */
+  .slide {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide.active   { opacity: 1; z-index: 2; }
+  .slide.outgoing { opacity: 0; z-index: 1; }
+
+
+  /* ── Progress bar ── */
+  #progress-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(245,240,232,0.2);
+    z-index: 500;
+    width: 0%;
+    transition: none;
+  }
+
+  /* ── IMAGE SLIDES ── */
+  .slide-image {
+    background: var(--bg);
+  }
+
+  /* Background version — fills screen, blurred, faded */
+  .slide-image-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.25;
+    filter: grayscale(0%);
+    animation: kenBurnsBg 12s ease-in-out forwards;
+  }
+
+  .slide-image img.slide-image-fg {
+    position: absolute;
+    z-index: 2;
+    top: 96px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 96px - 80px);
+    object-fit: contain;
+    object-position: center center;
+    display: block;
+  }
+
+  .slide-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @keyframes kenBurns {
+    0%   { transform: scale(1.0) translateX(0px); }
+    50%  { transform: scale(1.0) translateX(-12px); }
+    100% { transform: scale(1.0) translateX(12px); }
+  }
+
+  /* ── INFO SLIDES (events/auditions) ── */
+  .slide-info {
+    background: var(--bg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 120px 160px;
+    overflow: hidden;
+  }
+
+  .slide-info-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.25;
+    filter: grayscale(0%);
+    animation: kenBurnsBg 12s ease-in-out forwards;
+  }
+
+  @keyframes kenBurnsBg {
+    0%   { transform: scale(1.05) translateX(-8px); }
+    100% { transform: scale(1.12) translateX(8px); }
+  }
+
+  .slide-info-eyebrow {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+  }
+
+  .slide.active .slide-info-eyebrow {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .slide-info-eyebrow.youth     { color: var(--youth); }
+  .slide-info-eyebrow.community { color: var(--community); }
+  .slide-info-eyebrow.camps     { color: var(--gold); }
+
+  .slide-info-title {
+    font-size: 7rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: var(--text);
+    max-width: 1200px;
+    margin-bottom: 56px;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease 0.5s, transform 0.6s ease 0.5s;
+  }
+
+  .slide.active .slide-info-title {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .slide-info-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease 0.75s, transform 0.6s ease 0.75s;
+  }
+
+  .slide.active .slide-info-meta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .slide-info-meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+  }
+
+  .slide-info-meta-label {
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.3);
+  }
+
+  .slide-info-meta-value {
+    font-size: 3.6rem;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+
+  /* Accent line */
+  .slide-info-accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+  }
+
+  .slide-info-accent.youth      { background: var(--youth); }
+  .slide-info-accent.rising-sun { background: var(--youth); }
+  .slide-info-accent.community  { background: var(--community); }
+  .slide-info-accent.kennett    { background: var(--community); }
+  .slide-info-accent.camps      { background: var(--gold); }
+  .slide-info-accent.sponsor    { background: var(--gold); }
+
+  .slide-info-eyebrow.rising-sun { color: var(--youth); }
+  .slide-info-eyebrow.kennett    { color: var(--community); }
+
+  /* ── SPONSOR SLIDE ── */
+  .slide-sponsor {
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 60px 160px;
+    gap: 0;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .slide-sponsor-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  .slide-sponsor-bg svg {
+    width: 110%;
+    height: auto;
+  }
+
+  .slide-sponsor-heading {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+  }
+
+  .slide.active .slide-sponsor-heading {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .slide-sponsor-tier {
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .slide.active .slide-sponsor-tier:nth-child(2) { transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s; opacity: 1; transform: translateY(0); }
+  .slide.active .slide-sponsor-tier:nth-child(3) { transition: opacity 0.5s ease 0.65s, transform 0.5s ease 0.65s; opacity: 1; transform: translateY(0); }
+  .slide.active .slide-sponsor-tier:nth-child(4) { transition: opacity 0.5s ease 0.8s, transform 0.5s ease 0.8s; opacity: 1; transform: translateY(0); }
+  .slide.active .slide-sponsor-tier:nth-child(5) { transition: opacity 0.5s ease 0.95s, transform 0.5s ease 0.95s; opacity: 1; transform: translateY(0); }
+  .slide.active .slide-sponsor-tier:nth-child(6) { transition: opacity 0.5s ease 1.1s, transform 0.5s ease 1.1s; opacity: 1; transform: translateY(0); }
+
+  .slide-sponsor-tier-label {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.3);
+    margin-bottom: 16px;
+  }
+
+  .slide-sponsor-names {
+    font-size: 3.2rem;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: rgba(245,240,232,0.85);
+    line-height: 1.3;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* ── CAMPS SLIDE ── */
+  .slide-camps {
+    background: var(--bg);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 120px 160px;
+  }
+
+  /* ── LOADING ── */
+  #loading {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    z-index: 900;
+    transition: opacity 0.8s ease;
+  }
+
+  #loading-logo {
+    width: 480px;
+    animation: loadpulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes loadpulse {
+    0%, 100% { opacity: 0.15; }
+    50%       { opacity: 0.5; }
+  }
+  /* ── Quote bar ── */
+  #quote-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 60px;
+    background: linear-gradient(to top, rgba(2,2,2,0.85) 0%, transparent 100%);
+    font-family: var(--font);
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  #quote-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    overflow: hidden;
+  }
+
+  #quote-text {
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: rgba(245,240,232,0.7);
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  #quote-attribution {
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    color: rgba(245,240,232,0.35);
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  /* ── QR slide ── */
+  .slide-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    background: #000;
+    position: absolute;
+    top: 96px;
+    left: 0;
+    right: 0;
+    bottom: 80px;
+    overflow: hidden;
+  }
+
+  .slide-qr-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .slide-qr-eyebrow {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.4);
+  }
+
+  .slide-qr-title {
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    text-align: center;
+  }
+
+  .slide-qr-url {
+    font-size: 1.4rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: rgba(245,240,232,0.4);
+  }
+
+
+
+
+  /* ── Persistent QR ── */
+  #persistent-qr {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 610;
+    opacity: 0.6;
+    transition: opacity 0.8s ease;
+  }
+
+</style>
+  <script src="https://unpkg.com/@bitjson/qr-code@1.0.2/dist/qr-code.js"></script>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <svg id="loading-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500">
+    <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+    <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+    <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+    <g fill="#f5f0e8">
+      <path d="M194.02,1383.57c4.76,3.02,9.68,5.31,14.76,6.88,5.08,1.57,9.97,2.35,14.67,2.35,1.97,0,3.67-.13,5.1-.39,1.42-.26,2.6-.64,3.53-1.13.93-.49,1.6-1.12,2-1.87.41-.75.61-1.62.61-2.61,0-1.62-.73-3.08-2.18-4.35-1.45-1.28-3.35-2.51-5.7-3.7-2.35-1.19-5.05-2.41-8.1-3.66-3.05-1.25-6.14-2.67-9.27-4.27-3.13-1.6-6.23-3.44-9.27-5.53-3.05-2.09-5.75-4.56-8.1-7.4-2.35-2.84-4.25-6.17-5.7-9.97-1.45-3.8-2.18-8.2-2.18-13.19,0-5.98,1.09-11.38,3.27-16.2,2.18-4.82,5.3-8.93,9.36-12.32,4.06-3.4,8.98-6.01,14.76-7.84,5.78-1.83,12.29-2.74,19.55-2.74s13.34.73,18.94,2.18c5.6,1.45,10.87,3.57,15.81,6.36l-8.17,29.61c-4.11-2.15-8.31-3.9-12.6-5.27-4.29-1.36-8.63-2.05-13.04-2.05-1.51,0-2.86.12-4.04.35s-2.19.58-3,1.04c-.81.47-1.43,1.04-1.87,1.74s-.65,1.51-.65,2.44c0,1.51.72,2.86,2.17,4.05,1.45,1.19,3.35,2.35,5.69,3.48,2.35,1.13,5.03,2.31,8.04,3.53,3.01,1.22,6.1,2.61,9.26,4.18,3.16,1.57,6.24,3.4,9.26,5.49,3.01,2.09,5.69,4.59,8.04,7.49,2.35,2.9,4.25,6.27,5.69,10.1,1.45,3.83,2.17,8.3,2.17,13.41,0,6.04-1.19,11.51-3.57,16.41-2.38,4.91-5.7,9.1-9.97,12.58-4.27,3.48-9.38,6.18-15.33,8.1-5.95,1.92-12.5,2.87-19.64,2.87-7.9,0-14.89-.87-20.99-2.61-6.1-1.74-11.76-4.32-16.98-7.75l7.66-29.78Z"/>
+      <path d="M368.44,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+      <path d="M380.2,1297.79c5.46-.29,10.84-.52,16.15-.7,5.31-.17,10.58-.26,15.81-.26,10.85,0,20.46,1,28.82,3,8.36,2,15.4,4.89,21.12,8.67,5.72,3.77,10.06,8.38,13.02,13.8,2.96,5.43,4.44,11.57,4.44,18.42,0,3.43-.38,6.66-1.13,9.71-.75,3.05-1.87,5.91-3.35,8.58-1.48,2.67-3.29,5.17-5.44,7.49-2.15,2.32-4.61,4.44-7.4,6.36,3.6,7.08,7.15,14.7,10.67,22.86,3.51,8.16,6.92,16.76,10.23,25.82h-41.89c-2.03-5.92-4.3-11.94-6.79-18.07-2.5-6.12-5.23-12.24-8.19-18.33-1.29.17-2.57.3-3.83.39-1.26.09-2.57.19-3.92.3v35.7h-38.32v-123.75ZM418.52,1356.66h1.4c3.32,0,6.25-.33,8.79-1,2.54-.67,4.66-1.61,6.38-2.82,1.72-1.22,3.02-2.72,3.89-4.52.87-1.79,1.31-3.82,1.31-6.08,0-2.14-.44-4.07-1.31-5.77s-2.17-3.17-3.89-4.38c-1.72-1.21-3.85-2.14-6.38-2.78-2.54-.64-5.46-.96-8.79-.96h-1.4v28.3Z"/>
+      <path d="M574.22,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+      <path d="M670.01,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+      <path d="M777.21,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+      <path d="M870.83,1389.41h36.05v32.13h-74.37v-123.75h38.32v91.61Z"/>
+      <path d="M994.2,1297.79c7.61,20.38,14.41,41,20.39,61.87,5.98,20.87,10.72,41.49,14.21,61.87h-39.45c-.47-3.13-.95-6.28-1.44-9.45-.5-3.16-1.03-6.31-1.61-9.45h-33.34c-.58,3.25-1.12,6.43-1.61,9.54-.5,3.11-.97,6.23-1.44,9.36h-38.32c3.48-20.38,8.22-41,14.23-61.87,6-20.87,12.81-41.5,20.41-61.87h47.98ZM979.92,1372.86c-1.46-6.1-3.06-12.19-4.8-18.29-1.75-6.1-3.55-12.13-5.41-18.11-1.98,5.98-3.84,12.02-5.59,18.11-1.75,6.1-3.35,12.19-4.8,18.29h20.6Z"/>
+      <path d="M1191.98,1297.79c1.8,11.26,3.34,22.21,4.62,32.83,1.28,10.62,2.32,21.05,3.14,31.26.81,10.22,1.44,20.28,1.87,30.17.43,9.9.77,19.73,1,29.48h-38.49c-.23-7.43-.5-14.86-.79-22.29-.29-7.43-.63-14.79-1.01-22.08-.38-7.28-.83-14.44-1.36-21.47-.53-7.02-1.14-13.85-1.85-20.47l-19.85,86.3h-40.49l-19.77-86.3c-.69,6.62-1.3,13.44-1.81,20.47-.52,7.02-.98,14.18-1.38,21.47-.4,7.29-.73,14.65-.99,22.08-.26,7.43-.5,14.86-.73,22.29h-37.45c.23-9.75.56-19.58,1-29.48.43-9.9,1.07-19.95,1.91-30.17.84-10.22,1.88-20.64,3.13-31.26,1.25-10.63,2.8-21.57,4.65-32.83h54.13l18.55,80.55,18.37-80.55h53.59Z"/>
+      <path d="M1217.51,1297.79c6.39-.41,12.08-.67,17.07-.78,4.99-.12,9.78-.17,14.37-.17,10.57,0,19.99,1.06,28.26,3.18,8.27,2.12,15.27,5.2,20.99,9.23,5.72,4.04,10.09,8.96,13.11,14.76,3.02,5.81,4.53,12.4,4.53,19.77s-1.37,13.77-4.1,19.55c-2.73,5.78-6.67,10.75-11.82,14.94-5.15,4.18-11.39,7.52-18.75,10.01-7.36,2.5-15.63,4.06-24.81,4.7h-.52v28.56h-38.32v-123.75ZM1255.82,1361.28h1.22c2.97,0,5.66-.38,8.05-1.13,2.39-.75,4.43-1.83,6.12-3.22,1.69-1.39,3-3.11,3.94-5.14.93-2.03,1.4-4.35,1.4-6.97,0-2.44-.41-4.63-1.22-6.57-.82-1.94-2.04-3.61-3.67-5.01-1.63-1.39-3.67-2.45-6.12-3.18-2.45-.72-5.28-1.09-8.48-1.09h-1.22v32.31Z"/>
+    </g>
+  </svg>
+</div>
+
+<!-- Watermark logo (icon only) -->
+
+<!-- Progress bar -->
+<div id="progress-bar"></div>
+
+<!-- Quote bar -->
+<!-- Persistent QR code -->
+<div id="persistent-qr">
+  <qr-code
+    contents="https://streetlamp.org"
+    module-color="#f5f0e8"
+    position-ring-color="#cc9900"
+    position-center-color="#ffffff"
+    mask-x-to-y-ratio="1.2"
+    style="width:120px;height:120px;"
+  ></qr-code>
+</div>
+
+<div id="quote-bar">
+  <div id="quote-group">
+    <span id="quote-text"></span>
+    <span id="quote-attribution"></span>
+  </div>
+</div>
+
+<!-- Status bar -->
+<div id="status-bar">
+  <div id="status-time">—</div>
+  <div id="status-holiday" style="display:none;font-size:1.9rem;font-weight:300;letter-spacing:0.06em;color:rgba(245,240,232,0.7);transition:opacity 0.5s ease;"></div>
+  <div id="status-weather">
+    <div id="status-weather-current">
+      <span id="status-weather-temp">—</span>
+      <span id="status-weather-desc">—</span>
+    </div>
+    <div id="status-weather-divider"></div>
+    <div id="status-weather-forecast">Loading forecast…</div>
+  </div>
+</div>
+
+<!-- Slideshow -->
+<div id="slideshow"></div>
+
+<script>
+(function() {
+
+  // ── CSV URLs ──────────────────────────────────────────────
+  const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub';
+  const URLS = {
+    events:   BASE + '?gid=2066707761&single=true&output=csv',
+    auditions:BASE + '?gid=1148275969&single=true&output=csv',
+    camps:    BASE + '?gid=778912244&single=true&output=csv',
+    sponsors: BASE + '?gid=1496411634&single=true&output=csv',
+  };
+  const SIGNAGE_FOLDER_ID = '1LlIjrjR-X8jqukjbwZy2SCnuC32qJ9JP';
+  const DRIVE_API_KEY     = 'AIzaSyCIQYPSLXBH6HuRJ5IWdldLy0bfZdqgNkY';
+
+  // ── Timings ───────────────────────────────────────────────
+  const INFO_DURATION  = 10000;
+  const IMAGE_DURATION = 8000;
+
+  // ── CSV parser ────────────────────────────────────────────
+  function parseLine(line) {
+    var cols = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur);
+    return cols;
+  }
+
+  function parseCSV(text) {
+    var lines = text.trim().split('\n').filter(function(l) { return l.trim(); });
+    if (lines.length < 2) return [];
+    var headers = parseLine(lines[0]).map(function(h) { return h.replace(/^"|"$/g,'').trim().toLowerCase().replace(/\s+/g,'_'); });
+    return lines.slice(1).map(function(line) {
+      var cols = parseLine(line);
+      var obj = {};
+      headers.forEach(function(h, i) { obj[h] = (cols[i] || '').replace(/^"|"$/g,'').trim(); });
+      return obj;
+    }).filter(function(r) { return Object.values(r).some(function(v) { return v; }); });
+  }
+
+  function driveUrl(raw) {
+    if (!raw) return '';
+    var m = raw.match(/\/file\/d\/([^\/\?&]+)/) || raw.match(/[?&]id=([^&]+)/);
+    return m ? 'https://lh3.googleusercontent.com/d/' + m[1] + '=w1920' : raw;
+  }
+
+  function companyClass(company) {
+    var c = (company || '').toUpperCase();
+    if (c === 'SLP') return 'youth';
+    if (c === 'SLCT') return 'community';
+    return 'youth';
+  }
+
+  function companyLabel(show) {
+    var cls = companyClass(show.company);
+    var loc = show.label || '';
+    if (cls === 'youth') return (loc ? loc + '  ·  ' : '') + 'Performing Arts Academy';
+    return 'Community Productions';
+  }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // ── Date helpers ─────────────────────────────────────────
+  function parseDate(str) {
+    if (!str) return null;
+    // Append T00:00:00 to force local timezone instead of UTC midnight
+    var d = new Date(str.indexOf("T") === -1 ? str + "T00:00:00" : str);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function isExpired(row) {
+    var end = parseDate(row.end_date);
+    if (!end) return false;
+    var today = new Date(); today.setHours(0,0,0,0);
+    return end < today;
+  }
+
+  function sortByStart(rows) {
+    return rows.slice().sort(function(a, b) {
+      var da = parseDate(a.start_date), db = parseDate(b.start_date);
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return da - db;
+    });
+  }
+
+  // ── Slide builders ────────────────────────────────────────
+
+  function buildImageSlide(imageUrl) {
+    var div = document.createElement('div');
+    div.className = 'slide slide-image';
+
+    // Background — same image, cover, faded
+    var bg = document.createElement('img');
+    bg.src = imageUrl;
+    bg.alt = '';
+    bg.className = 'slide-image-bg';
+
+    // Foreground — contained, max 90% height
+    var fg = document.createElement('img');
+    fg.src = imageUrl;
+    fg.alt = '';
+    fg.className = 'slide-image-fg';
+
+    div.appendChild(bg);
+    div.appendChild(fg);
+    return div;
+  }
+
+  function buildInfoSlide(eyebrow, title, meta, accentClass, imageUrl) {
+    var div = document.createElement('div');
+    div.className = 'slide slide-info';
+
+    if (imageUrl) {
+      var bg = document.createElement('img');
+      bg.className = 'slide-info-bg';
+      bg.src = driveUrl(imageUrl);
+      bg.alt = '';
+      div.appendChild(bg);
+    }
+
+    var accent = document.createElement('div');
+    accent.className = 'slide-info-accent ' + accentClass;
+
+    var eye = document.createElement('div');
+    eye.className = 'slide-info-eyebrow ' + accentClass;
+    eye.textContent = eyebrow;
+
+    var t = document.createElement('div');
+    t.className = 'slide-info-title';
+    t.textContent = title;
+
+    var metaDiv = document.createElement('div');
+    metaDiv.className = 'slide-info-meta';
+    meta.forEach(function(item) {
+      var row = document.createElement('div');
+      row.className = 'slide-info-meta-item';
+      row.innerHTML = '<span class="slide-info-meta-label">' + item.label + '</span>'
+                    + '<span class="slide-info-meta-value">' + item.value + '</span>';
+      metaDiv.appendChild(row);
+    });
+
+    div.appendChild(accent);
+    div.appendChild(eye);
+    div.appendChild(t);
+    div.appendChild(metaDiv);
+    return div;
+  }
+
+  function buildSponsorSlide(tier, names) {
+    var div = document.createElement('div');
+    div.className = 'slide slide-sponsor';
+
+    // Background SVG — lamp graphic, white, faded
+    var bgWrap = document.createElement('div');
+    bgWrap.className = 'slide-sponsor-bg';
+    bgWrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="684" viewBox="0 0 1920 684">'
+      + '<g fill="#f5f0e8">'
+      + '<path d="M1872.50 617.50 l0 -21.50 -445.50 0 -445.50 0 0 -24.50 0 -24.50 45.95 0 45.95 0 0.30 -9.35 c1.50 -47.15 6.50 -84.50 17.05 -127.15 11.90 -48.05 31.65 -99.45 53.65 -139.50 2.90 -5.30 3.80 -7.40 3.40 -7.80 -0.30 -0.30 -4.50 -3 -9.30 -6 -4.80 -2.95 -15.15 -9.70 -23 -14.95 -67.45 -45.10 -116.60 -88.95 -145.05 -129.50 -2.30 -3.30 -5.55 -8.30 -7.20 -11.10 -1.65 -2.80 -3.10 -5.10 -3.25 -5.10 -0.15 0 -1.60 2.30 -3.25 5.10 -14.30 24.30 -41.45 54.20 -75.75 83.40 -27.25 23.25 -66.25 51.50 -99.50 72.15 -4.80 3 -9 5.70 -9.30 6 -0.40 0.40 0.50 2.50 3.40 7.80 22.25 40.55 41.70 91.25 53.90 140.50 10.35 41.85 15.25 78.70 16.80 126.15 l0.30 9.35 45.95 0 45.95 0 0 24.50 0 24.50 -445.50 0 -445.50 0 0 21.50 0 21.50 912.50 0 912.50 0 0 -21.50z m-1075 -73.10 c0 -4.40 -0.95 -24.25 -1.50 -31.40 -4.80 -62.95 -20.95 -125.60 -47.55 -184.35 -8.35 -18.50 -15.45 -31.85 -34.65 -65.15 -6.05 -10.45 -8.80 -15.70 -8.80 -16.75 0 -1.45 0.80 -2 20.60 -14 32.05 -19.40 44.70 -27.50 63.40 -40.50 60.65 -42.15 103.90 -82.45 124.70 -116.20 1.60 -2.60 4.95 -8.45 7.40 -13 2.50 -4.55 5.40 -9.95 6.45 -11.90 l2 -3.65 -441.05 0 -441 0 0 249.75 0 249.75 375 0 375 0 0 -2.60z m1075 -247.15 l0 -249.75 -441.05 0 -441 0 1.45 2.65 c0.80 1.40 3.35 6.10 5.60 10.35 12.75 23.90 23.05 37.50 45 59.55 18.45 18.50 37.85 35.05 64.15 54.65 19.30 14.40 44.15 31.40 60.85 41.65 7 4.30 35.60 21.70 41.35 25.20 5.65 3.40 6.15 3.80 6.15 5.20 0 1.05 -2.75 6.25 -8.80 16.75 -19.45 33.80 -26.20 46.45 -34.90 65.65 -19.30 42.60 -33.45 88.85 -41.30 134.85 -4.20 24.90 -6.25 45.30 -7.30 73.90 l-0.35 9.10 375.10 0 375.05 0 0 -249.75z"/>'
+      + '<path d="M872.25 503.40 c-0.10 -0.35 -0.45 -3.55 -0.75 -7.15 -5.40 -63.10 -25.25 -137.45 -53.25 -199.35 -1.55 -3.45 -2.75 -6.85 -2.75 -7.75 0 -0.90 0.10 -1.65 0.20 -1.65 0.10 0 13.20 -2.95 29.15 -6.55 29.05 -6.55 38.75 -8.70 60.90 -13.70 6.60 -1.50 16.05 -3.60 20.95 -4.75 4.95 -1.10 9.60 -2 10.40 -2 l1.40 0 -0.10 121.65 -0.15 121.60 -32.90 0.15 c-26.05 0.10 -32.90 0 -33.10 -0.50z"/>'
+      + '<path d="M981.75 503.40 c-0.15 -0.35 -0.20 -55.10 -0.15 -121.65 l0.15 -121 1.25 -0.15 c0.70 -0.05 14.20 2.80 30 6.35 62.60 14.15 91.10 20.55 91.30 20.55 0.10 0 0.20 0.75 0.20 1.65 0 1 -1.55 5.10 -3.80 10.15 -28.05 62.75 -46.90 134.40 -52.60 200.20 l-0.35 4.25 -32.90 0.15 c-26.05 0.10 -32.95 0 -33.10 -0.50z"/>'
+      + '</g>'
+      + '<g fill="#f5f0e8" opacity="0.6">'
+      + '<path d="M46 617.50 l0 -23 445.50 0 445.50 0 0 -23 0 -23 -45.90 0 -45.90 0 -0.60 -16.35 c-1.25 -33.90 -4.60 -62.70 -10.90 -94.15 -11.60 -57.65 -33.05 -117 -60.05 -166.40 -2.60 -4.80 -4.55 -8.85 -4.35 -9.10 0.25 -0.20 4.75 -3 9.95 -6.25 20 -12.40 42.40 -27.75 62.55 -42.80 28.90 -21.55 48.75 -38.45 68.95 -58.70 20.65 -20.60 34.75 -38.05 45.10 -55.60 2.15 -3.65 4 -6.60 4.15 -6.60 0.15 0 2 2.95 4.15 6.60 15.05 25.55 41.55 54.85 76.85 84.90 27.70 23.60 67.35 52.20 101.75 73.45 4.15 2.55 7.70 4.80 7.90 5 0.25 0.20 -1.85 4.60 -4.65 9.75 -24.35 44.50 -44.90 99.50 -56.70 151.75 -8.25 36.70 -12.45 69.35 -13.90 108.15 l-0.60 16.35 -45.90 0 -45.90 0 0 23 0 23 445.50 0 445.50 0 0 23 0 23 -914 0 -914 0 0 -23z m891 -235.30 l0 -120.30 -1.35 0.35 c-0.80 0.20 -9.70 2.20 -19.90 4.50 -32.25 7.30 -73.55 16.60 -86.20 19.45 -6.70 1.55 -12.30 2.85 -12.40 2.95 -0.10 0.10 0.65 1.95 1.60 4.05 28.65 62.90 48.70 137.55 54.30 202.20 l0.60 7.10 31.70 0 31.65 0 0 -120.30z m109.70 115.95 c1.75 -22.70 6.85 -54.85 12.85 -81.15 9.60 -41.90 24.35 -85.75 41.65 -123.70 1 -2.20 1.75 -4.05 1.65 -4.15 -0.10 -0.10 -5.60 -1.40 -12.15 -2.85 -22.15 -5.05 -72.35 -16.35 -88.95 -20.10 -9.05 -2.05 -17 -3.80 -17.60 -3.95 l-1.15 -0.25 0 120.25 0 120.25 31.70 0 31.65 0 0.35 -4.35z"/>'
+      + '<path d="M46 297.25 l0 -251.25 442.90 0 c243.60 0 443.10 0.15 443.25 0.35 0.20 0.15 0.15 0.55 -0.10 0.85 -0.25 0.30 -3.35 6 -6.95 12.60 -8.15 15.05 -10.50 19.05 -15.35 25.95 -8.40 12 -18.05 23.15 -32 37 -25.70 25.55 -57.35 50.85 -97.75 78 -18.65 12.60 -24.55 16.25 -63.25 39.75 -4.65 2.85 -8.90 5.40 -9.35 5.75 -0.75 0.50 0.60 3.10 13 24.80 14 24.45 22.40 40.40 29.25 55.45 27 59.60 43 121.70 47.85 185.50 0.45 5.95 1.45 29.55 1.50 34.65 l0 1.85 -376.50 0 -376.50 0 0 -251.25z"/>'
+      + '<path d="M1121 546.65 c0.10 -12.45 1.30 -34.15 2.80 -49.15 4.85 -49.20 17.95 -101.70 37.35 -149.50 3.45 -8.45 5 -12.10 9.85 -23 5.05 -11.25 16 -32 27.80 -52.55 7.30 -12.75 13.60 -23.80 13.95 -24.50 l0.70 -1.30 -9.10 -5.50 c-36.30 -21.95 -45.70 -27.85 -64.35 -40.40 -60.75 -40.90 -105.75 -80.75 -129.75 -115 -4.85 -6.90 -7.20 -10.85 -15.35 -25.95 -3.60 -6.60 -6.70 -12.30 -6.95 -12.60 -0.25 -0.30 -0.30 -0.70 -0.10 -0.85 0.15 -0.20 199.65 -0.35 443.25 -0.35 l442.90 0 0 251.25 0 251.25 -376.50 0 -376.50 0 0 -1.85z"/>'
+      + '</g>'
+      + '</svg>';
+
+    var accent = document.createElement('div');
+    accent.className = 'slide-info-accent sponsor';
+
+    var eyebrow = document.createElement('div');
+    eyebrow.className = 'slide-sponsor-heading';
+    eyebrow.textContent = 'Thank You to Our Sponsors';
+
+    var tierLabel = document.createElement('div');
+    tierLabel.className = 'slide-sponsor-tier-label';
+    tierLabel.textContent = tier + (TIER_AMOUNTS[tier] ? '  ·  ' + TIER_AMOUNTS[tier] : '');
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'slide-sponsor-names';
+    nameEl.innerHTML = names.map(function(n) {
+      return '<span style="white-space:nowrap">' + n + '</span>';
+    }).join('<span style="white-space:nowrap">  ·  </span> ');
+
+    div.appendChild(bgWrap);
+    div.appendChild(accent);
+    div.appendChild(eyebrow);
+    div.appendChild(tierLabel);
+    div.appendChild(nameEl);
+    return div;
+  }
+
+  // ── Slideshow engine ──────────────────────────────────────
+  var slides = [];
+  var current = 0;
+  var timer = null;
+  var progressTimer = null;
+  var slideshow = document.getElementById('slideshow');
+  var progressBar = document.getElementById('progress-bar');
+
+  function showSlide(index) {
+    slides.forEach(function(slide, i) {
+      slide.classList.remove('active', 'outgoing');
+      if (i === index) {
+        slide.classList.add('active');
+        slide.dispatchEvent(new Event('slideActivated'));
+        // Hide persistent QR on the QR slide
+        var pqr = document.getElementById('persistent-qr');
+        if (pqr) pqr.style.opacity = slide.classList.contains('slide-qr') ? '0' : '0.6';
+        // Restart Ken Burns animations on all images in the slide
+        slide.querySelectorAll('img').forEach(function(img) {
+          var anim = img.style.animation || window.getComputedStyle(img).animation;
+          img.style.animation = 'none';
+          img.offsetHeight;
+          img.style.animation = '';
+        });
+      }
+    });
+
+    var duration = slides[index].classList.contains('slide-image') ? IMAGE_DURATION : INFO_DURATION;
+    progressBar.style.transition = 'none';
+    progressBar.style.width = '0%';
+    progressBar.offsetHeight;
+    progressBar.style.transition = 'width ' + duration + 'ms linear';
+    progressBar.style.width = '100%';
+
+    clearTimeout(timer);
+    timer = setTimeout(function() {
+      current = (current + 1) % slides.length;
+      showSlide(current);
+    }, duration);
+  }
+
+
+  function buildQRSlide() {
+    var slide = document.createElement('div');
+    slide.className = 'slide slide-qr';
+    slide.innerHTML = [
+      '<div class="slide-qr-content">',
+      '  <qr-code',
+      '    contents="https://streetlamp.org"',
+      '    module-color="#f5f0e8"',
+      '    position-ring-color="#cc9900"',
+      '    position-center-color="#ffffff"',
+      '    mask-x-to-y-ratio="1.2"',
+      '    style="width:40vh;height:40vh;background:#000;"',
+      '  ></qr-code>',
+      '  <p class="slide-qr-title">Visit Our Website</p>',
+      '  <p class="slide-qr-url">streetlamp.org</p>',
+      '</div>',
+    ].join('');
+
+    // Animate and populate weather when slide becomes active
+    slide.addEventListener('slideActivated', function() {
+      var qr = slide.querySelector('qr-code');
+      if (qr && qr.animateQRCode) {
+        qr.animateQRCode('RadialRippleIn');
+      } else if (qr) {
+        qr.addEventListener('codeRendered', function() {
+          qr.animateQRCode('RadialRippleIn');
+        }, { once: true });
+      }
+
+    });
+
+    return slide;
+  }
+
+  function buildSlides(data) {
+    var result = [];
+
+    // Events
+    sortByStart((data.events || []).filter(function(e) { return !isExpired(e); })).forEach(function(e) {
+      if (!e.name) return;
+      var cls = companyClass(e.company);
+      var meta = [];
+      if (e.dates) meta.push({ label: 'Performance Date(s)', value: e.dates });
+      result.push({ type: 'info', slide: buildInfoSlide('Tickets Available', e.name, meta, cls, e.image_url) });
+    });
+
+    // Auditions
+    sortByStart((data.auditions || []).filter(function(a) {
+      return (!a.active || a.active.toLowerCase() !== 'no') && !isExpired(a);
+    })).forEach(function(a) {
+      if (!a.name) return;
+      var cls = companyClass(a.company);
+      var isSoon = (a.active || '').toLowerCase() === 'soon';
+      var eyebrow = isSoon ? 'Audition Info Coming Soon' : 'Now Auditioning';
+      var meta = [];
+      if (a.dates) meta.push({ label: 'Performance Date(s)', value: a.dates });
+      if (a.label) meta.push({ label: 'Location', value: a.label });
+      result.push({ type: 'info', slide: buildInfoSlide(eyebrow, a.name, meta, cls, a.image_url) });
+    });
+
+    // Camps — one slide per camp with venue color
+    sortByStart((data.camps || []).filter(function(c) { return !isExpired(c) && (c.soldout || '').toLowerCase() !== 'yes'; })).forEach(function(c) {
+      if (!c.name) return;
+      var meta = [];
+      if (c.dates) meta.push({ label: 'Dates', value: c.dates });
+      if (c.ages)  meta.push({ label: 'Ages',  value: c.ages  });
+      var loc = (c.label || '').toLowerCase();
+      var campClass = loc.indexOf('kennett') > -1 ? 'kennett'
+                    : loc.indexOf('rising')  > -1 ? 'rising-sun'
+                    : 'camps';
+      var eyebrow = c.label ? 'Summer Camps  ·  ' + c.label : 'Summer Camps';
+      result.push({ type: 'info', slide: buildInfoSlide(eyebrow, c.name, meta, campClass, c.image_url) });
+    });
+
+    // Sponsors — one slide per tier
+    if (data.sponsorGroups && data.sponsorGroups.length) {
+      data.sponsorGroups.forEach(function(g) {
+        result.push({ type: 'sponsor', slide: buildSponsorSlide(g.tier, g.names) });
+      });
+    }
+
+    // Image slides from Drive folder
+    (data.signageIds || []).forEach(function(id) {
+      result.push({ type: 'image', slide: buildImageSlide('https://lh3.googleusercontent.com/d/' + id + '=w3840-h2160') });
+    });
+
+    // Interleave: add an image after every 2 info slides
+    var interleaved = [];
+    var imgSlides = result.filter(function(s) { return s.type === 'image'; });
+    var infoSlides = shuffle(result.filter(function(s) { return s.type !== 'image'; }));
+    var imgIdx = 0;
+    imgSlides = shuffle(imgSlides);
+
+    infoSlides.forEach(function(s, i) {
+      interleaved.push(s.slide);
+      if ((i + 1) % 2 === 0 && imgIdx < imgSlides.length) {
+        interleaved.push(imgSlides[imgIdx++].slide);
+      }
+    });
+    // Append remaining images at the end
+    while (imgIdx < imgSlides.length) interleaved.push(imgSlides[imgIdx++].slide);
+
+    var finalSlides = interleaved.length ? interleaved : infoSlides.map(function(s) { return s.slide; });
+
+    // Insert QR slide every 10 slides, and always at the end
+    var withQR = [];
+    finalSlides.forEach(function(slide, i) {
+      withQR.push(slide);
+      if ((i + 1) % 10 === 0) withQR.push(buildQRSlide());
+    });
+    withQR.push(buildQRSlide());
+
+    return withQR.length ? withQR : finalSlides;
+  }
+(function() {
+  var HOLIDAYS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1832146325&single=true&output=csv';
+
+  function parseLine(line) {
+    var cols = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur);
+    return cols.map(function(c) { return c.replace(/^"|"$/g,'').trim(); });
+  }
+
+  function showHolidayList(items) {
+    var el = document.getElementById('status-holiday');
+    if (!el) return;
+
+    if (!items || !items.length) { el.style.display = 'none'; return; }
+
+    el.style.display = '';
+
+    function formatItem(item) {
+      if (item.type === 'birthday')   return 'Happy birthday ' + item.text + '!';
+      if (item.type === 'nowplaying') return 'Now Playing: ' + item.text;
+      return 'Happy ' + item.text + '!';
+    }
+
+    if (items.length === 1) {
+      el.textContent = formatItem(items[0]);
+      return;
+    }
+
+    var idx = 0;
+    function showNext() {
+      // Fade out
+      el.style.opacity = '0';
+      setTimeout(function() {
+        // Update text
+        el.textContent = formatItem(items[idx]);
+        idx = (idx + 1) % items.length;
+        // Fade in
+        el.style.opacity = '1';
+      }, 500);
+    }
+
+    showNext();
+    setInterval(showNext, 8000);
+  }
+
+  fetch(HOLIDAYS_CSV)
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      var lines = text.trim().split('\n');
+      var headers = parseLine(lines[0]).map(function(h) { return h.toLowerCase().trim(); });
+      var dateIdx     = headers.indexOf('date');
+      var holidayIdx  = headers.indexOf('holiday');
+      var birthdayIdx = headers.indexOf('birthday');
+      if (dateIdx === -1) return;
+
+      var now   = new Date();
+      var month = String(now.getMonth() + 1).padStart(2, '0');
+      var day   = String(now.getDate()).padStart(2, '0');
+      var today = month + '-' + day;
+
+      var todayItems = [];
+      lines.slice(1).forEach(function(line) {
+        var cols    = parseLine(line);
+        var date    = (cols[dateIdx] || '').trim();
+        if (!date) return;
+        var m = date.match(/(?:\d{4}[\-\/])?0*(\d{1,2})[\-\/]0*(\d{1,2})/);
+        if (!m) return;
+        var key = String(m[1]).padStart(2,'0') + '-' + String(m[2]).padStart(2,'0');
+        if (key !== today) return;
+        var holiday  = holidayIdx  > -1 ? (cols[holidayIdx]  || '').trim() : '';
+        var birthday = birthdayIdx > -1 ? (cols[birthdayIdx] || '').trim() : '';
+        if (holiday) holiday.split(',').forEach(function(h) {
+          h = h.trim();
+          if (h) todayItems.push({ type: 'holiday', text: h });
+        });
+        if (birthday) birthday.split(',').forEach(function(b) {
+          b = b.trim();
+          if (b) todayItems.push({ type: 'birthday', text: b });
+        });
+      });
+
+      // Merge in any now-playing shows — poll briefly if main data not yet loaded
+      function mergeAndShow(todayItems, attempts) {
+        if (window._nowPlayingItems !== undefined || attempts >= 20) {
+          var allItems = todayItems.concat(window._nowPlayingItems || []);
+          showHolidayList(allItems);
+        } else {
+          setTimeout(function() { mergeAndShow(todayItems, attempts + 1); }, 250);
+        }
+      }
+      mergeAndShow(todayItems, 0);
+    })
+    .catch(function() {
+      var el = document.getElementById('status-holiday');
+      if (el) el.style.display = 'none';
+    });
+})();
+  // ── Fetch images from Drive folder ───────────────────────
+  function fetchSignageImages() {
+    var params = new URLSearchParams({
+      q: "'" + SIGNAGE_FOLDER_ID + "' in parents and trashed=false and mimeType contains 'image/'",
+      fields: 'files(id,name)',
+      key: DRIVE_API_KEY,
+      pageSize: 100,
+      supportsAllDrives: 'true',
+      includeItemsFromAllDrives: 'true'
+    });
+    return fetch('https://www.googleapis.com/drive/v3/files?' + params)
+      .then(function(r) { return r.json(); })
+      .then(function(data) { return (data.files || []).map(function(f) { return f.id; }); })
+      .catch(function() { return []; });
+  }
+
+  // ── Load all data ─────────────────────────────────────────
+  var loading = document.getElementById('loading');
+
+  var TIER_ORDER = ['Season Sponsor','Show Sponsor','Rights Sponsor','Music Sponsor','Costumes Sponsor','Props Sponsor'];
+  var TIER_AMOUNTS = {
+    'Season Sponsor':   '$10,000 and up',
+    'Show Sponsor':     '$5,000 – $9,999',
+    'Rights Sponsor':   '$2,500 – $4,999',
+    'Music Sponsor':    '$1,000 – $2,499',
+    'Costumes Sponsor': '$500 – $999',
+    'Props Sponsor':    '$250 – $499',
+  };
+
+  Promise.all([
+    Promise.all(Object.keys(URLS).map(function(key) {
+      return fetch(URLS[key]).then(function(r) { return r.text(); }).then(function(text) {
+        return { key: key, data: parseCSV(text) };
+      }).catch(function() { return { key: key, data: [] }; });
+    })),
+    fetchSignageImages()
+  ]).then(function(results) {
+    var csvResults = results[0];
+    var imageIds   = results[1];
+
+    var data = {};
+    csvResults.forEach(function(r) { data[r.key] = r.data; });
+    data.signageIds = shuffle(imageIds);
+
+    // Camps active check — show if any row has active=yes OR no active column at all
+    data.campsActive = data.camps.some(function(c) {
+      return (!c.active || c.active.toLowerCase() !== 'no') && !isExpired(c);
+    });
+    data.camps = data.camps.filter(function(c) {
+      return (!c.active || c.active.toLowerCase() !== 'no') && !isExpired(c);
+    });
+
+    // Sponsor groups
+    var sponsorMap = {};
+    data.sponsors.filter(function(s) { return s.name && (s.active || '').toLowerCase() === 'yes'; })
+      .forEach(function(s) {
+        var t = s.tier || 'Sponsor';
+        if (!sponsorMap[t]) sponsorMap[t] = [];
+        sponsorMap[t].push(s.name);
+      });
+    data.sponsorGroups = [];
+    TIER_ORDER.forEach(function(tier) {
+      if (sponsorMap[tier]) data.sponsorGroups.push({ tier: tier, names: sponsorMap[tier] });
+    });
+    Object.keys(sponsorMap).forEach(function(tier) {
+      if (TIER_ORDER.indexOf(tier) === -1) data.sponsorGroups.push({ tier: tier, names: sponsorMap[tier] });
+    });
+
+    slides = buildSlides(data);
+
+    // Build "Now Playing" items from events with matching run dates
+    var nowPlaying = [];
+    var todayLocal = new Date();
+    todayLocal.setHours(0,0,0,0);
+    (data.events || []).forEach(function(e) {
+      if (!e.start_date || !e.end_date) return;
+      var start = new Date(e.start_date + 'T00:00:00');
+      var end   = new Date(e.end_date   + 'T00:00:00');
+      end.setDate(end.getDate() + 1); // stop showing day after end_date
+      if (todayLocal >= start && todayLocal < end && e.name) {
+        nowPlaying.push({ type: 'nowplaying', text: e.name });
+      }
+    });
+    window._nowPlayingItems = nowPlaying;
+
+    // Pre-render all slides into the DOM at once
+    slides.forEach(function(slide) { slideshow.appendChild(slide); });
+
+    // Fade out loading screen
+    loading.style.opacity = '0';
+    setTimeout(function() {
+      loading.style.display = 'none';
+      if (slides.length) showSlide(0);
+    }, 800);
+  });
+
+  // ── Keyboard navigation ───────────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    if (!slides.length) return;
+    if (e.key === 'ArrowLeft') {
+      current = (current - 1 + slides.length) % slides.length;
+      clearTimeout(timer);
+      showSlide(current);
+    } else if (e.key === 'ArrowRight') {
+      current = (current + 1) % slides.length;
+      clearTimeout(timer);
+      showSlide(current);
+    }
+  });
+
+})();
+
+// ── Clock ─────────────────────────────────────────────────
+(function() {
+  var timeEl = document.getElementById('status-time');
+  function tick() {
+    var now = new Date();
+    var h = now.getHours();
+    var m = now.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    timeEl.textContent = h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+  }
+  tick();
+  setInterval(tick, 10000);
+})();
+
+// ── Weather (Open-Meteo, ZIP 21911 → lat/lon) ─────────────
+(function() {
+  // Rising Sun, MD 21911
+  var LAT = 39.6987, LON = -76.0584;
+
+  var WMO_DESC = {
+    0:'Clear', 1:'Mostly Clear', 2:'Partly Cloudy', 3:'Overcast',
+    45:'Foggy', 48:'Icy Fog',
+    51:'Light Drizzle', 53:'Drizzle', 55:'Heavy Drizzle',
+    61:'Light Rain', 63:'Rain', 65:'Heavy Rain',
+    71:'Light Snow', 73:'Snow', 75:'Heavy Snow', 77:'Snow Grains',
+    80:'Light Showers', 81:'Showers', 82:'Heavy Showers',
+    85:'Snow Showers', 86:'Heavy Snow Showers',
+    95:'Thunderstorm', 96:'Thunderstorm', 99:'Thunderstorm'
+  };
+
+  function desc(code) { return WMO_DESC[code] || 'Unknown'; }
+
+  function buildForecast(hourlyTimes, hourlyTemps, hourlyCodes, hourlyPrecip) {
+    var now = new Date();
+    var lookahead = 6; // hours to look ahead
+    var rainHour = null;
+    var snowHour = null;
+
+    for (var i = 0; i < hourlyTimes.length; i++) {
+      var t = new Date(hourlyTimes[i]);
+      var diffH = (t - now) / 3600000;
+      if (diffH < 0 || diffH > lookahead) continue;
+      var code = hourlyCodes[i];
+      var precip = hourlyPrecip[i];
+      if (!rainHour && precip > 0.1 && code >= 51 && code < 70) rainHour = t;
+      if (!snowHour && precip > 0.1 && code >= 71 && code < 78) snowHour = t;
+    }
+
+    if (rainHour) {
+      var diffMin = Math.round((rainHour - now) / 60000);
+      if (diffMin < 30) return 'Rain starting soon';
+      var h = rainHour.getHours(), ap = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return 'Rain expected at ' + h + ap;
+    }
+    if (snowHour) {
+      var diffMin2 = Math.round((snowHour - now) / 60000);
+      if (diffMin2 < 30) return 'Snow starting soon';
+      var h2 = snowHour.getHours(), ap2 = h2 >= 12 ? 'PM' : 'AM';
+      h2 = h2 % 12 || 12;
+      return 'Snow expected at ' + h2 + ap2;
+    }
+
+    // Look at temp trend over next 3 hours
+    var temps = [];
+    for (var j = 0; j < hourlyTimes.length; j++) {
+      var t2 = new Date(hourlyTimes[j]);
+      var diff2 = (t2 - now) / 3600000;
+      if (diff2 >= 0 && diff2 <= 3) temps.push(hourlyTemps[j]);
+    }
+    if (temps.length >= 2) {
+      var delta = temps[temps.length - 1] - temps[0];
+      if (delta >= 5) return 'Warming up';
+      if (delta <= -5) return 'Cooling down';
+    }
+    return 'No significant changes';
+  }
+
+  function fetchWeather() {
+    var url = 'https://api.open-meteo.com/v1/forecast'
+      + '?latitude=' + LAT + '&longitude=' + LON
+      + '&current=temperature_2m,weathercode'
+      + '&hourly=temperature_2m,weathercode,precipitation'
+      + '&temperature_unit=fahrenheit'
+      + '&forecast_days=1'
+      + '&timezone=America%2FNew_York';
+
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var temp = Math.round(data.current.temperature_2m);
+        var code = data.current.weathercode;
+        window._weatherCode = code;
+        var forecast = buildForecast(
+          data.hourly.time,
+          data.hourly.temperature_2m,
+          data.hourly.weathercode,
+          data.hourly.precipitation
+        );
+        document.getElementById('status-weather-temp').textContent = temp + '°F';
+        document.getElementById('status-weather-desc').textContent = desc(code);
+        var showForecast = forecast && forecast !== 'No significant changes';
+        document.getElementById('status-weather-forecast').textContent = showForecast ? forecast : '';
+        document.getElementById('status-weather-divider').style.display = showForecast ? '' : 'none';
+        document.getElementById('status-weather-forecast').style.display = showForecast ? '' : 'none';
+      })
+      .catch(function() {
+        document.getElementById('status-weather-forecast').textContent = '';
+      });
+  }
+
+  fetchWeather();
+  setInterval(fetchWeather, 10 * 60 * 1000);
+})();
+
+// ── Theatre quotes ────────────────────────────────────────────
+(function() {
+  var QUOTES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=544167978&single=true&output=csv';
+
+  var quotes = [];
+  var currentIdx = 0;
+
+  function parseLine(line) {
+    var cols = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur);
+    return cols.map(function(c) { return c.replace(/^"|"$/g,'').trim(); });
+  }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function showQuote() {
+    if (!quotes.length) return;
+    var q = quotes[currentIdx % quotes.length];
+    var textEl = document.getElementById('quote-text');
+    var attrEl = document.getElementById('quote-attribution');
+
+    // Slide down and fade out
+    textEl.style.opacity = '0';
+    textEl.style.transform = 'translateY(10px)';
+    attrEl.style.opacity = '0';
+    attrEl.style.transform = 'translateY(10px)';
+
+    setTimeout(function() {
+      textEl.textContent = '\u201C' + q.quote + '\u201D';
+      var attr = [];
+      if (q.character) attr.push(q.character);
+      if (q.show)      attr.push(q.show);
+      attrEl.textContent = attr.join('  \u00b7  ');
+
+      // Reset to above, then slide down into place
+      textEl.style.transition = 'none';
+      attrEl.style.transition = 'none';
+      textEl.style.transform = 'translateY(-10px)';
+      attrEl.style.transform = 'translateY(-10px)';
+
+      textEl.offsetHeight; // force reflow
+
+      textEl.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      attrEl.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      textEl.style.opacity = '1';
+      textEl.style.transform = 'translateY(0)';
+      attrEl.style.opacity = '1';
+      attrEl.style.transform = 'translateY(0)';
+    }, 500);
+
+    currentIdx++;
+    if (currentIdx >= quotes.length) {
+      quotes = shuffle(quotes);
+      currentIdx = 0;
+    }
+  }
+
+  fetch(QUOTES_URL)
+    .then(function(r) { return r.text(); })
+    .then(function(text) {
+      var lines = text.trim().split('\n');
+      var headers = parseLine(lines[0]).map(function(h) { return h.toLowerCase(); });
+      var qIdx = headers.indexOf('quote');
+      var sIdx = headers.indexOf('show');
+      var cIdx = headers.indexOf('character');
+
+      lines.slice(1).forEach(function(line) {
+        var cols = parseLine(line);
+        var q = cols[qIdx] || '';
+        if (!q) return;
+        quotes.push({
+          quote:     q,
+          show:      sIdx > -1 ? (cols[sIdx] || '') : '',
+          character: cIdx > -1 ? (cols[cIdx] || '') : ''
+        });
+      });
+
+      if (quotes.length) {
+        quotes = shuffle(quotes);
+        showQuote();
+        setInterval(showQuote, 15000);
+      }
+    })
+    .catch(function() { document.getElementById('quote-bar').style.display = 'none'; });
+})();
+</script>
+</body>
+</html>
