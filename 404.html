@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; min-height: 100vh; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --bg:        #020202;
@@ -22,20 +22,24 @@
     }
 
     html, body {
-      min-height: 100vh;
       background: var(--bg);
       color: var(--text);
       font-family: var(--font);
       -webkit-font-smoothing: antialiased;
       line-height: 1.5em;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      min-height: 100vh;
     }
 
-    body {
+    #main {
+      flex: none;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       padding: 40px 24px;
       gap: 32px;
       text-align: center;
@@ -79,15 +83,6 @@
       gap: 20px;
     }
 
-    #not-found h1 {
-      font-size: clamp(3rem, 10vw, 6rem);
-      font-weight: 700;
-      letter-spacing: -0.04em;
-      line-height: 1;
-      color: var(--text);
-      opacity: 0.15;
-    }
-
     #not-found h2 {
       font-size: clamp(1.2rem, 3vw, 1.8rem);
       font-weight: 700;
@@ -120,6 +115,7 @@
 </head>
 <body>
 
+<div id="main">
   <a href="https://streetlamp.org">
     <svg id="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210" width="56">
       <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
@@ -139,6 +135,9 @@
     <a href="https://streetlamp.org">Let's get you back to the lobby.</a>
     <a href="https://streetlamp.org/#contact">Or did you need to speak to a staff member?</a>
   </div>
+</div>
+
+<div id="footer-placeholder"></div>
 
 <script>
   // ── Redirect map — add old Squarespace slugs here ─────────────
@@ -158,27 +157,22 @@
   var destination = REDIRECTS[path];
 
   if (destination) {
-    // Show redirect UI
     document.title = 'Redirecting…';
     document.getElementById('redirecting').style.display = 'flex';
     document.getElementById('redirect-link').href = destination;
     document.getElementById('redirect-link').textContent = destination.replace('https://', '');
-    // Redirect after brief pause
     setTimeout(function() {
       window.location.replace(destination);
     }, 800);
   } else {
-    // Show 404 UI
     document.getElementById('not-found').style.display = 'flex';
   }
-</script>
-<div id="footer-placeholder"></div>
-<script>
+
   fetch('/footer.html')
     .then(function(r) { return r.text(); })
     .then(function(html) {
       document.getElementById('footer-placeholder').innerHTML = html;
-  });
+    });
 </script>
 </body>
 </html>
