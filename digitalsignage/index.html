@@ -503,7 +503,10 @@
     text-align: center;
   }
 
-  .slide-qr-url {
+  .slide-qr-content qr-code {
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
     font-size: 1.4rem;
     font-weight: 300;
     letter-spacing: 0.2em;
@@ -876,17 +879,10 @@
       '</div>',
     ].join('');
 
-    // Animate and populate weather when slide becomes active
+    // Fade in QR code when slide becomes active
     slide.addEventListener('slideActivated', function() {
       var qr = slide.querySelector('qr-code');
-      if (qr && qr.animateQRCode) {
-        qr.animateQRCode('RadialRippleIn');
-      } else if (qr) {
-        qr.addEventListener('codeRendered', function() {
-          qr.animateQRCode('RadialRippleIn');
-        }, { once: true });
-      }
-
+      if (qr) qr.style.opacity = '1';
     });
 
     return slide;
