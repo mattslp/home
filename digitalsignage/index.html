@@ -518,12 +518,19 @@
 
   /* ── Persistent QR ── */
   #persistent-qr {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
+    position: fixed !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    top: auto !important;
+    right: auto !important;
     z-index: 610;
     opacity: 0.6;
     transition: opacity 0.8s ease;
+  }
+
+  #persistent-qr qr-code {
+    opacity: 1 !important;
+    transition: none !important;
   }
 
 </style>
