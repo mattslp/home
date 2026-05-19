@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summer Camps | Street Lamp</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="stylesheet" href="https://use.typekit.net/wby1ytb.css">
+</head>
+<body>
+<style>
+  body * {
+      font-family: inherit;
+    }
+  body {
+    animation: fadeInAnimation ease 2s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+  #sl-camps * { box-sizing: border-box; padding: 0; }
+
+  #sl-camps {
+    background: #020202;
+    color: #f5f0e8;
+    font-family: 'komet', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── Banner ── */
+  #sl-camps-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 52px 24px 44px;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    #sl-camps-banner { padding: 16px 24px 12px; }
+  }
+
+  #sl-camps-logo {
+    width: clamp(60px, 10vw, 120px);
+    height: auto;
+    margin-bottom: 30px;
+  }
+
+  #sl-camps-logo path, #sl-camps-logo g path { fill: #f5f0e8; }
+
+  #sl-camps-banner a {
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+  }
+
+  #sl-camps-title {
+    font-weight: 900;
+    font-size: clamp(1.375rem, 4.69vw, 3.25rem);
+    line-height: 1;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    margin-bottom: 0;
+  }
+
+  /* ── Section ── */
+  .sl-camps-section {
+    padding: 30px 50px 30px !important;
+  }
+
+  @media (max-width: 560px) {
+    .sl-camps-section { padding: 30px 24px !important; }
+  }
+
+  .sl-section-heading {
+    font-weight: 900;
+    font-size: clamp(1.1rem, 3.75vw, 2.6rem);
+    line-height: 1;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    margin-bottom: 32px !important;
+    padding-top: 60px !important;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* ── Camp cards ── */
+  .sl-camp-card {
+    display: block;
+    width: 100%;
+    border: none;
+    border-left: 3px solid transparent;
+    padding-left: 20px !important;
+    margin-bottom: 20px !important;
+    text-decoration: none;
+    color: #f5f0e8;
+    cursor: pointer;
+    background: #020202 !important;
+    box-sizing: border-box;
+    transition: background 0.2s, border-left-color 0.2s;
+    overflow: hidden;
+  }
+
+  .sl-camp-card:hover {
+    background: rgba(245,240,232,0.03) !important;
+  }
+
+  .sl-camp-card.venue-rising-sun  { border-left-color: #cc3399; }
+  .sl-camp-card.venue-rising-sun:hover { border-left-color: #ff44bb; }
+  .sl-camp-card.venue-kennett     { border-left-color: #00aa99; }
+  .sl-camp-card.venue-kennett:hover  { border-left-color: #00ddcc; }
+
+  /* Card layout — image left, info right */
+  .sl-camp-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .sl-camp-img-wrap {
+    width: 30%;
+    max-width: 30%;
+    flex-shrink: 0;
+    padding: 16px 28px 16px 20px;
+    box-sizing: border-box;
+  }
+
+  .sl-camp-img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: contain;
+    object-position: left top;
+    display: block;
+  }
+
+  /* Text area */
+  .sl-camp-info {
+    flex: 1;
+    padding: 20px 24px 20px 20px;
+    min-width: 0;
+  }
+
+  @media (max-width: 768px) {
+    .sl-camp-card-inner { flex-direction: column; gap: 0; }
+    .sl-camp-img-wrap { width: 100%; max-width: 100%; padding: 16px 20px 8px; }
+    .sl-camp-info { padding: 8px 20px 20px 20px !important; }
+  }
+
+  .sl-camp-name {
+    font-weight: 400;
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    letter-spacing: 0.03em;
+    color: #f5f0e8;
+    margin-bottom: 6px;
+  }
+
+  .sl-camp-meta {
+    display: block;
+    font-size: clamp(0.72rem, 1.8vw, 0.7rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    margin-bottom: 8px;
+  }
+
+  .sl-camp-register {
+    display: block;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.9rem, 2vw, 0.88rem);
+    line-height: 1.75;
+    color: rgba(245,240,232,0.55);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-top: 1.75em;
+    transition: color 0.2s;
+  }
+
+  .sl-camp-register:hover { color: #f5f0e8; }
+
+  .sl-camp-desc {
+    font-size: clamp(0.9rem, 2vw, 0.88rem);
+    line-height: 1.75;
+    color: rgba(245,240,232,0.55);
+  }
+
+  /* ── Tabs ── */
+  #sl-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 32px 0 0;
+    margin-bottom: 0;
+  }
+
+
+
+  .sl-tab {
+    flex: 1;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1rem, 3vw, 2rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.3);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(245,240,232,0.08);
+    padding: 0.75em 20px !important;
+    min-height: 64px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    text-align: center;
+  }
+
+  .sl-tab:hover {
+    color: rgba(245,240,232,0.6);
+    background: linear-gradient(to bottom, transparent 0%, rgba(245,240,232,0.06) 100%);
+  }
+
+  .sl-tab.active {
+    color: #f5f0e8;
+    border-bottom: 2px solid rgba(245,240,232,0.5);
+  }
+
+  .sl-tab.active.venue-rising-sun {
+    border-bottom-color: #cc3399;
+    background: linear-gradient(to bottom, transparent 0%, rgba(204,51,153,0.12) 100%);
+  }
+
+  .sl-tab.active.venue-kennett {
+    border-bottom-color: #00aa99;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0,170,153,0.12) 100%);
+  }
+
+  .sl-tab:hover.venue-rising-sun {
+    background: linear-gradient(to bottom, transparent 0%, rgba(204,51,153,0.07) 100%);
+  }
+
+  .sl-tab:hover.venue-kennett {
+    background: linear-gradient(to bottom, transparent 0%, rgba(0,170,153,0.07) 100%);
+  }
+
+  .sl-tab-panel {
+    display: none;
+  }
+
+  .sl-tab-panel.active {
+    display: block;
+    padding-top: 30px !important;
+  }
+
+
+
+  /* ── Sold out overlay ── */
+  .sl-camp-card {
+    position: relative;
+  }
+
+  .sl-sold-out {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2,2,2,0.72);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .sl-sold-out-label {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.1rem, 4vw, 1.6rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.85);
+    border: 2px solid rgba(245,240,232,0.4);
+    padding: 6px 20px;
+    transform: rotate(-8deg);
+  }
+
+  .sl-camp-card.sold-out {
+    pointer-events: none;
+    filter: grayscale(40%);
+  }
+
+  /* ── Empty / loading ── */
+  .sl-empty {
+    font-size: clamp(0.9rem, 2vw, 0.88rem);
+    color: rgba(245,240,232,0.3);
+    letter-spacing: 0.1em;
+    padding: 20px 0 40px;
+  }
+
+  .sl-spinner {
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(245,240,232,0.15);
+    border-top-color: rgba(245,240,232,0.5);
+    border-radius: 50%;
+    animation: sl-spin 0.8s linear infinite;
+    margin: 40px 0;
+  }
+
+  @keyframes sl-spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 560px) {
+    .sl-camps-section { padding: 0 24px 60px !important; }
+    .sl-section-heading { font-size: clamp(1.1rem, 5vw, 2.6rem); }
+  }
+
+  /* Squarespace overrides */
+  body, html { margin: 0 !important; padding: 0 !important; background: #020202 !important; }
+  body { background-color: #020202 !important; }
+  .sqs-layout .sqs-row .sqs-block,
+  .sqs-block-content, .sqs-block-code,
+  .content-wrapper, .content-inner,
+  article.entry-detail, .entry-content,
+  .page-section, [data-section-id],
+  .fluid-engine, [data-fluid-engine-block] { padding: 0 !important; margin: 0 !important; }
+
+  @media (max-width: 768px) {
+    .sl-camp-name, .sl-event-name, .sl-aud-name { font-size: 1.05rem !important; }
+    .sl-camp-meta, .sl-event-meta, .sl-aud-meta { font-size: 0.82rem !important; }
+    .sl-camp-desc, .sl-aud-desc { font-size: 0.95rem !important; line-height: 1.7; }
+  }
+</style>
+
+<div id="sl-camps">
+
+  <div id="sl-camps-banner">
+    <a href="https://streetlamp.org" aria-label="Street Lamp Home">
+      <svg id="sl-camps-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500">
+        <path d="M1315.82,76.28v956.28h-259.08c0-242.15,93.17-430.39,133.23-500.08l42.65-74.2-73.14-44.44c-34.42-20.91-102.39-64.17-170.86-118.9-79.61-63.61-133.93-121.71-161.49-172.68l-24.86-45.99h513.55Z"/>
+        <path d="M184.18,1032.56h259.08c0-242.17-93.17-430.39-133.23-500.07l-42.65-74.2,73.14-44.44c34.42-20.91,102.39-64.17,170.85-118.89,79.61-63.62,133.94-121.72,161.5-172.69l24.86-45.98H184.18v956.28Z"/>
+        <path d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+        <g fill="#f5f0e8">
+          <path d="M194.02,1383.57c4.76,3.02,9.68,5.31,14.76,6.88,5.08,1.57,9.97,2.35,14.67,2.35,1.97,0,3.67-.13,5.1-.39,1.42-.26,2.6-.64,3.53-1.13.93-.49,1.6-1.12,2-1.87.41-.75.61-1.62.61-2.61,0-1.62-.73-3.08-2.18-4.35-1.45-1.28-3.35-2.51-5.7-3.7-2.35-1.19-5.05-2.41-8.1-3.66-3.05-1.25-6.14-2.67-9.27-4.27-3.13-1.6-6.23-3.44-9.27-5.53-3.05-2.09-5.75-4.56-8.1-7.4-2.35-2.84-4.25-6.17-5.7-9.97-1.45-3.8-2.18-8.2-2.18-13.19,0-5.98,1.09-11.38,3.27-16.2,2.18-4.82,5.3-8.93,9.36-12.32,4.06-3.4,8.98-6.01,14.76-7.84,5.78-1.83,12.29-2.74,19.55-2.74s13.34.73,18.94,2.18c5.6,1.45,10.87,3.57,15.81,6.36l-8.17,29.61c-4.11-2.15-8.31-3.9-12.6-5.27-4.29-1.36-8.63-2.05-13.04-2.05-1.51,0-2.86.12-4.04.35s-2.19.58-3,1.04c-.81.47-1.43,1.04-1.87,1.74s-.65,1.51-.65,2.44c0,1.51.72,2.86,2.17,4.05,1.45,1.19,3.35,2.35,5.69,3.48,2.35,1.13,5.03,2.31,8.04,3.53,3.01,1.22,6.1,2.61,9.26,4.18,3.16,1.57,6.24,3.4,9.26,5.49,3.01,2.09,5.69,4.59,8.04,7.49,2.35,2.9,4.25,6.27,5.69,10.1,1.45,3.83,2.17,8.3,2.17,13.41,0,6.04-1.19,11.51-3.57,16.41-2.38,4.91-5.7,9.1-9.97,12.58-4.27,3.48-9.38,6.18-15.33,8.1-5.95,1.92-12.5,2.87-19.64,2.87-7.9,0-14.89-.87-20.99-2.61-6.1-1.74-11.76-4.32-16.98-7.75l7.66-29.78Z"/>
+          <path d="M368.44,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+          <path d="M380.2,1297.79c5.46-.29,10.84-.52,16.15-.7,5.31-.17,10.58-.26,15.81-.26,10.85,0,20.46,1,28.82,3,8.36,2,15.4,4.89,21.12,8.67,5.72,3.77,10.06,8.38,13.02,13.8,2.96,5.43,4.44,11.57,4.44,18.42,0,3.43-.38,6.66-1.13,9.71-.75,3.05-1.87,5.91-3.35,8.58-1.48,2.67-3.29,5.17-5.44,7.49-2.15,2.32-4.61,4.44-7.4,6.36,3.6,7.08,7.15,14.7,10.67,22.86,3.51,8.16,6.92,16.76,10.23,25.82h-41.89c-2.03-5.92-4.3-11.94-6.79-18.07-2.5-6.12-5.23-12.24-8.19-18.33-1.29.17-2.57.3-3.83.39-1.26.09-2.57.19-3.92.3v35.7h-38.32v-123.75ZM418.52,1356.66h1.4c3.32,0,6.25-.33,8.79-1,2.54-.67,4.66-1.61,6.38-2.82,1.72-1.22,3.02-2.72,3.89-4.52.87-1.79,1.31-3.82,1.31-6.08,0-2.14-.44-4.07-1.31-5.77s-2.17-3.17-3.89-4.38c-1.72-1.21-3.85-2.14-6.38-2.78-2.54-.64-5.46-.96-8.79-.96h-1.4v28.3Z"/>
+          <path d="M574.22,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+          <path d="M670.01,1329.32h-42.5v14.37h40.15v31.52h-40.15v14.8h42.5v31.52h-80.81v-123.75h80.81v31.52Z"/>
+          <path d="M777.21,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
+          <path d="M870.83,1389.41h36.05v32.13h-74.37v-123.75h38.32v91.61Z"/>
+          <path d="M994.2,1297.79c7.61,20.38,14.41,41,20.39,61.87,5.98,20.87,10.72,41.49,14.21,61.87h-39.45c-.47-3.13-.95-6.28-1.44-9.45-.5-3.16-1.03-6.31-1.61-9.45h-33.34c-.58,3.25-1.12,6.43-1.61,9.54-.5,3.11-.97,6.23-1.44,9.36h-38.32c3.48-20.38,8.22-41,14.23-61.87,6-20.87,12.81-41.5,20.41-61.87h47.98ZM979.92,1372.86c-1.46-6.1-3.06-12.19-4.8-18.29-1.75-6.1-3.55-12.13-5.41-18.11-1.98,5.98-3.84,12.02-5.59,18.11-1.75,6.1-3.35,12.19-4.8,18.29h20.6Z"/>
+          <path d="M1191.98,1297.79c1.8,11.26,3.34,22.21,4.62,32.83,1.28,10.62,2.32,21.05,3.14,31.26.81,10.22,1.44,20.28,1.87,30.17.43,9.9.77,19.73,1,29.48h-38.49c-.23-7.43-.5-14.86-.79-22.29-.29-7.43-.63-14.79-1.01-22.08-.38-7.28-.83-14.44-1.36-21.47-.53-7.02-1.14-13.85-1.85-20.47l-19.85,86.3h-40.49l-19.77-86.3c-.69,6.62-1.3,13.44-1.81,20.47-.52,7.02-.98,14.18-1.38,21.47-.4,7.29-.73,14.65-.99,22.08-.26,7.43-.5,14.86-.73,22.29h-37.45c.23-9.75.56-19.58,1-29.48.43-9.9,1.07-19.95,1.91-30.17.84-10.22,1.88-20.64,3.13-31.26,1.25-10.63,2.8-21.57,4.65-32.83h54.13l18.55,80.55,18.37-80.55h53.59Z"/>
+          <path d="M1217.51,1297.79c6.39-.41,12.08-.67,17.07-.78,4.99-.12,9.78-.17,14.37-.17,10.57,0,19.99,1.06,28.26,3.18,8.27,2.12,15.27,5.2,20.99,9.23,5.72,4.04,10.09,8.96,13.11,14.76,3.02,5.81,4.53,12.4,4.53,19.77s-1.37,13.77-4.1,19.55c-2.73,5.78-6.67,10.75-11.82,14.94-5.15,4.18-11.39,7.52-18.75,10.01-7.36,2.5-15.63,4.06-24.81,4.7h-.52v28.56h-38.32v-123.75ZM1255.82,1361.28h1.22c2.97,0,5.66-.38,8.05-1.13,2.39-.75,4.43-1.83,6.12-3.22,1.69-1.39,3-3.11,3.94-5.14.93-2.03,1.4-4.35,1.4-6.97,0-2.44-.41-4.63-1.22-6.57-.82-1.94-2.04-3.61-3.67-5.01-1.63-1.39-3.67-2.45-6.12-3.18-2.45-.72-5.28-1.09-8.48-1.09h-1.22v32.31Z"/>
+        </g>
+      </svg>
+    </a>
+    <h1 id="sl-camps-title">SUMMER&nbsp;&nbsp;CAMPS</h1>
+  </div>
+
+  <!-- Tabs -->
+  <div id="sl-tabs">
+    <button class="sl-tab venue-rising-sun active" onclick="switchTab('rising')">Rising Sun</button>
+    <button class="sl-tab venue-kennett" onclick="switchTab('kennett')">Kennett Square</button>
+  </div>
+
+  <div id="sl-rising-panel" class="sl-tab-panel sl-camps-section active">
+    <div id="sl-rising-list"><div class="sl-spinner"></div></div>
+  </div>
+  <div id="sl-kennett-panel" class="sl-tab-panel sl-camps-section">
+    <div id="sl-kennett-list"><div class="sl-spinner"></div></div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=778912244&single=true&output=csv';
+
+  const MONTHS = {
+    january:0, february:1, march:2, april:3, may:4, june:5,
+    july:6, august:7, september:8, october:9, november:10, december:11,
+    jan:0, feb:1, mar:2, apr:3, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11
+  };
+
+  function parseDateKey(dates) {
+    if (!dates) return Infinity;
+    const parts = dates.trim().toLowerCase().split(/\s+/);
+    const month = MONTHS[parts[0]];
+    const day   = parseInt(parts[1]) || 1;
+    if (month === undefined) return Infinity;
+    return month * 100 + day;
+  }
+
+  function sortByDate(rows) {
+    return rows.slice().sort(function(a, b) {
+      return parseDateKey(a.dates) - parseDateKey(b.dates);
+    });
+  }
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    const cols  = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+    return lines.slice(1).map(function(line) {
+      const vals = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQ = !inQ; }
+        else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+        else { cur += ch; }
+      }
+      vals.push(cur.trim());
+      const row = {};
+      cols.forEach((c, i) => { row[c] = (vals[i] || '').replace(/^"|"$/g, '').trim(); });
+      return row;
+    }).filter(r => Object.values(r).some(v => v));
+  }
+
+  function venueClass(label) {
+    const l = (label || '').toLowerCase();
+    if (l.includes('rising')) return 'venue-rising-sun';
+    if (l.includes('kennett')) return 'venue-kennett';
+    return '';
+  }
+
+  function renderCard(row) {
+    const vc   = venueClass(row.label);
+    const dateStr = row.dates || '';
+    const agesStr = row.ages ? '<span class="sl-camp-ages">Ages ' + row.ages + '</span>' : '';
+    const metaParts = [dateStr, agesStr].filter(Boolean).join(' · ');
+
+    const isSoldOut = (row.soldout || '').toLowerCase() === 'yes';
+    const imgWrap = row.image_url
+      ? `<div class="sl-camp-img-wrap"><img class="sl-camp-img" src="${row.image_url}" alt="${row.name}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+      : '';
+    return `<div class="sl-camp-card ${vc}${isSoldOut ? ' sold-out' : ''}" ${row.url && !isSoldOut ? `onclick="window.open('${row.url}','_blank')"` : ''}>
+      ${isSoldOut ? '<div class="sl-sold-out"><span class="sl-sold-out-label">Sold Out</span></div>' : ''}
+      <div class="sl-camp-card-inner">
+        ${imgWrap}
+        <div class="sl-camp-info">
+          <p class="sl-camp-name">${row.name}</p>
+          ${(dateStr || agesStr) ? `<span class="sl-camp-meta">${metaParts}</span>` : ''}
+          ${row.description ? row.description.split('||').map((p, i) => `<p class="sl-camp-desc" style="${i>0?'margin-top:1.2em':''}">` + p.trim() + '</p>').join('') : ''}
+
+        ${row.url && !isSoldOut ? `<a href="${row.url}" target="_blank" rel="noopener" class="sl-camp-register" onclick="event.stopPropagation()">Click here to register</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function load() {
+    try {
+      const res  = await fetch(CSV_URL);
+      const text = await res.text();
+      const rows = parseCSV(text);
+
+      // Check if any camps are active
+      const activeRows = rows.filter(r => !r.active || r.active.toLowerCase() !== 'no');
+
+      if (!activeRows.length) {
+        // All inactive — hide tabs, show message
+        document.getElementById('sl-tabs').style.display = 'none';
+        document.querySelectorAll('.sl-camps-section').forEach(function(el) { el.style.display = 'none'; });
+        var msg = document.createElement('p');
+        msg.className = 'sl-empty';
+        msg.style.cssText = 'text-align:center;padding:80px 40px;';
+        msg.textContent = 'No summer camps are currently available — check back soon.';
+        document.getElementById('sl-camps').appendChild(msg);
+        return;
+      }
+
+      const rising  = sortByDate(activeRows.filter(r => (r.label || '').toLowerCase().includes('rising')));
+      const kennett = sortByDate(activeRows.filter(r => (r.label || '').toLowerCase().includes('kennett')));
+
+      const risingList  = document.getElementById('sl-rising-list');
+      const kennettList = document.getElementById('sl-kennett-list');
+
+      risingList.innerHTML  = rising.length  ? rising.map(renderCard).join('')  : '<p class="sl-empty">No camps currently available — check back soon.</p>';
+      kennettList.innerHTML = kennett.length ? kennett.map(renderCard).join('') : '<p class="sl-empty">No camps currently available — check back soon.</p>';
+
+    } catch(e) {
+      console.warn('Street Lamp: camps load error', e);
+      document.getElementById('sl-rising-list').innerHTML  = '<p class="sl-empty">Unable to load camps.</p>';
+      document.getElementById('sl-kennett-list').innerHTML = '<p class="sl-empty">Unable to load camps.</p>';
+    }
+  }
+
+  load();
+
+  // URL hash deep links: #rs = Rising Sun, #ksq = Kennett Square
+  (function() {
+    function handleHash() {
+      var hash = window.location.hash.toLowerCase().replace('#', '').trim();
+      if (hash === 'ksq' || hash === 'kennett') {
+        window.switchTab('kennett');
+      } else if (hash === 'rs' || hash === 'rising') {
+        window.switchTab('rising');
+      }
+    }
+    // Small delay to ensure DOM is ready
+    setTimeout(handleHash, 100);
+    window.addEventListener('hashchange', handleHash);
+  })();
+
+  window.switchTab = function(id) {
+    document.querySelectorAll('.sl-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.sl-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelector('.sl-tab[onclick*="' + id + '"]').classList.add('active');
+    document.getElementById('sl-' + id + '-panel').classList.add('active');
+  };
+})();
+</script>
+<div id="footer-placeholder"></div>
+<script>
+  fetch('/footer.html')
+    .then(function(r) { return r.text(); })
+    .then(function(html) {
+      document.getElementById('footer-placeholder').innerHTML = html;
+    });
+</script>
+</body>
+</html>
