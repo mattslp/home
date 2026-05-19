@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auditions Admin | Street Lamp</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Quasimoda', -apple-system, BlinkMacSystemFont, sans-serif; background: #fdfdfd; color: #1a1a1a; line-height: 1.6; }
+    .container { max-width: 960px; min-height: 100vh; margin: 0 auto; padding: 40px 24px; }
+    h1 { font-family: 'Komet', Georgia, serif; font-size: 1.8rem; margin-bottom: 8px; }
+    h2 { font-family: 'Komet', Georgia, serif; font-size: 1.3rem; margin-bottom: 16px; }
+    .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 32px; }
+
+    /* Login */
+    .login-box { max-width: 360px; min-height: 100vh; margin: 120px auto; text-align: center; }
+    .login-box h1 { margin-bottom: 24px; }
+    .login-box input { width: 100%; padding: 12px 16px; font-size: 1rem; border: 1.5px solid #ccc; border-radius: 6px; margin-bottom: 12px; outline: none; font-family: inherit; }
+    .login-box input:focus { border-color: #1a1a1a; }
+    .login-box .err { color: #c0392b; font-size: 0.85rem; margin-bottom: 12px; display: none; }
+
+    /* Buttons */
+    .btn { padding: 10px 20px; font-family: inherit; font-size: 0.9rem; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+    .btn-primary { background: #1a1a1a; color: #fff; } .btn-primary:hover { background: #333; }
+    .btn-secondary { background: #eee; color: #333; } .btn-secondary:hover { background: #ddd; }
+    .btn-danger { background: #fff; color: #c0392b; border: 1px solid #c0392b; } .btn-danger:hover { background: #fdf0ef; }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #ddd; margin-bottom: 0; }
+    .tab { padding: 12px 24px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #888; transition: color 0.2s; }
+    .tab:hover { color: #333; }
+    .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+    .tab-content { display: none; padding-top: 24px; } .tab-content.active { display: block; }
+
+    /* Cards */
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }
+    .card-name { font-weight: 700; font-size: 1.05rem; }
+    .card-meta { font-size: 0.82rem; color: #888; }
+    .card-detail { font-size: 0.88rem; margin-bottom: 4px; }
+    .card-detail strong { color: #555; font-weight: 600; }
+    .card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; }
+    .card-actions select { padding: 6px 10px; font-size: 0.82rem; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+    .card-video { margin-top: 8px; }
+    .card-video a { color: #333; text-decoration: underline; font-size: 0.88rem; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: #eee; color: #555; }
+    .badge-assigned { background: #1a1a1a; color: #fff; }
+
+    /* Shows */
+    .show-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #fff; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 8px; }
+    .show-name { font-weight: 600; }
+    .show-link { font-size: 0.82rem; color: #888; word-break: break-all; }
+    .show-link a { color: #333; }
+    .new-show-row { display: flex; gap: 8px; margin-bottom: 24px; }
+    .new-show-row input { flex: 1; padding: 10px 14px; font-size: 0.9rem; border: 1.5px solid #ccc; border-radius: 6px; font-family: inherit; outline: none; }
+    .new-show-row input:focus { border-color: #1a1a1a; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 48px 24px; color: #aaa; font-size: 0.95rem; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 48px; color: #aaa; }
+
+    /* Logout */
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .logout { font-size: 0.85rem; color: #888; cursor: pointer; text-decoration: underline; } .logout:hover { color: #333; }
+
+    /* Filter */
+    .filter-row { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-row select, .filter-row input { padding: 8px 12px; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+    .filter-row input { flex: 1; min-width: 200px; }
+    .count { font-size: 0.85rem; color: #888; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" class="login-box">
+  <h1>Auditions Admin</h1>
+  <div id="loginErr" class="err"></div>
+  <input type="password" id="loginPw" placeholder="Enter admin password" autofocus onkeydown="if(event.key==='Enter')doLogin()">
+  <button id="loginBtn" class="btn btn-primary" style="width:100%;" onclick="doLogin()">Log In</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashView" class="container" style="display:none;">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210" style="height:40px;width:auto;"><g><path d="M1315.82,76.28v956.28h-259.08c0-242.15,93.17-430.39,133.23-500.08l42.65-74.2-73.14-44.44c-34.42-20.91-102.39-64.17-170.86-118.9-79.61-63.61-133.93-121.71-161.49-172.68l-24.86-45.99h513.55Z"/><path d="M184.18,1032.56h259.08c0-242.17-93.17-430.39-133.23-500.07l-42.65-74.2,73.14-44.44c34.42-20.91,102.39-64.17,170.85-118.89,79.61-63.62,133.94-121.72,161.5-172.69l24.86-45.98H184.18v956.28Z"/><path d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/></g></svg>
+      <h1 style="margin:0;">Auditions Admin</h1>
+    </div>
+    <span class="logout" onclick="doLogout()">Log out</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="submissions">Submissions</div>
+    <div class="tab" data-tab="shows">Shows</div>
+  </div>
+
+  <!-- SUBMISSIONS TAB -->
+  <div id="tab-submissions" class="tab-content active">
+    <div class="filter-row">
+      <input type="text" id="filterSearch" placeholder="Search by name, show, or role..." oninput="renderSubmissions()">
+      <select id="filterShow" onchange="renderSubmissions()"><option value="">All Shows</option></select>
+      <select id="filterAssignment" onchange="renderSubmissions()">
+        <option value="">All</option>
+        <option value="unassigned">Unassigned</option>
+        <option value="assigned">Assigned</option>
+      </select>
+      <select id="filterType" onchange="renderSubmissions()">
+        <option value="">All Types</option>
+        <option value="in-person">In-Person</option>
+        <option value="virtual">Virtual</option>
+      </select>
+    </div>
+    <div class="count" id="subCount"></div>
+    <div id="subList"><div class="loading">Loading submissions...</div></div>
+  </div>
+
+  <!-- SHOWS TAB -->
+  <div id="tab-shows" class="tab-content">
+    <div class="new-show-row">
+      <input type="text" id="newShowName" placeholder="New show name (e.g. Annie)">
+      <button id="createShowBtn" class="btn btn-primary" onclick="createShow()">Create Show</button>
+    </div>
+    <div id="showList"><div class="loading">Loading shows...</div></div>
+  </div>
+</div>
+
+<script>
+var APPS_SCRIPT_URL = 'https://script.google.com/a/macros/streetlamp.org/s/AKfycbzdPHLpGNRG5ORBCneZH2TGmzM0Hi2xJnhDKkXM3sn0IbvzD18CWUDpZ_AuTPTvpie5/exec';
+var password = '';
+var submissions = [];
+var shows = [];
+var BASE_URL = window.location.href.replace(/\/[^/]*$/, '/');
+
+// ── LOGIN ─────────────────────────────────────────────
+document.getElementById('loginPw').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+
+function doLogin() {
+  var btn = document.getElementById('loginBtn');
+  password = document.getElementById('loginPw').value;
+  btn.disabled = true;
+  btn.textContent = 'Logging in...';
+  jsonp('slLogin', { action: 'adminLogin', password: password }, function(r) {
+    if (r && r.success) {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('dashView').style.display = 'block';
+      loadAll();
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Log In';
+      document.getElementById('loginErr').textContent = (r && r.error) || 'Incorrect password.';
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  });
+}
+
+function doLogout() {
+  password = '';
+  document.getElementById('dashView').style.display = 'none';
+  document.getElementById('loginView').style.display = 'block';
+  document.getElementById('loginPw').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+}
+
+// ── TABS ──────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── LOAD DATA ─────────────────────────────────────────
+function loadAll() {
+  loadShows(function() {
+    loadSubmissions();
+  });
+}
+
+function loadSubmissions() {
+  jsonp('slSubs', { action: 'getSubmissions', password: password }, function(r) {
+    if (r && r.success) {
+      submissions = r.submissions;
+      renderSubmissions();
+      renderShows();
+    }
+  });
+}
+
+function loadShows(callback) {
+  jsonp('slShows', { action: 'getShows' }, function(r) {
+    if (r && r.success) {
+      shows = r.shows;
+      renderShows();
+      updateShowFilters();
+    }
+    if (callback) callback();
+  });
+}
+
+// ── RENDER SUBMISSIONS ────────────────────────────────
+function renderSubmissions() {
+  var search = document.getElementById('filterSearch').value.toLowerCase();
+  var showFilter = document.getElementById('filterShow').value;
+  var assignFilter = document.getElementById('filterAssignment').value;
+  var typeFilter = document.getElementById('filterType').value;
+
+  var filtered = submissions.filter(function(s) {
+    if (search && !(s['Full Name'] + ' ' + s['Show'] + ' ' + s['Role']).toLowerCase().includes(search)) return false;
+    if (showFilter && s['Show'] !== showFilter) return false;
+    if (assignFilter === 'unassigned' && s['Show Assignment']) return false;
+    if (assignFilter === 'assigned' && !s['Show Assignment']) return false;
+    if (typeFilter && (s['Audition Type'] || 'virtual') !== typeFilter) return false;
+    return true;
+  });
+
+  document.getElementById('subCount').textContent = filtered.length + ' submission' + (filtered.length !== 1 ? 's' : '');
+
+  if (filtered.length === 0) {
+    document.getElementById('subList').innerHTML = '<div class="empty">No submissions found.</div>';
+    return;
+  }
+
+  var html = '';
+  filtered.forEach(function(s) {
+    var assignment = s['Show Assignment'] || '';
+    var badgeHtml = assignment
+      ? '<span class="badge badge-assigned">' + esc(assignment) + '</span>'
+      : '<span class="badge">Unassigned</span>';
+    var aType = s['Audition Type'] || 'virtual';
+    var typeBadge = aType === 'in-person'
+      ? ' <span class="badge" style="background:#e8e8e8;">In-Person</span>'
+      : ' <span class="badge" style="background:#e8e8e8;">Virtual</span>';
+
+    var videoHtml = '';
+    if (s['YouTube URL']) videoHtml += '<a href="' + esc(s['YouTube URL']) + '" target="_blank">YouTube Video</a> ';
+    if (s['File URL']) videoHtml += '<a href="' + esc(s['File URL']) + '" target="_blank">Uploaded File</a>';
+    if (!videoHtml) videoHtml = '<span style="color:#aaa;">No video</span>';
+
+    var resumeHtml = '';
+    if (s['Resume URL']) resumeHtml += '<a href="' + esc(s['Resume URL']) + '" target="_blank">Resume (uploaded)</a> ';
+    if (s['Resume Link']) resumeHtml += '<a href="' + esc(s['Resume Link']) + '" target="_blank">Resume (link)</a>';
+
+    var showOptions = '<option value="">— Assign to show —</option>';
+    shows.forEach(function(sh) {
+      showOptions += '<option value="' + esc(sh.name) + '"' + (assignment === sh.name ? ' selected' : '') + '>' + esc(sh.name) + '</option>';
+    });
+    showOptions += '<option value="__new__">+ Add new show...</option>';
+
+    html += '<div class="card">'
+      + '<div class="card-header"><div><div class="card-name">' + esc(s['Full Name']) + ' ' + badgeHtml + typeBadge + '</div>'
+      + '<div class="card-meta">' + formatTimestamp(s['Timestamp']) + ' · ' + esc(s['Location']) + '</div></div></div>'
+      + '<div class="card-detail"><strong>Show:</strong> ' + esc(s['Show']) + '</div>'
+      + '<div class="card-detail"><strong>1st Choice:</strong> ' + esc(s['Role 1st Choice']) + (s['Role 2nd Choice'] ? ' · <strong>2nd Choice:</strong> ' + esc(s['Role 2nd Choice']) : '') + '</div>'
+      + '<div class="card-detail"><strong>Consider Other Roles:</strong> ' + esc(s['Consider Other Roles']) + ' · <strong>Any Gender:</strong> ' + esc(s['Any Gender Role']) + '</div>'
+      + '<div class="card-detail"><strong>Email:</strong> ' + esc(s['Email']) + ' · <strong>Phone:</strong> ' + esc(s['Phone']) + '</div>'
+      + (s['Pronouns'] ? '<div class="card-detail"><strong>Pronouns:</strong> ' + esc(s['Pronouns']) + '</div>' : '')
+      + (s['Age'] ? '<div class="card-detail"><strong>Age:</strong> ' + esc(s['Age']) + '</div>' : '')
+      + (s['Height'] ? '<div class="card-detail"><strong>Height:</strong> ' + esc(s['Height']) + '</div>' : '')
+      + (s['Hair Color'] ? '<div class="card-detail"><strong>Hair Color:</strong> ' + esc(s['Hair Color']) + (s['Alter Hair'] ? ' · <strong>Willing to Alter:</strong> ' + esc(s['Alter Hair']) : '') + '</div>' : '')
+      + (s['Parent Name'] ? '<div class="card-detail"><strong>Parent/Guardian:</strong> ' + esc(s['Parent Name']) + (s['Parent Phone'] ? ' · ' + esc(s['Parent Phone']) : '') + (s['Parent Email'] ? ' · ' + esc(s['Parent Email']) : '') + '</div>' : '')
+      + (s['Experience'] ? '<div class="card-detail"><strong>Experience:</strong> ' + esc(s['Experience']) + '</div>' : '')
+      + (s['Conflicts'] ? '<div class="card-detail"><strong>Conflicts:</strong> ' + esc(s['Conflicts']) + '</div>' : '')
+      + (s['Notes'] ? '<div class="card-detail"><strong>Notes:</strong> ' + esc(s['Notes']) + '</div>' : '')
+      + '<div class="card-video">' + videoHtml + '</div>'
+      + (resumeHtml ? '<div class="card-video">' + resumeHtml + '</div>' : '')
+      + '<div class="card-actions">'
+      + '<select onchange="handleAssignChange(\'' + esc(s['ID']) + '\', this)">' + showOptions + '</select>'
+      + (assignment ? ' <button class="btn btn-sm btn-secondary" onclick="unassignSubmission(\'' + esc(s['ID']) + '\')">Unassign</button>' : '')
+      + ' <button class="btn btn-sm btn-danger" onclick="deleteSubmission(\'' + esc(s['ID']) + '\')">Delete</button>'
+      + '</div></div>';
+  });
+
+  document.getElementById('subList').innerHTML = html;
+}
+
+// ── RENDER SHOWS ──────────────────────────────────────
+function renderShows() {
+  if (shows.length === 0) {
+    document.getElementById('showList').innerHTML = '<div class="empty">No shows created yet.</div>';
+    return;
+  }
+
+  var html = '';
+  shows.forEach(function(s) {
+    var count = submissions.filter(function(sub) { return sub['Show Assignment'] === s.name; }).length;
+    var showUrl = BASE_URL + 'show.html?show=' + encodeURIComponent(s.name);
+    var isClosed = s.status === 'closed';
+    var statusBadge = isClosed
+      ? '<span class="badge" style="background:#c0392b;color:#fff;">Closed</span>'
+      : '<span class="badge" style="background:#2ecc71;color:#fff;">Open</span>';
+    var toggleLabel = isClosed ? 'Reopen' : 'Close';
+    html += '<div class="show-row">'
+      + '<div><div class="show-name">' + statusBadge + ' ' + esc(s.name) + '</div>'
+      + '<div class="show-link">' + count + ' audition' + (count !== 1 ? 's' : '') + ' · <a href="' + showUrl + '" target="_blank">Public link</a></div></div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button class="btn btn-sm btn-secondary" onclick="toggleShow(\'' + esc(s.name) + '\')">' + toggleLabel + '</button>'
+      + '<button class="btn btn-sm btn-danger" onclick="deleteShowConfirm(\'' + esc(s.name) + '\')">Delete</button>'
+      + '</div></div>';
+  });
+
+  document.getElementById('showList').innerHTML = html;
+}
+
+function updateShowFilters() {
+  var sel = document.getElementById('filterShow');
+  var val = sel.value;
+  sel.innerHTML = '<option value="">All Shows</option>';
+  // Add unique show names from submissions
+  var showNames = {};
+  submissions.forEach(function(s) { if (s['Show']) showNames[s['Show']] = true; });
+  shows.forEach(function(s) { showNames[s.name] = true; });
+  Object.keys(showNames).sort().forEach(function(name) {
+    sel.innerHTML += '<option value="' + esc(name) + '">' + esc(name) + '</option>';
+  });
+  sel.value = val;
+}
+
+// ── ACTIONS ───────────────────────────────────────────
+function handleAssignChange(id, selectEl) {
+  var val = selectEl.value;
+  if (val === '__new__') {
+    var name = prompt('Enter new show name:');
+    if (!name || !name.trim()) {
+      selectEl.value = '';
+      return;
+    }
+    // Create the show, then assign this submission to it
+    jsonp('slCreateAssign', { action: 'createShow', password: password, showName: name.trim() }, function(r) {
+      if (r && r.success) {
+        assignSubmission(id, name.trim());
+      } else {
+        alert((r && r.error) || 'Failed to create show.');
+        selectEl.value = '';
+      }
+    });
+  } else if (val) {
+    assignSubmission(id, val);
+  }
+}
+
+function assignSubmission(id, showName) {
+  if (!showName) return;
+  jsonp('slAssign', { action: 'assignShow', password: password, submissionId: id, showName: showName }, function(r) {
+    if (r && r.success) { loadAll(); } else { alert((r && r.error) || 'Failed to assign.'); }
+  });
+}
+
+function unassignSubmission(id) {
+  jsonp('slUnassign', { action: 'unassignShow', password: password, submissionId: id }, function(r) {
+    if (r && r.success) { loadAll(); } else { alert((r && r.error) || 'Failed to unassign.'); }
+  });
+}
+
+function deleteSubmission(id) {
+  if (!confirm('Delete this submission? This cannot be undone.')) return;
+  jsonp('slDel', { action: 'deleteSubmission', password: password, submissionId: id }, function(r) {
+    if (r && r.success) { loadAll(); } else { alert((r && r.error) || 'Failed to delete.'); }
+  });
+}
+
+function createShow() {
+  var input = document.getElementById('newShowName');
+  var btn = document.getElementById('createShowBtn');
+  var name = input.value.trim();
+  if (!name) return;
+
+  input.value = '';
+  btn.disabled = true;
+  btn.textContent = 'Creating Show...';
+
+  jsonp('slCreate', { action: 'createShow', password: password, showName: name }, function(r) {
+    btn.disabled = false;
+    btn.textContent = 'Create Show';
+    if (r && r.success) { loadAll(); }
+    else { alert((r && r.error) || 'Failed to create show.'); }
+  });
+}
+
+function toggleShow(name) {
+  jsonp('slToggle', { action: 'toggleShowStatus', password: password, showName: name }, function(r) {
+    if (r && r.success) { loadAll(); } else { alert((r && r.error) || 'Failed to update show status.'); }
+  });
+}
+
+function deleteShowConfirm(name) {
+  if (!confirm('Delete "' + name + '"? All auditions assigned to it will be unassigned.')) return;
+  jsonp('slDelShow', { action: 'deleteShow', password: password, showName: name }, function(r) {
+    if (r && r.success) { loadAll(); } else { alert((r && r.error) || 'Failed to delete show.'); }
+  });
+}
+
+// ── JSONP ─────────────────────────────────────────────
+function jsonp(cbName, data, onResult) {
+  var uniqueCb = cbName + '_' + Date.now();
+  window[uniqueCb] = function(result) { onResult(result); delete window[uniqueCb]; };
+  var s = document.createElement('script');
+  s.src = APPS_SCRIPT_URL + '?callback=' + uniqueCb + '&payload=' + encodeURIComponent(JSON.stringify(data)) + '&_=' + Date.now();
+  s.onload = function() { try { document.head.removeChild(s); } catch(e) {} };
+  s.onerror = function() { onResult({ success: false, error: 'Request failed.' }); try { document.head.removeChild(s); } catch(e) {} };
+  document.head.appendChild(s);
+}
+
+function esc(str) { if (str == null) return ''; var d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; }
+
+function formatTimestamp(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  if (isNaN(d)) return esc(ts);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var h = d.getHours(), m = d.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  var min = m < 10 ? '0' + m : m;
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' at ' + h + ':' + min + ' ' + ampm;
+}
+</script>
+<div id="footer-placeholder"></div>
+<script>
+  fetch('/footer.html')
+    .then(function(r) { return r.text(); })
+    .then(function(html) {
+      document.getElementById('footer-placeholder').innerHTML = html;
+    });
+</script>
+</body>
+</html>
