@@ -172,11 +172,8 @@
     z-index: 2;
     top: 96px;
     left: 0;
-    width: 100%;
-    height: calc(100vh - 96px - 80px);
-    object-fit: contain;
-    object-position: center center;
     display: block;
+    /* JS will set width/height after load */
   }
 
   .slide-image {
@@ -653,7 +650,7 @@
   function companyLabel(show) {
     var cls = companyClass(show.company);
     var loc = show.label || '';
-    if (cls === 'youth') return (loc ? loc + '  ·  ' : '') + 'Performing Arts Academy';
+    if (cls === 'youth') return (loc ? loc + '  ·  ' : '') + 'Youth Productions';
     return 'Community Productions';
   }
 
@@ -693,6 +690,25 @@
 
   // ── Slide builders ────────────────────────────────────────
 
+  function fitImage(img) {
+    var availW = 1920;
+    var availH = 1080 - 96 - 80;
+    var natW = img.naturalWidth  || availW;
+    var natH = img.naturalHeight || availH;
+    // Scale to fill the available space completely (like cover but without cropping — pick the smaller scale)
+    // To guarantee filling: use the larger scale (cover), or contain (smaller scale).
+    // User wants image to fill without cropping → use contain but scale UP to fill at least one dimension fully.
+    var scaleW = availW / natW;
+    var scaleH = availH / natH;
+    var scale  = Math.min(scaleW, scaleH); // largest size that fits without cropping
+    var w = Math.round(natW * scale);
+    var h = Math.round(natH * scale);
+    img.style.width  = w + 'px';
+    img.style.height = h + 'px';
+    img.style.left   = Math.round((availW - w) / 2) + 'px';
+    img.style.top    = Math.round(96 + (availH - h) / 2) + 'px';
+  }
+
   function buildImageSlide(imageUrl) {
     var div = document.createElement('div');
     div.className = 'slide slide-image';
@@ -708,6 +724,7 @@
     fg.src = imageUrl;
     fg.alt = '';
     fg.className = 'slide-image-fg';
+    fg.onload = function() { fitImage(fg); };
 
     div.appendChild(bg);
     div.appendChild(fg);
