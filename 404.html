@@ -15,7 +15,7 @@
     :root {
       --bg:        #020202;
       --text:      #f5f0e8;
-      --text-dim:  rgba(245,240,232,0.5);
+      --text-dim:  rgba(245,240,232,0.8);
       --text-faint:rgba(245,240,232,0.22);
       --rule:      rgba(245,240,232,0.1);
       --font:      'komet', 'Jost', sans-serif;
@@ -91,20 +91,21 @@
       line-height: 1;
     }
 
-    #not-found p {
-      font-size: 0.75rem;
-      font-weight: 300;
-      letter-spacing: 0.1em;
-      color: var(--text-dim);
-      max-width: 360px;
+    #not-found h3 {
+      font-size: clamp(1rem, 3vw, 1.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--text-dim)
+      line-height: 1;
     }
 
     #not-found a {
-      font-size: 1rem;
+      font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.35em;
       text-transform: uppercase;
-      color: #f5f0e8;
+      color: var(--text-dim);
       text-decoration: none;
       border-bottom: 1px solid var(--rule);
       padding-bottom: 2px;
