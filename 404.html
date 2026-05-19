@@ -165,6 +165,7 @@
 
   if (destination) {
     // Show redirect UI
+    document.title = 'Redirecting…';
     document.getElementById('redirecting').style.display = 'flex';
     document.getElementById('redirect-link').href = destination;
     document.getElementById('redirect-link').textContent = destination.replace('https://', '');
