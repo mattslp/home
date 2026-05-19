@@ -2827,5 +2827,13 @@
   })();
 })();
 </script>
+<div id="footer-placeholder"></div>
+<script>
+  fetch('/footer.html')
+    .then(function(r) { return r.text(); })
+    .then(function(html) {
+      document.getElementById('footer-placeholder').innerHTML = html;
+    });
+</script>
 </body>
 </html>
