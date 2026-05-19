@@ -877,15 +877,15 @@
     ].join('');
 
     // Animate and populate weather when slide becomes active
-//    slide.addEventListener('slideActivated', function() {
-//      var qr = slide.querySelector('qr-code');
-//      if (qr && qr.animateQRCode) {
-//        qr.animateQRCode('RadialRippleIn');
-//      } else if (qr) {
-//        qr.addEventListener('codeRendered', function() {
-//          qr.animateQRCode('RadialRippleIn');
-//        }, { once: true });
-//      }
+    slide.addEventListener('slideActivated', function() {
+      var qr = slide.querySelector('qr-code');
+      if (qr && qr.animateQRCode) {
+        qr.animateQRCode('RadialRippleIn');
+      } else if (qr) {
+        qr.addEventListener('codeRendered', function() {
+          qr.animateQRCode('RadialRippleIn');
+        }, { once: true });
+      }
 
     });
 
