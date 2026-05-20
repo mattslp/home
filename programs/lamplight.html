@@ -279,6 +279,10 @@
       transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    .section.hidden {
+      display: none;
+    }
+
     .section.revealed {
       opacity: 1;
       transform: translateY(0);
@@ -772,7 +776,7 @@
   </div>
 
   <!-- Director's Note -->
-  <div class="section" id="section-note" style="display:none">
+  <div class="section hidden" id="section-note">
     <div class="section-header">
       <span class="section-title">Director's Note</span>
       <div class="section-rule"></div>
@@ -782,7 +786,7 @@
   </div>
 
   <!-- Cast -->
-  <div class="section" id="section-cast" style="display:none">
+  <div class="section hidden" id="section-cast">
     <div class="section-header">
       <span class="section-title" id="cast-section-title">Cast</span>
       <div class="section-rule"></div>
@@ -791,7 +795,7 @@
   </div>
 
   <!-- Production Team -->
-  <div class="section" id="section-crew" style="display:none">
+  <div class="section hidden" id="section-crew">
     <div class="section-header">
       <span class="section-title">Production Team</span>
       <div class="section-rule"></div>
@@ -800,7 +804,7 @@
   </div>
 
   <!-- Sponsors -->
-  <div class="section" id="section-sponsors" style="display:none">
+  <div class="section hidden" id="section-sponsors">
     <div class="section-header">
       <span class="section-title">Our Sponsors</span>
       <div class="section-rule"></div>
@@ -809,7 +813,7 @@
   </div>
 
   <!-- Advertisements -->
-  <div class="section" id="section-ads" style="display:none">
+  <div class="section hidden" id="section-ads">
     <div class="section-header">
       <span class="section-title">Advertisements</span>
       <div class="section-rule"></div>
@@ -1066,7 +1070,7 @@
         document.getElementById('directors-note-attribution').textContent = '— ' + show.director;
       }
 
-      document.getElementById('section-note').style.display = '';
+      document.getElementById('section-note').classList.remove('hidden');
     }
 
     // ── Cast & crew ───────────────────────────────────────────────────────────
@@ -1126,7 +1130,7 @@
         img.onerror = function() { img.style.display = 'none'; };
       });
 
-      document.getElementById('section-cast').style.display = '';
+      document.getElementById('section-cast').classList.remove('hidden');
     }
 
     // Crew
@@ -1137,7 +1141,7 @@
              + '<p class="crew-name">' + c.name + '</p>'
              + '</div>';
       }).join('');
-      document.getElementById('section-crew').style.display = '';
+      document.getElementById('section-crew').classList.remove('hidden');
     }
 
     // Sponsors — from cast sheet sponsor rows OR from show.sponsors field
@@ -1162,7 +1166,7 @@
 
     if (sponsorHtml) {
       document.getElementById('sponsors-list').innerHTML = sponsorHtml;
-      document.getElementById('section-sponsors').style.display = '';
+      document.getElementById('section-sponsors').classList.remove('hidden');
     }
 
     // ── Advertisements ────────────────────────────────────────────────────────
@@ -1181,6 +1185,7 @@
       var adsGrid = document.getElementById('ads-grid');
       adsGrid.innerHTML = ads.map(function(a) {
         var imgUrl = driveThumb(a.image_url, 'w800');
+        console.log('Ad:', a.name, '| raw:', a.image_url, '| resolved:', imgUrl);
         var isFull = (a.size || '').toLowerCase() === 'full';
         var inner = '<img class="ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy">'
                   + (a.name ? '<p class="ad-name">' + a.name + '</p>' : '');
@@ -1188,7 +1193,7 @@
           ? '<a href="' + a.url + '" target="_blank" rel="noopener" class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</a>'
           : '<div class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</div>';
       }).join('');
-      document.getElementById('section-ads').style.display = '';
+      document.getElementById('section-ads').classList.remove('hidden');
     }
 
     // ── Reveal page ───────────────────────────────────────────────────────────
@@ -1198,19 +1203,21 @@
       loading.style.display = 'none';
       document.getElementById('page').style.display = 'block';
 
-      // Scroll reveal for section cards
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+      // Scroll reveal for section cards — use rAF so all sections are visible first
+      requestAnimationFrame(function() {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
 
-      document.querySelectorAll('.section').forEach(function(el, i) {
-        el.style.transitionDelay = (i * 0.07) + 's';
-        observer.observe(el);
+        document.querySelectorAll('.section').forEach(function(el, i) {
+          el.style.transitionDelay = (i * 0.07) + 's';
+          observer.observe(el);
+        });
       });
     }, 600);
 
