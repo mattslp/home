@@ -16,7 +16,21 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    /* Define the animation: name, duration, timing function, and fill-mode */
+    animation: fadeInAnimation ease 3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+  }
 
+  @keyframes fadeInAnimation {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
     :root {
       --bg: #fdfdfd;
       --text: #1a1a1a;
