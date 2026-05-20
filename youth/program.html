@@ -374,7 +374,7 @@
       subtitle: 'RISING SUN',
       color:    '#cc3399',
       tabClass: 'tab-rising-sun',
-      backUrl:  'https://youth.streetlamp.org'
+      backUrl:  'https://streetlamp.org/youth'
     },
     'ksq': {
       label:    'Kennett Square',
@@ -383,13 +383,13 @@
       subtitle: 'KENNETT SQUARE',
       color:    '#00aa99',
       tabClass: 'tab-kennett',
-      backUrl:  'https://youth.streetlamp.org'
+      backUrl:  'https://streetlamp.org/youth'
     }
   };
 
   // If no valid loc, redirect to landing page
   if (!CONFIGS[loc]) {
-    window.location.replace('https://youth.streetlamp.org');
+    window.location.replace('https://streetlamp.org/youth');
   }
 
   var CFG = CONFIGS[loc];
