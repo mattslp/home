@@ -1168,11 +1168,14 @@
     // ── Advertisements ────────────────────────────────────────────────────────
     var ads = allAds.filter(function(a) {
       if (!a.image_url) return false;
-      if (!a.show_id || a.show_id === slug) return true;
-      return false;
+      // show_id blank or missing = show on all programs; otherwise must match slug
+      var sid = (a.show_id || '').trim();
+      return !sid || sid === slug;
     }).sort(function(a, b) {
       return (parseInt(a.order)||999) - (parseInt(b.order)||999);
     });
+
+    console.log('Lamp Light ads: total=' + allAds.length + ' filtered=' + ads.length + ' slug=' + slug);
 
     if (ads.length) {
       var adsGrid = document.getElementById('ads-grid');
