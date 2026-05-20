@@ -1009,10 +1009,24 @@
   }
 
   // ── Fetch both sheets ───────────────────────────────────────────────────────
+  function fetchWithRetry(url, retries) {
+    retries = retries || 3;
+    return fetch(url).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).catch(function(err) {
+      if (retries > 1) {
+        return new Promise(function(resolve) { setTimeout(resolve, 800); })
+          .then(function() { return fetchWithRetry(url, retries - 1); });
+      }
+      throw err;
+    });
+  }
+
   Promise.all([
-    fetch(SHOWS_CSV).then(function(r) { return r.text(); }),
-    fetch(CAST_CSV).then(function(r) { return r.text(); }),
-    fetch(ADS_CSV).then(function(r) { return r.text(); }).catch(function() { return ''; }),
+    fetchWithRetry(SHOWS_CSV),
+    fetchWithRetry(CAST_CSV),
+    fetchWithRetry(ADS_CSV).catch(function() { return ''; }),
   ]).then(function(results) {
 
     var shows = parseCSV(results[0]);
