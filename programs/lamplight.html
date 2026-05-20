@@ -830,22 +830,50 @@
   }
 
   function applyAccentColor(r, g, b) {
-    if (r === null) return; // fallback to default gold
+    if (r === null) return;
     var root = document.documentElement;
-    // Brighten slightly for use as accent
-    var brighten = function(v) { return Math.min(255, Math.round(v * 1.3)); };
-    var ar = brighten(r), ag = brighten(g), ab = brighten(b);
-    var hex = '#' + [ar, ag, ab].map(function(v) { return ('0'+v.toString(16)).slice(-2); }).join('');
+
+    // Convert to HSL to enforce minimum lightness
+    var rn = r/255, gn = g/255, bn = b/255;
+    var max = Math.max(rn,gn,bn), min = Math.min(rn,gn,bn);
+    var h, s, l = (max+min)/2;
+    if (max === min) { h = s = 0; }
+    else {
+      var d = max - min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max) {
+        case rn: h = ((gn-bn)/d + (gn<bn?6:0))/6; break;
+        case gn: h = ((bn-rn)/d + 2)/6; break;
+        default: h = ((rn-gn)/d + 4)/6; break;
+      }
+    }
+
+    // Clamp lightness between 55% and 75% so it's always visible on dark bg
+    l = Math.max(0.55, Math.min(0.75, l));
+    s = Math.max(0.5, s); // ensure enough saturation
+
+    // Convert back to RGB
+    function hue2rgb(p, q, t) {
+      if (t<0) t+=1; if (t>1) t-=1;
+      if (t<1/6) return p+(q-p)*6*t;
+      if (t<1/2) return q;
+      if (t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    }
+    var q = l<0.5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+    var ar = Math.round(hue2rgb(p,q,h+1/3)*255);
+    var ag = Math.round(hue2rgb(p,q,h)*255);
+    var ab = Math.round(hue2rgb(p,q,h-1/3)*255);
+
+    var hex = '#' + [ar,ag,ab].map(function(v) { return ('0'+v.toString(16)).slice(-2); }).join('');
     root.style.setProperty('--accent', hex);
-    root.style.setProperty('--accent-glow', 'rgba(' + ar + ',' + ag + ',' + ab + ',0.1)');
+    root.style.setProperty('--accent-glow', 'rgba('+ar+','+ag+','+ab+',0.1)');
     root.style.setProperty('--gold', hex);
-    root.style.setProperty('--gold-dim', 'rgba(' + ar + ',' + ag + ',' + ab + ',0.3)');
-    // Update masthead title color
+    root.style.setProperty('--gold-dim', 'rgba('+ar+','+ag+','+ab+',0.3)');
     var title = document.getElementById('lamplight-masthead-title');
     if (title) title.style.color = hex;
-    // Update glow animation
     var logo = document.getElementById('lamplight-masthead-logo');
-    if (logo) logo.style.filter = 'drop-shadow(0 0 18px rgba(' + ar + ',' + ag + ',' + ab + ',0.5)) drop-shadow(0 0 48px rgba(' + ar + ',' + ag + ',' + ab + ',0.2))';
+    if (logo) logo.style.filter = 'drop-shadow(0 0 18px rgba('+ar+','+ag+','+ab+',0.5)) drop-shadow(0 0 48px rgba('+ar+','+ag+','+ab+',0.2))';
   }
 
   var SHOWS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=0&single=true&output=csv';
