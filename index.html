@@ -94,6 +94,13 @@
     flex-direction: column;
     gap: 10px;
     padding: 10px 0;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s ease, opacity 0.5s ease;
+  }
+
+  #sl-hero.panel-open #sl-stage {
+    transform: scale(0.97);
+    filter: blur(4px);
+    opacity: 0.5;
   }
 
   .sl-row {
@@ -139,6 +146,13 @@
     justify-content: center;
     padding-bottom: 5vh;
     z-index: 10;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s ease, opacity 0.5s ease;
+  }
+
+  #sl-hero.panel-open #sl-overlay {
+    transform: scale(0.96);
+    filter: blur(2px);
+    opacity: 0.3;
   }
 
   #sl-logo {
@@ -488,7 +502,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(10,10,10,0.95);
+    background: rgba(10,10,10,0.75);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -571,7 +585,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    background: rgba(2,2,2,0.98);
+    background: rgba(2,2,2,0.82);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -686,7 +700,11 @@
   }
 
   .sl-ov-tier:hover { border-color: rgba(245,240,232,0.22); }
-  .sl-ov-tier.open  { border-color: rgba(245,240,232,0.2); }
+  .sl-ov-tier[open] { border-color: rgba(245,240,232,0.2); }
+
+  /* Remove default details marker */
+  .sl-ov-tier summary { list-style: none; }
+  .sl-ov-tier summary::-webkit-details-marker { display: none; }
 
   .sl-ov-tier-header {
     display: flex;
@@ -694,6 +712,7 @@
     justify-content: space-between;
     padding: 16px 20px;
     gap: 12px;
+    cursor: pointer;
   }
 
   .sl-ov-tier-name {
@@ -723,18 +742,12 @@
     transition: transform 0.25s ease;
   }
 
-  .sl-ov-tier.open .sl-ov-tier-chevron {
+  .sl-ov-tier[open] .sl-ov-tier-chevron {
     transform: rotate(180deg);
   }
 
   .sl-ov-tier-body {
-    max-height: 0;
     overflow: hidden;
-    transition: max-height 0.35s ease;
-  }
-
-  .sl-ov-tier.open .sl-ov-tier-body {
-    max-height: 400px;
   }
 
   .sl-ov-tier-perks {
@@ -885,7 +898,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(2,2,2,0.98);
+    background: rgba(2,2,2,0.82);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -1094,7 +1107,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(10,10,10,0.94);
+    background: rgba(10,10,10,0.75);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -1266,7 +1279,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(10,10,10,0.92);
+    background: rgba(10,10,10,0.75);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -1354,7 +1367,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(10,10,10,0.92);
+    background: rgba(10,10,10,0.75);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
@@ -2120,11 +2133,13 @@
   window.toggleBoxOffice = function() {
     document.getElementById('sl-boxoffice-overlay').classList.add('open');
     document.getElementById('sl-boxoffice-btn').classList.add('active');
+    document.getElementById('sl-hero').classList.add('panel-open');
   };
 
   window.closeBoxOffice = function() {
     document.getElementById('sl-boxoffice-overlay').classList.remove('open');
     document.getElementById('sl-boxoffice-btn').classList.remove('active');
+    document.getElementById('sl-hero').classList.remove('panel-open');
   };
 
   /* ── Staff panel — triple tap the rule ── */
@@ -2138,6 +2153,7 @@
 
     function openStaff() {
       document.getElementById('sl-staff-overlay').classList.add('open');
+      document.getElementById('sl-hero').classList.add('panel-open');
       if (!staffLinksLoaded) {
         staffLinksLoaded = true;
         loadStaffLinks();
@@ -2218,6 +2234,7 @@
   window.toggleSupport = function() {
     document.getElementById('sl-support-overlay').classList.add('open');
     document.getElementById('sl-support-btn').classList.add('active');
+    document.getElementById('sl-hero').classList.add('panel-open');
     if (!supportLoaded) {
       supportLoaded = true;
       loadSupportButtons();
@@ -2265,6 +2282,7 @@
   window.closeSupport = function() {
     document.getElementById('sl-support-overlay').classList.remove('open');
     document.getElementById('sl-support-btn').classList.remove('active');
+    document.getElementById('sl-hero').classList.remove('panel-open');
   };
 
   document.getElementById('sl-support-overlay').addEventListener('click', function(e) {
@@ -2281,23 +2299,33 @@
       { name: 'Props Sponsor',    amount: '$250 – $499',     perks: ['Name in all programs for this season'] },
     ];
     var container = document.getElementById('sl-support-tiers');
+    var allDetails = [];
+
     tiers.forEach(function(tier) {
-      var el = document.createElement('div');
+      var el = document.createElement('details');
       el.className = 'sl-ov-tier';
       el.innerHTML =
-        '<div class="sl-ov-tier-header">' +
+        '<summary class="sl-ov-tier-header">' +
           '<span class="sl-ov-tier-name">' + tier.name + '</span>' +
           '<span class="sl-ov-tier-amount">' + tier.amount + '</span>' +
           '<svg class="sl-ov-tier-chevron" viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>' +
-        '</div>' +
+        '</summary>' +
         '<div class="sl-ov-tier-body">' +
           '<ul class="sl-ov-tier-perks">' +
             tier.perks.map(function(p) { return '<li>' + p + '</li>'; }).join('') +
           '</ul>' +
         '</div>';
-      el.querySelector('.sl-ov-tier-header').addEventListener('click', function() {
-        el.classList.toggle('open');
+
+      // Accordion: close others when this one opens
+      el.addEventListener('toggle', function() {
+        if (el.open) {
+          allDetails.forEach(function(other) {
+            if (other !== el) other.removeAttribute('open');
+          });
+        }
       });
+
+      allDetails.push(el);
       container.appendChild(el);
     });
   }
@@ -2372,11 +2400,13 @@
   window.toggleContact = function() {
     document.getElementById('sl-contact-overlay').classList.add('open');
     document.getElementById('sl-contact-btn').classList.add('active');
+    document.getElementById('sl-hero').classList.add('panel-open');
   };
 
   window.closeContact = function() {
     document.getElementById('sl-contact-overlay').classList.remove('open');
     document.getElementById('sl-contact-btn').classList.remove('active');
+    document.getElementById('sl-hero').classList.remove('panel-open');
   };
 
   document.getElementById('sl-contact-overlay').addEventListener('click', function(e) {
@@ -2453,16 +2483,19 @@
 
   window.closeStaff = function() {
     document.getElementById('sl-staff-overlay').classList.remove('open');
+    document.getElementById('sl-hero').classList.remove('panel-open');
   };
 
   window.toggleStory = function() {
     document.getElementById('sl-story-overlay').classList.add('open');
     document.getElementById('sl-story-btn').classList.add('active');
+    document.getElementById('sl-hero').classList.add('panel-open');
   };
 
   window.closeStory = function() {
     document.getElementById('sl-story-overlay').classList.remove('open');
     document.getElementById('sl-story-btn').classList.remove('active');
+    document.getElementById('sl-hero').classList.remove('panel-open');
   };
 
   // Tap backdrop to close story
@@ -2664,6 +2697,7 @@
   window.toggleAuditions = function() {
     document.getElementById('sl-auditions-overlay').classList.add('open');
     document.getElementById('sl-auditions-btn').classList.add('active');
+    document.getElementById('sl-hero').classList.add('panel-open');
     // If preload is still in flight (or not yet started), show skeleton in the empty list
     var list = document.getElementById('sl-auditions-list');
     if (list && !list.children.length) {
@@ -2681,6 +2715,7 @@
   window.closeAuditions = function() {
     document.getElementById('sl-auditions-overlay').classList.remove('open');
     document.getElementById('sl-auditions-btn').classList.remove('active');
+    document.getElementById('sl-hero').classList.remove('panel-open');
   };
 
   document.getElementById('sl-auditions-overlay').addEventListener('click', function(e) {
