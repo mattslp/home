@@ -1024,14 +1024,29 @@
   }
 
   Promise.all([
-    fetchWithRetry(SHOWS_CSV),
-    fetchWithRetry(CAST_CSV),
+    fetchWithRetry(SHOWS_CSV).catch(function(e) { console.error('Shows CSV failed:', e); return ''; }),
+    fetchWithRetry(CAST_CSV).catch(function(e) { console.error('Cast CSV failed:', e); return ''; }),
     fetchWithRetry(ADS_CSV).catch(function() { return ''; }),
   ]).then(function(results) {
 
     var shows = parseCSV(results[0]);
     var cast  = parseCSV(results[1]);
     var allAds = results[2] ? parseCSV(results[2]) : [];
+
+    // If shows is empty, the CSV fetch may have silently failed — retry once
+    if (!shows.length && results[0] === '') {
+      console.warn('Lamp Light: shows CSV empty, retrying...');
+      fetchWithRetry(SHOWS_CSV).then(function(text) {
+        var retried = parseCSV(text);
+        var s = retried.find(function(s) { return s.show_id === slug; });
+        if (s) { location.reload(); }
+        else {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('error').style.display = 'flex';
+        }
+      });
+      return;
+    }
 
     var show = shows.find(function(s) { return s.show_id === slug; });
 
