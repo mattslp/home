@@ -1184,7 +1184,7 @@
     if (ads.length) {
       var adsGrid = document.getElementById('ads-grid');
       adsGrid.innerHTML = ads.map(function(a) {
-        var imgUrl = driveThumb(a.image_url, 'w800');
+        var imgUrl = driveThumb(a.image_url, 's800');
         console.log('Ad:', a.name, '| raw:', a.image_url, '| resolved:', imgUrl);
         var isFull = (a.size || '').toLowerCase() === 'full';
         var inner = '<img class="ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy" onerror="console.error(\'Ad image failed:\', this.src)">'
@@ -1205,21 +1205,12 @@
       loading.style.display = 'none';
       document.getElementById('page').style.display = 'block';
 
-      // Scroll reveal for section cards — use rAF so all sections are visible first
-      requestAnimationFrame(function() {
-        var observer = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('revealed');
-              observer.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
-
-        document.querySelectorAll('.section').forEach(function(el, i) {
-          el.style.transitionDelay = (i * 0.07) + 's';
-          observer.observe(el);
-        });
+      // Reveal section cards with staggered delay
+      var sections = document.querySelectorAll('.section:not(.hidden)');
+      sections.forEach(function(el, i) {
+        setTimeout(function() {
+          el.classList.add('revealed');
+        }, i * 120);
       });
     }, 600);
 
