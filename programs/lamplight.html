@@ -1212,7 +1212,7 @@
     console.log('Lamp Light ads: total=' + allAds.length + ' filtered=' + ads.length + ' slug=' + slug);
 
     if (ads.length) {
-      var adsGrid = document.getElementById('ads-grid');
+      var adsGrid = document.getElementById('lamplight-ads-grid');
       adsGrid.innerHTML = ads.map(function(a) {
         var imgUrl = driveThumb(a.image_url, 's800');
         console.log('Ad:', a.name, '| raw:', a.image_url, '| resolved:', imgUrl);
