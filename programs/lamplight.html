@@ -633,31 +633,31 @@
     .ad-card {
       display: block;
       overflow: hidden;
-      background: #0a0a0a;
+      background: #1a1a1a;
+      border: 1px solid rgba(245,240,232,0.1);
       text-decoration: none;
       transition: opacity 0.2s;
+      min-height: 60px;
+    }
+
+    .ad-name {
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      padding: 12px 16px;
+      display: block;
     }
 
     .ad-card:hover { opacity: 0.85; }
 
-    .ad-full {
-      grid-column: 1 / -1;
-    }
+    .ad-full { grid-column: 1 / -1; }
 
     .ad-image {
       width: 100%;
       height: auto;
       display: block;
       object-fit: cover;
-    }
-
-    .ad-name {
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      padding: 8px 12px;
     }
 
     @media (max-width: 500px) {
