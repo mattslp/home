@@ -616,6 +616,48 @@
       color: rgba(245,240,232,0.7);
     }
 
+    /* ── Advertisements ── */
+    #ads-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .ad-card {
+      display: block;
+      overflow: hidden;
+      background: #0a0a0a;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .ad-card:hover { opacity: 0.85; }
+
+    .ad-full {
+      grid-column: 1 / -1;
+    }
+
+    .ad-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+
+    .ad-name {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 8px 12px;
+    }
+
+    @media (max-width: 500px) {
+      #ads-grid { grid-template-columns: 1fr; }
+      .ad-full  { grid-column: 1; }
+    }
+
     /* ── Footer ── */
     #program-footer {
       margin-top: 80px;
@@ -763,6 +805,15 @@
     <div id="sponsors-list"></div>
   </div>
 
+  <!-- Advertisements -->
+  <div class="section" id="section-ads" style="display:none">
+    <div class="section-header">
+      <span class="section-title">Advertisements</span>
+      <div class="section-rule"></div>
+    </div>
+    <div id="ads-grid"></div>
+  </div>
+
   <!-- Footer -->
   <div id="program-footer">
     <a href="https://streetlamp.org" id="footer-logo-wrap">
@@ -854,6 +905,7 @@
 
     var SHOWS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=0&single=true&output=csv';
   var CAST_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1553402469&single=true&output=csv';
+  var ADS_CSV   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1398222407&single=true&output=csv';
 
   var TIER_ORDER = ['Season Sponsor','Show Sponsor','Rights Sponsor','Music Sponsor','Costumes Sponsor','Props Sponsor'];
   var castData = {};
@@ -903,10 +955,12 @@
   Promise.all([
     fetch(SHOWS_CSV).then(function(r) { return r.text(); }),
     fetch(CAST_CSV).then(function(r) { return r.text(); }),
+    fetch(ADS_CSV).then(function(r) { return r.text(); }).catch(function() { return ''; }),
   ]).then(function(results) {
 
     var shows = parseCSV(results[0]);
     var cast  = parseCSV(results[1]);
+    var allAds = results[2] ? parseCSV(results[2]) : [];
 
     var show = shows.find(function(s) { return s.show_id === slug; });
 
@@ -1057,6 +1111,29 @@
     if (sponsorHtml) {
       document.getElementById('sponsors-list').innerHTML = sponsorHtml;
       document.getElementById('section-sponsors').style.display = '';
+    }
+
+    // ── Advertisements ────────────────────────────────────────────────────────
+    var ads = allAds.filter(function(a) {
+      if (!a.image_url) return false;
+      if (!a.show_id || a.show_id === slug) return true;
+      return false;
+    }).sort(function(a, b) {
+      return (parseInt(a.order)||999) - (parseInt(b.order)||999);
+    });
+
+    if (ads.length) {
+      var adsGrid = document.getElementById('ads-grid');
+      adsGrid.innerHTML = ads.map(function(a) {
+        var imgUrl = driveThumb(a.image_url, 'w800');
+        var isFull = (a.size || '').toLowerCase() === 'full';
+        var inner = '<img class="ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy">'
+                  + (a.name ? '<p class="ad-name">' + a.name + '</p>' : '');
+        return a.url
+          ? '<a href="' + a.url + '" target="_blank" rel="noopener" class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</a>'
+          : '<div class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</div>';
+      }).join('');
+      document.getElementById('section-ads').style.display = '';
     }
 
     // ── Reveal page ───────────────────────────────────────────────────────────
