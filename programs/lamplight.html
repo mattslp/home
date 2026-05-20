@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>The Lamp Light</title>
+  <link rel="stylesheet" href="https://use.typekit.net/wby1ytb.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #020202;
+      --bg-card:    #0d0d0d;
+      --text:       #f5f0e8;
+      --text-dim:   rgba(245,240,232,0.5);
+      --text-faint: rgba(245,240,232,0.22);
+      --rule:       rgba(245,240,232,0.08);
+      --gold:       #cc9900;
+      --gold-dim:   rgba(204,153,0,0.3);
+      --font:       'komet', 'Jost', sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Loading ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      background: var(--bg);
+      z-index: 900;
+      transition: opacity 0.6s ease;
+    }
+
+    #loading-logo {
+      width: 56px;
+      opacity: 0.4;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    #loading-label {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 0.8; }
+    }
+
+    /* ── Error ── */
+    #error {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 20px;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    #error h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+
+    #error p {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    #error a {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 2px;
+    }
+
+    /* ── Page ── */
+    #page {
+      display: none;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Hero header ── */
+    #show-header {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 80px 0 56px;
+      margin-bottom: 64px;
+      overflow: hidden;
+    }
+
+    #show-header-bg {
+      position: absolute;
+      inset: 0;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      opacity: 0.2;
+      filter: grayscale(30%);
+    }
+
+    #show-header-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(2,2,2,0.3) 0%,
+        rgba(2,2,2,0.0) 30%,
+        rgba(2,2,2,0.5) 70%,
+        rgba(2,2,2,1.0) 100%);
+    }
+
+    #show-header-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    #show-masthead {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    #show-masthead-logo {
+      width: 28px;
+      opacity: 0.5;
+    }
+
+    #show-masthead-label {
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    #show-title {
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 0.95;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    #show-subtitle {
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+    }
+
+    #show-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px 40px;
+      padding-top: 28px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .show-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .show-meta-label {
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .show-meta-value {
+      font-size: 0.85rem;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: var(--text);
+    }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 64px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    /* ── Director's note ── */
+    #directors-note-text {
+      font-size: clamp(0.9rem, 2vw, 1.05rem);
+      font-weight: 300;
+      line-height: 1.9;
+      color: rgba(245,240,232,0.75);
+      font-style: italic;
+      max-width: 680px;
+      position: relative;
+      padding-left: 28px;
+    }
+
+    #directors-note-text::before {
+      content: '\201C';
+      position: absolute;
+      left: 0;
+      top: -8px;
+      font-size: 3rem;
+      line-height: 1;
+      color: var(--gold-dim);
+      font-style: normal;
+    }
+
+    #directors-note-attribution {
+      margin-top: 20px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    /* ── Cast grid ── */
+    #cast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 2px;
+    }
+
+    .cast-card {
+      background: var(--bg-card);
+      overflow: hidden;
+      cursor: default;
+      transition: background 0.2s;
+    }
+
+    .cast-card.has-bio {
+      cursor: pointer;
+    }
+
+    .cast-card.has-bio:hover {
+      background: #141414;
+    }
+
+    .cast-photo-wrap {
+      position: relative;
+      aspect-ratio: 3/4;
+      background: #0a0a0a;
+      overflow: hidden;
+    }
+
+    .cast-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .cast-photo.loaded { opacity: 1; }
+
+    .cast-photo-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cast-photo-placeholder svg {
+      width: 40%;
+      opacity: 0.08;
+    }
+
+    .cast-info {
+      padding: 14px 16px 16px;
+    }
+
+    .cast-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .cast-role {
+      font-size: 0.65rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+    }
+
+    .cast-bio-indicator {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    /* No-photo mode — compact list */
+    #cast-grid.list-mode {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    #cast-grid.list-mode .cast-card {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 14px 0;
+      background: transparent;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    #cast-grid.list-mode .cast-photo-wrap {
+      display: none;
+    }
+
+    #cast-grid.list-mode .cast-info {
+      padding: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex: 1;
+    }
+
+    #cast-grid.list-mode .cast-name {
+      margin-bottom: 0;
+      min-width: 160px;
+    }
+
+    #cast-grid.list-mode .cast-role {
+      color: var(--text-dim);
+    }
+
+    #cast-grid.list-mode .cast-bio-indicator {
+      margin-top: 0;
+      margin-left: auto;
+    }
+
+    /* ── Crew list ── */
+    #crew-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0;
+    }
+
+    .crew-item {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .crew-role {
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 4px;
+    }
+
+    .crew-name {
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    /* ── Sponsors ── */
+    #sponsors-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sponsor-tier-group { }
+
+    .sponsor-tier-label {
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+    }
+
+    .sponsor-names {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 24px;
+    }
+
+    .sponsor-name {
+      font-size: 0.9rem;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+    }
+
+    /* ── Bio modal ── */
+    #bio-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #bio-modal.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    #bio-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(2,2,2,0.85);
+    }
+
+    #bio-panel {
+      position: relative;
+      z-index: 1;
+      background: #111;
+      width: 100%;
+      max-width: 560px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 32px 28px 40px;
+      transform: translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #bio-modal.open #bio-panel {
+      transform: translateY(0);
+    }
+
+    #bio-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+      padding: 4px 8px;
+      transition: color 0.2s;
+    }
+
+    #bio-close:hover { color: var(--text); }
+
+    #bio-panel-header {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    #bio-panel-photo {
+      width: 72px;
+      height: 96px;
+      object-fit: cover;
+      object-position: center top;
+      flex-shrink: 0;
+    }
+
+    #bio-panel-photo.hidden { display: none; }
+
+    #bio-panel-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    #bio-panel-role {
+      font-size: 0.65rem;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    #bio-panel-text {
+      font-size: 0.88rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: rgba(245,240,232,0.7);
+    }
+
+    /* ── Footer ── */
+    #program-footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    #footer-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    #footer-logo-wrap svg {
+      width: 28px;
+      opacity: 0.4;
+    }
+
+    #footer-logo-label {
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    #footer-lamplight {
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      #cast-grid { grid-template-columns: repeat(2, 1fr); }
+      #crew-list  { grid-template-columns: 1fr; }
+      #bio-panel  { max-height: 90vh; }
+    }
+
+    @media (max-width: 400px) {
+      #cast-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <svg id="loading-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+    <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+    <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+    <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+  </svg>
+  <span id="loading-label">The Lamp Light</span>
+</div>
+
+<!-- Error -->
+<div id="error">
+  <h2>Program Not Found</h2>
+  <p>We couldn't find a program for that show.</p>
+  <a href="https://streetlamp.org">← Street Lamp Productions</a>
+</div>
+
+<!-- Bio modal -->
+<div id="bio-modal">
+  <div id="bio-backdrop"></div>
+  <div id="bio-panel">
+    <button id="bio-close" onclick="closeBio()">✕</button>
+    <div id="bio-panel-header">
+      <img id="bio-panel-photo" src="" alt="">
+      <div>
+        <p id="bio-panel-name"></p>
+        <p id="bio-panel-role"></p>
+      </div>
+    </div>
+    <p id="bio-panel-text"></p>
+  </div>
+</div>
+
+<!-- Main page -->
+<div id="page">
+
+  <!-- Show header -->
+  <div id="show-header">
+    <img id="show-header-bg" src="" alt="" style="display:none">
+    <div id="show-header-gradient"></div>
+    <div id="show-header-content">
+      <div id="show-masthead">
+        <svg id="show-masthead-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+          <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+          <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+          <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+        </svg>
+        <span id="show-masthead-label">The Lamp Light</span>
+      </div>
+      <h1 id="show-title"></h1>
+      <p id="show-subtitle"></p>
+      <div id="show-meta-row"></div>
+    </div>
+  </div>
+
+  <!-- Director's Note -->
+  <div class="section" id="section-note" style="display:none">
+    <div class="section-header">
+      <span class="section-title">Director's Note</span>
+      <div class="section-rule"></div>
+    </div>
+    <div id="directors-note-text"></div>
+    <p id="directors-note-attribution"></p>
+  </div>
+
+  <!-- Cast -->
+  <div class="section" id="section-cast" style="display:none">
+    <div class="section-header">
+      <span class="section-title" id="cast-section-title">Cast</span>
+      <div class="section-rule"></div>
+    </div>
+    <div id="cast-grid"></div>
+  </div>
+
+  <!-- Production Team -->
+  <div class="section" id="section-crew" style="display:none">
+    <div class="section-header">
+      <span class="section-title">Production Team</span>
+      <div class="section-rule"></div>
+    </div>
+    <div id="crew-list"></div>
+  </div>
+
+  <!-- Sponsors -->
+  <div class="section" id="section-sponsors" style="display:none">
+    <div class="section-header">
+      <span class="section-title">Our Sponsors</span>
+      <div class="section-rule"></div>
+    </div>
+    <div id="sponsors-list"></div>
+  </div>
+
+  <!-- Footer -->
+  <div id="program-footer">
+    <a href="https://streetlamp.org" id="footer-logo-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+        <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+        <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+        <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+      </svg>
+      <span id="footer-logo-label">Street Lamp Productions</span>
+    </a>
+    <span id="footer-lamplight">The Lamp Light</span>
+  </div>
+
+</div>
+
+<script>
+(function() {
+
+  var SHOWS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=0&single=true&output=csv';
+  var CAST_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1553402469&single=true&output=csv';
+
+  var TIER_ORDER = ['Season Sponsor','Show Sponsor','Rights Sponsor','Music Sponsor','Costumes Sponsor','Props Sponsor'];
+
+  // ── CSV parser ──────────────────────────────────────────────────────────────
+  function parseLine(line) {
+    var cols = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur);
+    return cols;
+  }
+
+  function parseCSV(text) {
+    var lines = text.trim().split('\n').filter(function(l) { return l.trim(); });
+    if (lines.length < 2) return [];
+    var headers = parseLine(lines[0]).map(function(h) { return h.replace(/^"|"$/g,'').trim().toLowerCase().replace(/\s+/g,'_'); });
+    return lines.slice(1).map(function(line) {
+      var cols = parseLine(line);
+      var obj = {};
+      headers.forEach(function(h, i) { obj[h] = (cols[i] || '').replace(/^"|"$/g,'').trim(); });
+      return obj;
+    }).filter(function(r) { return Object.values(r).some(function(v) { return v; }); });
+  }
+
+  function driveThumb(raw, size) {
+    if (!raw) return '';
+    var m = raw.match(/\/file\/d\/([^\/\?&]+)/) || raw.match(/[?&]id=([^&]+)/) || raw.match(/\/d\/([^\/\?&]+)/);
+    if (m) return 'https://lh3.googleusercontent.com/d/' + m[1] + '=' + (size || 'w400');
+    return raw;
+  }
+
+  // ── Slug from URL ───────────────────────────────────────────────────────────
+  var slug = new URLSearchParams(window.location.search).get('id') || '';
+
+  if (!slug) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'flex';
+    return;
+  }
+
+  // ── Fetch both sheets ───────────────────────────────────────────────────────
+  Promise.all([
+    fetch(SHOWS_CSV).then(function(r) { return r.text(); }),
+    fetch(CAST_CSV).then(function(r) { return r.text(); }),
+  ]).then(function(results) {
+
+    var shows = parseCSV(results[0]);
+    var cast  = parseCSV(results[1]);
+
+    var show = shows.find(function(s) { return s.show_id === slug; });
+
+    if (!show) {
+      document.getElementById('loading').style.opacity = '0';
+      setTimeout(function() {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'flex';
+      }, 600);
+      return;
+    }
+
+    // ── Populate show header ──────────────────────────────────────────────────
+    document.title = show.title + ' — The Lamp Light';
+
+    document.getElementById('show-title').textContent = show.title || '';
+    document.getElementById('show-subtitle').textContent = show.subtitle || '';
+
+    // Background image
+    var imgUrl = driveThumb(show.image_url, 'w1200');
+    if (imgUrl) {
+      var bg = document.getElementById('show-header-bg');
+      bg.src = imgUrl;
+      bg.style.display = '';
+    }
+
+    // Meta row
+    var metaRow = document.getElementById('show-meta-row');
+    var metas = [
+      { label: 'Dates',         value: show.dates },
+      { label: 'Venue',         value: show.venue },
+      { label: 'Director',      value: show.director },
+      { label: 'Music Director',value: show.music_director },
+      { label: 'Choreographer', value: show.choreographer },
+    ].filter(function(m) { return m.value; });
+
+    metaRow.innerHTML = metas.map(function(m) {
+      return '<div class="show-meta-item">'
+           + '<span class="show-meta-label">' + m.label + '</span>'
+           + '<span class="show-meta-value">' + m.value + '</span>'
+           + '</div>';
+    }).join('');
+
+    // ── Director's note ───────────────────────────────────────────────────────
+    if (show.director_note) {
+      var noteEl = document.getElementById('directors-note-text');
+      // Support || line breaks
+      noteEl.innerHTML = show.director_note.split('||').map(function(p, i) {
+        return '<span style="display:block' + (i > 0 ? ';margin-top:1.2em' : '') + '">' + p.trim() + '</span>';
+      }).join('');
+
+      if (show.director) {
+        document.getElementById('directors-note-attribution').textContent = '— ' + show.director;
+      }
+
+      document.getElementById('section-note').style.display = '';
+    }
+
+    // ── Cast & crew ───────────────────────────────────────────────────────────
+    var showCast = cast.filter(function(c) { return c.show_id === slug; })
+      .sort(function(a, b) {
+        var oa = parseInt(a.order) || 999;
+        var ob = parseInt(b.order) || 999;
+        return oa - ob;
+      });
+
+    var castMembers = showCast.filter(function(c) { return !c.type || c.type.toLowerCase() === 'cast'; });
+    var crewMembers = showCast.filter(function(c) { return c.type && c.type.toLowerCase() !== 'cast' && c.type.toLowerCase() !== 'sponsor'; });
+    var sponsorRows = showCast.filter(function(c) { return c.type && c.type.toLowerCase() === 'sponsor'; });
+
+    // Determine layout
+    var hasPhotos = castMembers.some(function(c) { return c.photo_url; });
+    var castGrid  = document.getElementById('cast-grid');
+    if (!hasPhotos) castGrid.classList.add('list-mode');
+
+    if (castMembers.length) {
+      castGrid.innerHTML = castMembers.map(function(c) {
+        var photoUrl = driveThumb(c.photo_url, 'w400');
+        var hasBio   = !!c.bio;
+
+        var photoHtml = hasPhotos ? [
+          '<div class="cast-photo-wrap">',
+            photoUrl
+              ? '<img class="cast-photo" src="' + photoUrl + '" alt="' + c.name + '" loading="lazy">'
+              : '',
+            '<div class="cast-photo-placeholder">',
+              '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="#f5f0e8">',
+                '<circle cx="50" cy="35" r="20"/>',
+                '<path d="M10 90 Q10 65 50 65 Q90 65 90 90"/>',
+              '</svg>',
+            '</div>',
+          '</div>',
+        ].join('') : '';
+
+        return '<div class="cast-card' + (hasBio ? ' has-bio' : '') + '"'
+             + (hasBio ? ' onclick="openBio(' + JSON.stringify(c) + ')"' : '')
+             + '>'
+             + photoHtml
+             + '<div class="cast-info">'
+               + '<p class="cast-name">' + c.name + '</p>'
+               + '<p class="cast-role">' + (c.role || '') + '</p>'
+               + (hasBio ? '<span class="cast-bio-indicator">Bio ›</span>' : '')
+             + '</div>'
+             + '</div>';
+      }).join('');
+
+      // Lazy load images
+      castGrid.querySelectorAll('.cast-photo').forEach(function(img) {
+        img.onload = function() { img.classList.add('loaded'); };
+        img.onerror = function() { img.style.display = 'none'; };
+      });
+
+      document.getElementById('section-cast').style.display = '';
+    }
+
+    // Crew
+    if (crewMembers.length) {
+      document.getElementById('crew-list').innerHTML = crewMembers.map(function(c) {
+        return '<div class="crew-item">'
+             + '<p class="crew-role">' + (c.role || c.type || '') + '</p>'
+             + '<p class="crew-name">' + c.name + '</p>'
+             + '</div>';
+      }).join('');
+      document.getElementById('section-crew').style.display = '';
+    }
+
+    // Sponsors — from cast sheet sponsor rows OR from show.sponsors field
+    var sponsorHtml = '';
+    if (sponsorRows.length) {
+      var byTier = {};
+      sponsorRows.forEach(function(s) {
+        var t = s.role || 'Sponsor';
+        if (!byTier[t]) byTier[t] = [];
+        byTier[t].push(s.name);
+      });
+      var tiers = TIER_ORDER.filter(function(t) { return byTier[t]; })
+        .concat(Object.keys(byTier).filter(function(t) { return TIER_ORDER.indexOf(t) === -1; }));
+      sponsorHtml = tiers.map(function(tier) {
+        return '<div class="sponsor-tier-group">'
+             + '<p class="sponsor-tier-label">' + tier + '</p>'
+             + '<div class="sponsor-names">'
+             + byTier[tier].map(function(n) { return '<span class="sponsor-name">' + n + '</span>'; }).join('')
+             + '</div></div>';
+      }).join('');
+    }
+
+    if (sponsorHtml) {
+      document.getElementById('sponsors-list').innerHTML = sponsorHtml;
+      document.getElementById('section-sponsors').style.display = '';
+    }
+
+    // ── Reveal page ───────────────────────────────────────────────────────────
+    var loading = document.getElementById('loading');
+    loading.style.opacity = '0';
+    setTimeout(function() {
+      loading.style.display = 'none';
+      document.getElementById('page').style.display = 'block';
+    }, 600);
+
+  }).catch(function(err) {
+    console.error('Lamp Light load error:', err);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'flex';
+  });
+
+  // ── Bio modal ───────────────────────────────────────────────────────────────
+  window.openBio = function(member) {
+    var modal = document.getElementById('bio-modal');
+    var photo = document.getElementById('bio-panel-photo');
+    var photoUrl = member.photo_url
+      ? 'https://lh3.googleusercontent.com/d/' + (member.photo_url.match(/\/file\/d\/([^\/\?&]+)/) || member.photo_url.match(/[?&]id=([^&]+)/) || ['',''])[1] + '=w200'
+      : '';
+
+    if (photoUrl && photoUrl !== 'https://lh3.googleusercontent.com/d/=w200') {
+      photo.src = photoUrl;
+      photo.classList.remove('hidden');
+    } else {
+      photo.classList.add('hidden');
+    }
+
+    document.getElementById('bio-panel-name').textContent = member.name || '';
+    document.getElementById('bio-panel-role').textContent = member.role || '';
+    document.getElementById('bio-panel-text').textContent = member.bio || '';
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeBio = function() {
+    document.getElementById('bio-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  document.getElementById('bio-backdrop').addEventListener('click', window.closeBio);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') window.closeBio();
+  });
+
+})();
+</script>
+
+</body>
+</html>
