@@ -624,36 +624,37 @@
     }
 
     /* ── Advertisements ── */
-    #ads-grid {
+    #lamplight-ads-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
 
-    .ad-card {
+    .lamplight-ad {
       display: block;
-      overflow: hidden;
       background: #1a1a1a;
       border: 1px solid rgba(245,240,232,0.1);
       text-decoration: none;
       transition: opacity 0.2s;
-      min-height: 60px;
+      min-height: 80px;
+      padding-bottom: 4px;
+      color: var(--text);
     }
 
-    .ad-name {
+    .lamplight-ad-name {
       font-size: 0.75rem;
       font-weight: 400;
       letter-spacing: 0.1em;
-      color: var(--text);
+      color: #f5f0e8 !important;
       padding: 12px 16px;
       display: block;
     }
 
-    .ad-card:hover { opacity: 0.85; }
+    .lamplight-ad:hover { opacity: 0.85; }
 
-    .ad-full { grid-column: 1 / -1; }
+    .lamplight-ad-full { grid-column: 1 / -1; }
 
-    .ad-image {
+    .lamplight-ad-image {
       width: 100%;
       height: auto;
       display: block;
@@ -661,8 +662,8 @@
     }
 
     @media (max-width: 500px) {
-      #ads-grid { grid-template-columns: 1fr; }
-      .ad-full  { grid-column: 1; }
+      #lamplight-ads-grid { grid-template-columns: 1fr; }
+      .lamplight-ad-full  { grid-column: 1; }
     }
 
     /* ── Footer ── */
@@ -818,7 +819,7 @@
       <span class="section-title">Advertisements</span>
       <div class="section-rule"></div>
     </div>
-    <div id="ads-grid"></div>
+    <div id="lamplight-ads-grid"></div>
   </div>
 
   <!-- Footer -->
@@ -1187,11 +1188,11 @@
         var imgUrl = driveThumb(a.image_url, 's800');
         console.log('Ad:', a.name, '| raw:', a.image_url, '| resolved:', imgUrl);
         var isFull = (a.size || '').toLowerCase() === 'full';
-        var inner = '<img class="ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy" onerror="console.error(\'Ad image failed:\', this.src)">'
-                  + (a.name ? '<p class="ad-name">' + a.name + '</p>' : '');
+        var inner = '<img class="lamplight-ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy" onerror="console.error(\'Ad image failed:\', this.src)">'
+                  + (a.name ? '<p class="lamplight-ad-name">' + a.name + '</p>' : '');
         var card = a.url
-          ? '<a href="' + a.url + '" target="_blank" rel="noopener" class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</a>'
-          : '<div class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</div>';
+          ? '<a href="' + a.url + '" target="_blank" rel="noopener" class="lamplight-ad' + (isFull ? ' lamplight-ad-full' : '') + '">' + inner + '</a>'
+          : '<div class="lamplight-ad' + (isFull ? ' lamplight-ad-full' : '') + '">' + inner + '</div>';
         return card;
       }).join('');
       console.log('Ads grid HTML:', adsGrid.innerHTML.substring(0, 300));
