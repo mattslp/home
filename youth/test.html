@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performing Arts Academy | Street Lamp</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="stylesheet" href="https://use.typekit.net/wby1ytb.css">
+</head>
+<body>
+<style>
+  #sl-prog {
+    /* Define the animation: name, duration, timing function, and fill-mode */
+    animation: fadeInAnimation ease 3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes fadeInAnimation {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  #sl-prog * { box-sizing: border-box; padding: 0; }
+
+  #sl-prog {
+    background: #020202;
+    color: #f5f0e8;
+    font-family: 'komet', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* ── Banner ── */
+  #sl-prog-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 52px 24px 44px;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    #sl-prog-banner { padding: 32px 24px 24px; }
+  }
+
+  #sl-prog-logo {
+    width: clamp(60px, 10vw, 120px);
+    height: auto;
+    margin-bottom: 30px;
+  }
+
+  #sl-prog-logo path, #sl-prog-logo g path { fill: #f5f0e8; }
+
+  #sl-prog-banner a {
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+  }
+
+  .sl-prog-rule { display: none; }
+
+  #sl-prog-title {
+    font-weight: 900;
+    font-size: clamp(1.375rem, 4.69vw, 3.25rem);
+    line-height: 1;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
+    color: #f5f0e8;
+    margin-bottom: 0;
+  }
+
+  /* ── Tabs ── */
+  /* ── Tabs ── */
+  #sl-tabs {
+    display: flex;
+    gap: 0;
+    padding: 40px 0 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid rgba(245,240,232,0.08);
+  }
+
+  .sl-tab {
+    position: relative;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 600;
+    font-size: clamp(0.55rem, 1.5vw, 0.7rem);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.3);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    padding: 14px 28px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .sl-tab:hover {
+    color: rgba(245,240,232,0.65);
+  }
+
+  .sl-tab.active {
+    color: #f5f0e8;
+  }
+
+  .sl-tab.active.tab-rising-sun { border-bottom-color: #cc3399; }
+  .sl-tab.active.tab-kennett    { border-bottom-color: #00aa99; }
+  .sl-tab.active.tab-neutral    { border-bottom-color: rgba(245,240,232,0.5); }
+
+  /* ── Tab panels ── */
+  .sl-tab-panel {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    transition: opacity 0.25s ease;
+    padding: 30px 50px !important;
+  }
+
+  .sl-tab-panel.active {
+    opacity: 1;
+    pointer-events: all;
+    position: relative;
+    padding-top: 30px !important;
+  }
+
+  #sl-tab-panels {
+    position: relative;
+  }
+
+  @media (max-width: 768px) {
+    .sl-tab { padding: 12px 16px; letter-spacing: 0.2em; }
+    .sl-tab-panel { padding: 24px !important; }
+  }
+
+  /* ── Spinner ── */
+  .sl-spinner {
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(245,240,232,0.15);
+    border-top-color: rgba(245,240,232,0.5);
+    border-radius: 50%;
+    animation: sl-spin 0.8s linear infinite;
+    margin: 40px auto;
+  }
+  @keyframes sl-spin { to { transform: rotate(360deg); } }
+
+  /* ── Empty state ── */
+
+  .sl-section-sub {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 32px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(245,240,232,0.1);
+  }
+
+  .sl-coming-soon-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2,2,2,0.72);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .sl-coming-soon-label {
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 900;
+    font-size: clamp(0.8rem, 2.5vw, 1.1rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.85);
+    border: 2px solid rgba(245,240,232,0.4);
+    padding: 6px 20px;
+    transform: rotate(-8deg);
+    text-align: center;
+  }
+
+  .sl-card.soon {
+    pointer-events: none;
+    filter: grayscale(40%);
+    position: relative;
+  }
+
+  .sl-empty {
+    font-size: 0.88rem;
+    color: rgba(245,240,232,0.3);
+    letter-spacing: 0.1em;
+    padding: 20px 0 40px;
+  }
+
+  /* ── Cards ── */
+  .sl-card {
+    display: block;
+    width: 100%;
+    border: none;
+    border-left: 3px solid transparent;
+    padding-left: 20px !important;
+    margin-bottom: 20px !important;
+    text-decoration: none;
+    color: #f5f0e8;
+    background: #020202 !important;
+    box-sizing: border-box;
+    transition: background 0.2s, border-left-color 0.2s;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .sl-card:hover { background: rgba(245,240,232,0.03) !important; }
+
+  .sl-card.venue-rising-sun { border-left-color: #cc3399; }
+  .sl-card.venue-rising-sun:hover { border-left-color: #ff44bb; }
+  .sl-card.venue-kennett    { border-left-color: #00aa99; }
+  .sl-card.venue-kennett:hover { border-left-color: #00ddcc; }
+  .sl-card.venue-offsite    { border-left-color: #cc9900; }
+  .sl-card.venue-offsite:hover { border-left-color: #ffcc00; }
+
+  /* ── Card inner layout (image + text) ── */
+  .sl-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .sl-card-img-wrap {
+    width: 30%;
+    max-width: 30%;
+    flex-shrink: 0;
+    padding: 16px 28px 16px 0;
+    box-sizing: border-box;
+  }
+
+  .sl-card-img {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: contain;
+    object-position: left top;
+    display: block;
+  }
+
+  .sl-card-info {
+    flex: 1;
+    padding: 20px 24px 20px 0;
+    min-width: 0;
+  }
+
+  /* No image: info is first child, needs its own top/bottom padding */
+  .sl-card-inner > .sl-card-info:first-child {
+    padding: 20px 24px;
+  }
+
+  .sl-card-name {
+    font-weight: 400;
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    letter-spacing: 0.03em;
+    color: #f5f0e8;
+    margin-bottom: 6px;
+  }
+
+  .sl-card-meta {
+    display: block;
+    font-size: clamp(0.72rem, 1.8vw, 0.7rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.35);
+    margin-bottom: 8px;
+  }
+
+  .sl-card-desc {
+    font-size: clamp(0.9rem, 2vw, 0.88rem);
+    line-height: 1.75;
+    color: rgba(245,240,232,0.55);
+  }
+
+  .sl-card-register {
+    display: block;
+    font-family: 'komet', 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.9rem, 2vw, 0.88rem);
+    line-height: 1.75;
+    color: rgba(245,240,232,0.55);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-top: 1.75em;
+    transition: color 0.2s;
+  }
+
+  .sl-card-register:hover { color: #f5f0e8; }
+
+  @media (max-width: 768px) {
+    .sl-card-inner { flex-direction: column; gap: 0; }
+    .sl-card-img-wrap { width: 100%; max-width: 100%; padding: 16px 20px 8px; }
+    .sl-card-info { padding: 8px 20px 20px 20px !important; }
+    .sl-card-inner > .sl-card-info:first-child { padding: 20px !important; }
+    .sl-card-name, .sl-event-name, .sl-aud-name { font-size: 1.05rem !important; }
+    .sl-card-meta, .sl-event-meta, .sl-aud-meta { font-size: 0.82rem !important; }
+    .sl-card-desc, .sl-aud-desc { font-size: 0.95rem !important; line-height: 1.7; }
+  }
+
+  /* Squarespace overrides */
+  body, html { margin: 0 !important; padding: 0 !important; background: #020202 !important; }
+  body { background-color: #020202 !important; }
+  html, body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; margin: 0; padding: 0; }
+  #sl-prog { flex: none; min-height: 100vh; min-height: 100dvh; }
+  html, body, #sl-prog, .sqs-layout, .sqs-row, .sqs-block, .sqs-block-content, .sqs-block-code,
+  .content-wrapper, .content-inner, .entry-content, article, main, .Main, .Site-inner,
+  [data-section-id], .page-section, .fluid-engine, [data-fluid-engine-block] {
+    background-color: #020202 !important;
+  }
+</style>
+
+<div id="sl-prog">
+
+  <!-- Banner -->
+  <div id="sl-prog-banner">
+    <a id="sl-prog-home-link" href="https://streetlamp.org" aria-label="Street Lamp Home">
+      <svg id="sl-prog-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+        <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+        <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+        <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+      </svg>
+    </a>
+    <div class="sl-prog-rule"></div>
+    <h1 id="sl-prog-title"></h1>
+  </div>
+
+  <!-- Tabs -->
+  <div id="sl-tabs">
+    <button class="sl-tab active" id="sl-tab1" onclick="switchTab('tab1')"></button>
+    <button class="sl-tab" id="sl-tab2" onclick="switchTab('tab2')">Upcoming&nbsp;Events</button>
+  </div>
+
+  <div id="sl-tab-panels">
+    <div id="sl-tab1-panel" class="sl-tab-panel active">
+      <div id="sl-aud-list"><div class="sl-spinner"></div></div>
+    </div>
+    <div id="sl-tab2-panel" class="sl-tab-panel">
+      <div id="sl-shows-list"><div class="sl-spinner"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+
+  /* ── CONFIG — driven by ?loc= URL parameter ── */
+  var loc = new URLSearchParams(window.location.search).get('loc') || '';
+
+  var CONFIGS = {
+    'rs':  {
+      label:    'Rising Sun',
+      company:  'SLP',
+      tab1:     'Classes',
+      subtitle: 'RISING SUN',
+      color:    '#cc3399',
+      tabClass: 'tab-rising-sun',
+      backUrl:  'https://youth.streetlamp.org'
+    },
+    'ksq': {
+      label:    'Kennett Square',
+      company:  'SLP',
+      tab1:     'Classes',
+      subtitle: 'KENNETT SQUARE',
+      color:    '#00aa99',
+      tabClass: 'tab-kennett',
+      backUrl:  'https://youth.streetlamp.org'
+    }
+  };
+
+  // If no valid loc, redirect to landing page
+  if (!CONFIGS[loc]) {
+    window.location.replace('https://youth.streetlamp.org');
+  }
+
+  var CFG = CONFIGS[loc];
+  var PAGE_LABEL   = CFG.label;
+  var PAGE_COMPANY = CFG.company;
+  var TAB1_LABEL   = CFG.tab1;
+
+  const EVENTS_CSV    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=2066707761&single=true&output=csv';
+  const AUDITIONS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0tCEKCsvAN0vdjSwhc8BWE52sbWjqb3gTdYU5m2w-YcazUKvZh0GGuMaHNc-w-RE6u_yGxJ82zUPy/pub?gid=1148275969&single=true&output=csv';
+
+  // Set page title
+  document.title = 'Performing Arts Academy · ' + CFG.subtitle.replace(/\b\w/g, function(c) { return c; }) + ' | Street Lamp';
+  document.getElementById('sl-prog-title').innerHTML = 'PERFORMING ARTS ACACDEMY<br><span style="font-size:0.75em;color:#878580;opacity:1">' + CFG.subtitle + '</span>';
+  document.getElementById('sl-tab1').textContent = TAB1_LABEL;
+
+  // Back link — logo goes to main site, add a location switcher below title
+  document.getElementById('sl-prog-home-link').href = 'https://streetlamp.org';
+  var backLink = document.createElement('a');
+  backLink.href = '/youth';
+  backLink.style.cssText = 'font-size:0.55rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(245,240,232,0.3);text-decoration:none;margin-top:12px;display:inline-block;transition:color 0.2s;';
+  backLink.textContent = '← All Locations';
+  backLink.onmouseover = function() { this.style.color = 'rgba(245,240,232,0.7)'; };
+  backLink.onmouseout  = function() { this.style.color = 'rgba(245,240,232,0.3)'; };
+  document.getElementById('sl-prog-title').after(backLink);
+
+  // Tab colour class
+  var tabClass = CFG.tabClass;
+  document.getElementById('sl-tab1').classList.add(tabClass);
+  document.getElementById('sl-tab2').classList.add(tabClass);
+
+  // Tab switching with fade
+  window.switchTab = function(id) {
+    var outgoing = document.querySelector('.sl-tab-panel.active');
+    if (outgoing) {
+      outgoing.style.opacity = '0';
+      outgoing.style.pointerEvents = 'none';
+    }
+    document.querySelectorAll('.sl-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.sl-tab-panel').forEach(function(p) {
+      p.classList.remove('active');
+      p.style.opacity = '';
+      p.style.pointerEvents = '';
+    });
+    document.getElementById('sl-' + id).classList.add('active');
+    var incoming = document.getElementById('sl-' + id + '-panel');
+    incoming.style.opacity = '0';
+    incoming.classList.add('active');
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        incoming.style.opacity = '';
+      });
+    });
+  };
+
+  /* ── CSV parser ── */
+  function parseCSV(text) {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    const delim = lines[0].includes('\t') ? '\t' : ',';
+    const headers = lines[0].split(delim).map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+    return lines.slice(1).map(function(line) {
+      const cols = [];
+      var cur = '', inQuote = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === '"') { inQuote = !inQuote; }
+        else if (ch === delim && !inQuote) { cols.push(cur.trim()); cur = ''; }
+        else { cur += ch; }
+      }
+      cols.push(cur.trim());
+      var row = {};
+      headers.forEach(function(h, i) { row[h] = (cols[i] || '').replace(/^"|"$/g, '').trim(); });
+      return row;
+    }).filter(function(r) { return Object.values(r).some(function(v) { return v; }); });
+  }
+
+  /* ── Filter rows for this page ── */
+  function parseDate(str) {
+    if (!str) return null;
+    var d = new Date(str.indexOf("T") === -1 ? str + "T00:00:00" : str);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function isExpired(row) {
+    var end = parseDate(row.end_date);
+    if (!end) return false;
+    var today = new Date(); today.setHours(0,0,0,0);
+    return end < today;
+  }
+
+  function sortByStartDate(rows) {
+    return rows.slice().sort(function(a, b) {
+      var da = parseDate(a.start_date), db = parseDate(b.start_date);
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return da - db;
+    });
+  }
+
+  function matchesPage(row) {
+    if (row.active && row.active.toLowerCase() === 'no') return false;
+    if (isExpired(row)) return false;
+    var company = (row.company || '').trim().toUpperCase();
+    var label   = (row.label   || '').trim().toLowerCase();
+    if (company !== PAGE_COMPANY.toUpperCase()) return false;
+    if (PAGE_COMPANY.toUpperCase() === 'SLCT') return true;
+    if (!PAGE_LABEL) return true;
+    return label === PAGE_LABEL.toLowerCase();
+  }
+
+  /* ── Venue CSS class ── */
+  function venueClass(label) {
+    var l = (label || '').toLowerCase();
+    if (l.includes('rising'))  return 'venue-rising-sun';
+    if (l.includes('kennett')) return 'venue-kennett';
+    return 'venue-offsite';
+  }
+
+  /* ── Render card (shared for events and auditions) ── */
+  function renderCard(row, showRegister) {
+    var isSoon  = (row.active || '').toLowerCase() === 'soon';
+    var vc      = venueClass(row.label);
+    var meta    = [row.label, row.dates].filter(Boolean).join(' · ');
+    var showUrl = row.slug ? 'https://streetlamp.org/shows/?id=' + row.slug : row.url;
+    var onclick = (!isSoon && showUrl) ? ' onclick="window.open(\'' + showUrl + '\',\'_blank\')" style="cursor:pointer"' : '';
+    var imgWrap = row.image_url
+      ? '<div class="sl-card-img-wrap"><img class="sl-card-img" src="' + row.image_url + '" alt="' + row.name + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>'
+      : '';
+    var desc = row.description
+      ? row.description.split('||').map(function(p, i) {
+          return '<p class="sl-card-desc" style="' + (i > 0 ? 'margin-top:1.2em' : '') + '">' + p.trim() + '</p>';
+        }).join('')
+      : '';
+    var registerLink = (!isSoon && showRegister && showUrl)
+      ? '<a href="' + showUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="sl-card-register">Click here to register</a>'
+      : '';
+    var overlay = isSoon
+      ? '<div class="sl-coming-soon-overlay"><span class="sl-coming-soon-label">Audition Info<br>Coming Soon</span></div>'
+      : '';
+    return '<div class="sl-card ' + vc + (isSoon ? ' soon' : '') + '"' + onclick + '>' +
+      overlay +
+      '<div class="sl-card-inner">' +
+        imgWrap +
+        '<div class="sl-card-info">' +
+          '<p class="sl-card-name">' + row.name + '</p>' +
+          (meta ? '<span class="sl-card-meta">' + meta + '</span>' : '') +
+          desc +
+          registerLink +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ── Render shows ── */
+  function renderShows(rows) {
+    var list = document.getElementById('sl-shows-list');
+    var filtered = sortByStartDate(rows.filter(matchesPage));
+    if (!filtered.length) {
+      list.innerHTML = '<p class="sl-empty">No upcoming events at this time — check back soon.</p>';
+      return;
+    }
+    list.innerHTML = filtered.map(function(row) { return renderCard(row); }).join('');
+  }
+
+  /* ── Render auditions/classes ── */
+  function renderAuditions(rows) {
+    var list = document.getElementById('sl-aud-list');
+    var matched = rows.filter(matchesPage);
+    var active = sortByStartDate(matched.filter(function(r) { return !r.active || r.active.toLowerCase() !== 'soon'; }));
+    var soon   = sortByStartDate(matched.filter(function(r) { return (r.active || '').toLowerCase() === 'soon'; }));
+    var emptyMsg = TAB1_LABEL === 'Classes'
+      ? 'No classes currently available for registration — check back soon.'
+      : 'No auditions currently scheduled — check back soon.';
+    if (!active.length && !soon.length) {
+      list.innerHTML = '<p class="sl-empty">' + emptyMsg + '</p>';
+      return;
+    }
+    var all = active.concat(soon);
+    list.innerHTML = all.map(function(row) { return renderCard(row, true); }).join('');
+  }
+
+  /* ── Fetch ── */
+  async function load(url, renderFn) {
+    try {
+      const res  = await fetch(url);
+      const text = await res.text();
+      renderFn(parseCSV(text));
+    } catch(e) {
+      console.warn('Street Lamp: fetch error', e);
+    }
+  }
+
+  load(EVENTS_CSV,    renderShows);
+  load(AUDITIONS_CSV, renderAuditions);
+
+})();
+</script>
+<div id="footer-placeholder"></div>
+<script>
+  fetch('/footer.html')
+    .then(function(r) { return r.text(); })
+    .then(function(html) {
+      document.getElementById('footer-placeholder').innerHTML = html;
+    });
+</script>
+</body>
+</html>
