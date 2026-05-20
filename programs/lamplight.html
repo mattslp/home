@@ -636,34 +636,32 @@
       border: 1px solid rgba(245,240,232,0.1);
       text-decoration: none;
       transition: opacity 0.2s;
-      min-height: 80px;
-      padding-bottom: 4px;
       color: var(--text);
+      overflow: hidden;
     }
-
-    .lamplight-ad-name {
-      font-size: 0.75rem;
-      font-weight: 400;
-      letter-spacing: 0.1em;
-      color: #f5f0e8 !important;
-      padding: 12px 16px;
-      display: block;
-    }
-
-    .lamplight-ad:hover { opacity: 0.85; }
-
-    .lamplight-ad-full { grid-column: 1 / -1; }
 
     .lamplight-ad-image {
       width: 100%;
       height: auto;
       display: block;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     .lamplight-ad-image-only {
       height: 200px;
-      object-fit: cover;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .lamplight-ad:hover { opacity: 0.85; }
+    .lamplight-ad-full { grid-column: 1 / -1; }
+    .lamplight-ad-name {
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: #f5f0e8;
+      padding: 10px 14px;
+      display: block;
     }
 
     @media (max-width: 500px) {
