@@ -1161,6 +1161,23 @@
     overflow-y: auto;
     padding: 0 8px;
     -webkit-overflow-scrolling: touch;
+    position: relative;
+    --fade-opacity: 1;
+  }
+
+  #sl-story-text::after {
+    content: '';
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: block;
+    height: 60px;
+    margin-top: -60px;
+    background: linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.85) 100%);
+    pointer-events: none;
+    opacity: var(--fade-opacity);
+    transition: opacity 0.3s ease;
   }
 
   #sl-story-title {
@@ -2489,7 +2506,20 @@
     document.getElementById('sl-story-overlay').classList.add('open');
     document.getElementById('sl-story-btn').classList.add('active');
     document.getElementById('sl-hero').classList.add('panel-open');
+    // Check scroll position when opened (in case content fits without scrolling)
+    var el = document.getElementById('sl-story-text');
+    if (el) el.dispatchEvent(new Event('scroll'));
   };
+
+  // Hide scroll fade when story text reaches the bottom
+  (function() {
+    var el = document.getElementById('sl-story-text');
+    if (!el) return;
+    el.addEventListener('scroll', function() {
+      var atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
+      el.style.setProperty('--fade-opacity', atBottom ? '0' : '1');
+    });
+  })();
 
   window.closeStory = function() {
     document.getElementById('sl-story-overlay').classList.remove('open');
