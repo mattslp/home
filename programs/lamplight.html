@@ -661,6 +661,11 @@
       object-fit: cover;
     }
 
+    .lamplight-ad-image-only {
+      height: 200px;
+      object-fit: cover;
+    }
+
     @media (max-width: 500px) {
       #lamplight-ads-grid { grid-template-columns: 1fr; }
       .lamplight-ad-full  { grid-column: 1; }
@@ -860,8 +865,8 @@
           var brightness = (r+g+b)/3;
           var max = Math.max(r,g,b), min = Math.min(r,g,b);
           var saturation = max === 0 ? 0 : (max-min)/max;
-          if (brightness < 30 || brightness > 220 || saturation < 0.2) continue;
-          var key = (Math.round(r/24)*24)+','+(Math.round(g/24)*24)+','+(Math.round(b/24)*24);
+          if (brightness < 40 || brightness > 210 || saturation < 0.35) continue;
+          var key = (Math.round(r/16)*16)+','+(Math.round(g/16)*16)+','+(Math.round(b/16)*16);
           buckets[key] = (buckets[key]||0) + 1;
         }
 
@@ -883,6 +888,7 @@
           return h * 360;
         }
 
+        console.log('Top 3 colors:', sorted.slice(0,3).map(function(k){return k+'('+buckets[k]+')';}).join(', '));
         var c1 = sorted[0].split(',').map(Number);
         var h1 = rgbToHue(c1[0],c1[1],c1[2]);
 
@@ -1217,7 +1223,8 @@
         var imgUrl = driveThumb(a.image_url, 's800');
         console.log('Ad:', a.name, '| raw:', a.image_url, '| resolved:', imgUrl);
         var isFull = (a.size || '').toLowerCase() === 'full';
-        var inner = '<img class="lamplight-ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy" onerror="console.error(\'Ad image failed:\', this.src)">'
+        var imgTag = '<img class="lamplight-ad-image' + (!a.name ? ' lamplight-ad-image-only' : '') + '" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy" onerror="console.error(\'Ad image failed:\', this.src)">';
+        var inner = imgTag
                   + (a.name ? '<p class="lamplight-ad-name">' + a.name + '</p>' : '');
         var card = a.url
           ? '<a href="' + a.url + '" target="_blank" rel="noopener" class="lamplight-ad' + (isFull ? ' lamplight-ad-full' : '') + '">' + inner + '</a>'
