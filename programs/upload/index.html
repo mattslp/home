@@ -504,7 +504,7 @@
 <script>
   // ── CONFIG ───────────────────────────────────────────────────
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw44bEVHQ9gSOwGh5eeq20IFfmbpFV3UaF1DNKmTNuZmXZuDpG54AfD2xUHJFiBfWAabg/exec';
-  const BASE_URL        = 'https://programs.streetlamp.org';
+  const BASE_URL        = 'https://streetlamp.org/programs';
   // SHA-256 of "programsupload"
   const PASS_HASH       = 'ccb84f0ccef348f99dc93e68e086be439891449c02a6164728528f548e2bf553';
   const STORAGE_KEY     = 'slp_auth';
@@ -536,7 +536,7 @@
 
   function signOut() {
     sessionStorage.removeItem(STORAGE_KEY);
-    window.location.href = 'https://programs.streetlamp.org';
+    window.location.href = 'https://streetlamp.org/programs';
   }
 
   // Check on load
