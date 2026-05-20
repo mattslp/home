@@ -1187,12 +1187,14 @@
         var imgUrl = driveThumb(a.image_url, 'w800');
         console.log('Ad:', a.name, '| raw:', a.image_url, '| resolved:', imgUrl);
         var isFull = (a.size || '').toLowerCase() === 'full';
-        var inner = '<img class="ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy">'
+        var inner = '<img class="ad-image" src="' + imgUrl + '" alt="' + (a.name || 'Advertisement') + '" loading="lazy" onerror="console.error(\'Ad image failed:\', this.src)">'
                   + (a.name ? '<p class="ad-name">' + a.name + '</p>' : '');
-        return a.url
+        var card = a.url
           ? '<a href="' + a.url + '" target="_blank" rel="noopener" class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</a>'
           : '<div class="ad-card' + (isFull ? ' ad-full' : '') + '">' + inner + '</div>';
+        return card;
       }).join('');
+      console.log('Ads grid HTML:', adsGrid.innerHTML.substring(0, 300));
       document.getElementById('section-ads').classList.remove('hidden');
     }
 
