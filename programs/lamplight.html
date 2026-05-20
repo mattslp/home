@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0a0a0a">
   <title>The Lamp Light</title>
   <link rel="stylesheet" href="https://use.typekit.net/wby1ytb.css">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -110,7 +110,43 @@
       padding: 0 24px 80px;
     }
 
-    /* ── Hero header ── */
+    /* ── Lamp Light masthead ── */
+    #lamplight-masthead {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 72px 24px 56px;
+      text-align: center;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 0;
+    }
+
+    #lamplight-masthead-logo {
+      width: 64px;
+      margin-bottom: 28px;
+      opacity: 0.7;
+    }
+
+    #lamplight-masthead-title {
+      font-size: clamp(2.2rem, 8vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    #lamplight-masthead-sub {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+
     #show-header {
       position: relative;
       min-height: 60vh;
@@ -645,19 +681,22 @@
 <!-- Main page -->
 <div id="page">
 
+  <!-- Lamp Light masthead -->
+  <div id="lamplight-masthead">
+    <svg id="lamplight-masthead-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+      <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+      <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+      <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+    </svg>
+    <h1 id="lamplight-masthead-title">The Lamp Light</h1>
+    <p id="lamplight-masthead-sub">Street Lamp Productions</p>
+  </div>
+
   <!-- Show header -->
   <div id="show-header">
     <img id="show-header-bg" src="" alt="" style="display:none">
     <div id="show-header-gradient"></div>
     <div id="show-header-content">
-      <div id="show-masthead">
-        <svg id="show-masthead-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
-          <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
-          <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
-          <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
-        </svg>
-        <span id="show-masthead-label">The Lamp Light</span>
-      </div>
       <h1 id="show-title"></h1>
       <p id="show-subtitle"></p>
       <div id="show-meta-row"></div>
@@ -723,6 +762,7 @@
   var CAST_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1553402469&single=true&output=csv';
 
   var TIER_ORDER = ['Season Sponsor','Show Sponsor','Rights Sponsor','Music Sponsor','Costumes Sponsor','Props Sponsor'];
+  var castData = {};
 
   // ── CSV parser ──────────────────────────────────────────────────────────────
   function parseLine(line) {
@@ -849,6 +889,7 @@
     if (!hasPhotos) castGrid.classList.add('list-mode');
 
     if (castMembers.length) {
+      var castIndex = 0;
       castGrid.innerHTML = castMembers.map(function(c) {
         var photoUrl = driveThumb(c.photo_url, 'w400');
         var hasBio   = !!c.bio;
@@ -867,8 +908,10 @@
           '</div>',
         ].join('') : '';
 
+        var idx = castIndex++;
+        if (hasBio) castData[idx] = c;
         return '<div class="cast-card' + (hasBio ? ' has-bio' : '') + '"'
-             + (hasBio ? ' onclick="openBio(' + JSON.stringify(c) + ')"' : '')
+             + (hasBio ? ' onclick="openBio(' + idx + ')"' : '')
              + '>'
              + photoHtml
              + '<div class="cast-info">'
@@ -939,20 +982,18 @@
   });
 
   // ── Bio modal ───────────────────────────────────────────────────────────────
-  window.openBio = function(member) {
+  window.openBio = function(idx) {
+    var member = castData[idx];
+    if (!member) return;
     var modal = document.getElementById('bio-modal');
     var photo = document.getElementById('bio-panel-photo');
-    var photoUrl = member.photo_url
-      ? 'https://lh3.googleusercontent.com/d/' + (member.photo_url.match(/\/file\/d\/([^\/\?&]+)/) || member.photo_url.match(/[?&]id=([^&]+)/) || ['',''])[1] + '=w200'
-      : '';
-
-    if (photoUrl && photoUrl !== 'https://lh3.googleusercontent.com/d/=w200') {
+    var photoUrl = driveThumb(member.photo_url, 'w200');
+    if (photoUrl) {
       photo.src = photoUrl;
       photo.classList.remove('hidden');
     } else {
       photo.classList.add('hidden');
     }
-
     document.getElementById('bio-panel-name').textContent = member.name || '';
     document.getElementById('bio-panel-role').textContent = member.role || '';
     document.getElementById('bio-panel-text').textContent = member.bio || '';
