@@ -124,11 +124,7 @@
       display: none;
       max-width: 860px;
       margin: 0 auto;
-      padding: 0 0 80px;
-    }
-
-    #page-inner {
-      padding: 0 24px;
+      padding: 0 24px 80px;
     }
 
     /* ── Lamp Light masthead ── */
@@ -141,19 +137,20 @@
       text-align: center;
       border-bottom: 1px solid var(--rule);
       margin-bottom: 0;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #lamplight-masthead.revealed {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     #lamplight-masthead-logo {
       width: 64px;
       margin-bottom: 28px;
       opacity: 0.7;
-      filter: drop-shadow(0 0 18px rgba(204,153,0,0.5)) drop-shadow(0 0 48px rgba(204,153,0,0.2));
-      animation: lamp-glow 3s ease-in-out infinite;
-    }
-
-    @keyframes lamp-glow {
-      0%, 100% { filter: drop-shadow(0 0 18px rgba(204,153,0,0.5)) drop-shadow(0 0 48px rgba(204,153,0,0.2)); opacity: 0.7; }
-      50%       { filter: drop-shadow(0 0 28px rgba(204,153,0,0.7)) drop-shadow(0 0 72px rgba(204,153,0,0.35)); opacity: 0.9; }
     }
 
     #lamplight-masthead-title {
@@ -182,8 +179,16 @@
       flex-direction: column;
       justify-content: flex-end;
       padding: 80px 24px 56px;
-      margin-bottom: 64px;
+      margin-bottom: 32px;
       overflow: hidden;
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.8s ease 0.15s, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+    }
+
+    #show-header.revealed {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     #show-header-bg {
@@ -281,7 +286,18 @@
 
     /* ── Sections ── */
     .section {
-      margin-bottom: 64px;
+      margin-bottom: 32px;
+      background: #0d0d0d;
+      border: 1px solid var(--rule);
+      padding: 36px 32px 40px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .section.revealed {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .section-header {
@@ -731,7 +747,6 @@
     </div>
   </div>
 
-  <div id="page-inner">
   <!-- Director's Note -->
   <div class="section" id="section-note" style="display:none">
     <div class="section-header">
@@ -782,9 +797,7 @@
     <span id="footer-lamplight">The Lamp Light</span>
   </div>
 
-  </div><!-- end page-inner -->
-
-</div><!-- end page -->
+</div>
 
 <script>
 (function() {
@@ -1004,6 +1017,29 @@
     setTimeout(function() {
       loading.style.display = 'none';
       document.getElementById('page').style.display = 'block';
+
+      // Trigger masthead and show header immediately
+      requestAnimationFrame(function() {
+        document.getElementById('lamplight-masthead').classList.add('revealed');
+        setTimeout(function() {
+          document.getElementById('show-header').classList.add('revealed');
+        }, 150);
+      });
+
+      // Scroll reveal for sections
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.section').forEach(function(el, i) {
+        el.style.transitionDelay = (i * 0.06) + 's';
+        observer.observe(el);
+      });
     }, 600);
 
   }).catch(function(err) {
