@@ -86,6 +86,88 @@
       50%       { opacity: 0.8; }
     }
 
+    /* ── Landing ── */
+    #landing-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    #landing-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .landing-show-card {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 24px;
+      background: #0d0d0d;
+      border: 1px solid var(--rule);
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .landing-show-card:hover {
+      background: #141414;
+      border-color: rgba(245,240,232,0.15);
+    }
+
+    .landing-show-img {
+      width: 56px;
+      height: 72px;
+      object-fit: cover;
+      object-position: center top;
+      flex-shrink: 0;
+      opacity: 0.85;
+    }
+
+    .landing-show-info { flex: 1; min-width: 0; }
+
+    .landing-show-eyebrow {
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .landing-show-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .landing-show-meta {
+      font-size: 0.65rem;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .landing-show-arrow {
+      flex-shrink: 0;
+      opacity: 0.25;
+    }
+
+    .landing-empty {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      text-align: center;
+      padding: 32px 0;
+    }
+
     /* ── Error ── */
     #error {
       display: none;
@@ -758,8 +840,23 @@
 </head>
 <body>
 
-<!-- Loading -->
-<div id="loading">
+<!-- Landing — list of active shows -->
+<div id="landing" style="display:none">
+  <div id="lamplight-masthead">
+    <svg id="lamplight-masthead-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+      <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+      <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+      <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+    </svg>
+    <h1 id="lamplight-masthead-title">The Lamp Light</h1>
+    <p id="lamplight-masthead-sub">Street Lamp Productions</p>
+  </div>
+  <div id="landing-inner">
+    <div id="landing-list"></div>
+  </div>
+</div>
+
+
   <svg id="loading-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
     <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
     <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
@@ -1042,8 +1139,39 @@
   var slug = new URLSearchParams(window.location.search).get('id') || '';
 
   if (!slug) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('error').style.display = 'flex';
+    fetchWithRetry(SHOWS_CSV).then(function(text) {
+      var shows = parseCSV(text);
+      var active = shows.filter(function(s) {
+        return (s.active || '').toLowerCase() === 'yes';
+      });
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('landing').style.display = 'block';
+      document.title = 'The Lamp Light — Street Lamp Productions';
+
+      var list = document.getElementById('landing-list');
+      if (!active.length) {
+        list.innerHTML = '<p class="landing-empty">No programs available at this time</p>';
+        return;
+      }
+
+      list.innerHTML = active.map(function(s) {
+        var imgUrl = driveThumb(s.image_url, 'w200');
+        var meta = [s.dates, s.venue].filter(Boolean).join(' · ');
+        return '<a class="landing-show-card" href="?id=' + encodeURIComponent(s.show_id) + '">'
+          + (imgUrl ? '<img class="landing-show-img" src="' + imgUrl + '" alt="' + s.title + '" loading="lazy">' : '')
+          + '<div class="landing-show-info">'
+            + '<p class="landing-show-eyebrow">The Lamp Light</p>'
+            + '<p class="landing-show-title">' + s.title + '</p>'
+            + (meta ? '<p class="landing-show-meta">' + meta + '</p>' : '')
+          + '</div>'
+          + '<svg class="landing-show-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+          + '</a>';
+      }).join('');
+    }).catch(function() {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'flex';
+    });
     return;
   }
 
