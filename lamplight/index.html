@@ -383,12 +383,12 @@
       transition: background 0.2s;
     }
 
-    .cast-card.has-bio {
-      cursor: pointer;
-    }
-
-    .cast-card.has-bio:hover {
-      background: #141414;
+    .cast-bio {
+      font-size: 0.75rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: rgba(245,240,232,0.55);
+      padding: 8px 16px 16px;
     }
 
     .cast-photo-wrap {
@@ -1171,17 +1171,14 @@
           '</div>',
         ].join('') : '';
 
-        var idx = castIndex++;
-        if (hasBio) castData[idx] = c;
-        return '<div class="cast-card' + (hasBio ? ' has-bio' : '') + '"'
-             + (hasBio ? ' onclick="openBio(' + idx + ')"' : '')
-             + '>'
+        var castIndex2 = castIndex++;
+        return '<div class="cast-card">'
              + photoHtml
              + '<div class="cast-info">'
                + '<p class="cast-name">' + c.name + '</p>'
                + '<p class="cast-role">' + (c.role || '') + '</p>'
-               + (hasBio ? '<span class="cast-bio-indicator">Bio ›</span>' : '')
              + '</div>'
+             + (hasBio ? '<p class="cast-bio">' + c.bio + '</p>' : '')
              + '</div>';
       }).join('');
 
