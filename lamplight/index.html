@@ -831,8 +831,8 @@
       #cast-grid { grid-template-columns: repeat(2, 1fr); }
       #crew-list  { grid-template-columns: 1fr; }
       #bio-panel  { max-height: 90vh; }
-      .cast-info  { flex-wrap: wrap; }
-      .cast-bio-inline { flex: 0 0 100%; }
+      .cast-info  { flex-direction: column; align-items: flex-start; }
+      .cast-bio-inline { width: 100%; }
     }
 
     @media (max-width: 400px) {
@@ -982,12 +982,12 @@
         // Build color frequency buckets, skip near-black/white/grey
         var buckets = {};
         for (var i = 0; i < data.length; i += 4) {
-          var r = data[i], g = data[i+1], b = data[i+2];
+          var r = Math.min(255, data[i]), g = Math.min(255, data[i+1]), b = Math.min(255, data[i+2]);
           var brightness = (r+g+b)/3;
           var max = Math.max(r,g,b), min = Math.min(r,g,b);
           var saturation = max === 0 ? 0 : (max-min)/max;
           if (brightness < 40 || brightness > 210 || saturation < 0.35) continue;
-          var key = (Math.round(r/16)*16)+','+(Math.round(g/16)*16)+','+(Math.round(b/16)*16);
+          var key = Math.min(240,Math.round(r/16)*16)+','+Math.min(240,Math.round(g/16)*16)+','+Math.min(240,Math.round(b/16)*16);
           buckets[key] = (buckets[key]||0) + 1;
         }
 
