@@ -840,23 +840,8 @@
 </head>
 <body>
 
-<!-- Landing — list of active shows -->
-<div id="landing" style="display:none">
-  <div id="lamplight-masthead">
-    <svg id="lamplight-masthead-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
-      <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
-      <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
-      <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
-    </svg>
-    <h1 id="lamplight-masthead-title">The Lamp Light</h1>
-    <p id="lamplight-masthead-sub">Street Lamp Productions</p>
-  </div>
-  <div id="landing-inner">
-    <div id="landing-list"></div>
-  </div>
-</div>
-
-
+<!-- Loading -->
+<div id="loading">
   <svg id="loading-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
     <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
     <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
@@ -900,6 +885,10 @@
     </svg>
     <h1 id="lamplight-masthead-title">The Lamp Light</h1>
     <p id="lamplight-masthead-sub">Street Lamp</p>
+  </div>
+
+  <div id="landing-inner" style="display:none">
+    <div id="landing-list"></div>
   </div>
 
   <!-- Show header -->
@@ -1138,6 +1127,20 @@
   // ── Slug from URL ───────────────────────────────────────────────────────────
   var slug = new URLSearchParams(window.location.search).get('id') || '';
 
+  function fetchWithRetry(url, retries) {
+    retries = retries || 3;
+    return fetch(url).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).catch(function(err) {
+      if (retries > 1) {
+        return new Promise(function(resolve) { setTimeout(resolve, 800); })
+          .then(function() { return fetchWithRetry(url, retries - 1); });
+      }
+      throw err;
+    });
+  }
+
   if (!slug) {
     fetchWithRetry(SHOWS_CSV).then(function(text) {
       var shows = parseCSV(text);
@@ -1146,7 +1149,10 @@
       });
 
       document.getElementById('loading').style.display = 'none';
-      document.getElementById('landing').style.display = 'block';
+      document.getElementById('page').style.display = 'block';
+      document.getElementById('landing-inner').style.display = 'block';
+      document.getElementById('show-header').style.display = 'none';
+      document.getElementById('lamplight-masthead').classList.add('revealed');
       document.title = 'The Lamp Light — Street Lamp Productions';
 
       var list = document.getElementById('landing-list');
@@ -1176,20 +1182,6 @@
   }
 
   // ── Fetch both sheets ───────────────────────────────────────────────────────
-  function fetchWithRetry(url, retries) {
-    retries = retries || 3;
-    return fetch(url).then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.text();
-    }).catch(function(err) {
-      if (retries > 1) {
-        return new Promise(function(resolve) { setTimeout(resolve, 800); })
-          .then(function() { return fetchWithRetry(url, retries - 1); });
-      }
-      throw err;
-    });
-  }
-
   Promise.all([
     fetchWithRetry(SHOWS_CSV).catch(function(e) { console.error('Shows CSV failed:', e); return ''; }),
     fetchWithRetry(CAST_CSV).catch(function(e) { console.error('Cast CSV failed:', e); return ''; }),
