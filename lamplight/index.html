@@ -828,6 +828,13 @@
       color: var(--text-faint);
     }
 
+    #footer-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 600px) {
       #cast-grid { grid-template-columns: 1fr !important; }
@@ -971,7 +978,7 @@
       </svg>
       <span id="footer-logo-label">Street Lamp</span>
     </a>
-    <a href="https://streetlamp.org/lamplight">
+    <a href="https://streetlamp.org/lamplight" id="footer-title-wrap">
       <span id="footer-lamplight">The Lamp Light</span>
     </a>
   </div>
