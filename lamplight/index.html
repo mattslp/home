@@ -829,7 +829,10 @@
       letter-spacing: 0.35em;
       text-transform: uppercase;
       color: var(--text-faint);
+      text-decoration: none;
+      transition: color 0.2s;
     }
+    #footer-lamplight:hover { color: var(--text-dim); }
 
     /* ── Responsive ── */
     @media (max-width: 600px) {
@@ -975,7 +978,7 @@
       </svg>
       <span id="footer-logo-label">Street Lamp</span>
     </a>
-    <span id="footer-lamplight">The Lamp Light</span>
+    <a id="footer-lamplight" href="/programs/lamplight">The Lamp Light</a>
   </div>
 
 </div>
@@ -1282,9 +1285,11 @@
     // ── Cast & crew ───────────────────────────────────────────────────────────
     var showCast = cast.filter(function(c) { return c.show_id === slug; })
       .sort(function(a, b) {
-        var oa = parseInt(a.order) || 999;
-        var ob = parseInt(b.order) || 999;
-        return oa - ob;
+        function lastName(name) {
+          var parts = (name || '').trim().split(/\s+/);
+          return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : parts[0].toLowerCase();
+        }
+        return lastName(a.name).localeCompare(lastName(b.name));
       });
 
     var castMembers = showCast.filter(function(c) { return !c.type || c.type.toLowerCase() === 'cast'; });
