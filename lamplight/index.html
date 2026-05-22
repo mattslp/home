@@ -237,17 +237,22 @@
 
     /* Slim persistent bar */
     #lamplight-slim-bar {
-      position: absolute;
-      inset: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: calc(4rem + env(safe-area-inset-top));
       display: flex;
       align-items: center;
       justify-content: center;
       padding-top: env(safe-area-inset-top);
+      background: #0a0a0a;
+      box-shadow: 0 4px 40px rgba(0,0,0,0.7), 0 1px 0 rgba(245,240,232,0.06);
       opacity: 0;
       transform: translateY(-6px);
       transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: none;
-      z-index: 3;
+      z-index: 200;
     }
 
     #lamplight-slim-bar.visible {
@@ -304,9 +309,7 @@
       z-index: 2;
     }
 
-    #lamplight-slim-bar {
-      z-index: 3 !important;
-    }
+
 
 
     #lamplight-wordmark {
@@ -939,7 +942,6 @@
 
   <!-- Lamp Light masthead -->
   <div id="lamplight-masthead">
-    <div id="lamplight-slim-bar"><span>The Lamp Light</span></div>
     <div id="lamplight-wordmark-wrap">
       <svg id="lamplight-wordmark" aria-label="The Lamp Light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1818.87 522.91">
   <defs>
@@ -957,6 +959,9 @@
 </svg>
     </div>
   </div>
+
+  <!-- Slim masthead bar — fixed, appears on scroll -->
+  <div id="lamplight-slim-bar"><span>The Lamp Light</span></div>
 
   <div id="landing-inner" style="display:none">
     <div id="landing-list"></div>
@@ -1152,6 +1157,8 @@
 
     var title = document.getElementById('lamplight-wordmark-wrap');
     if (title) title.style.color = mainHex;
+    var slimSpan = document.querySelector('#lamplight-slim-bar span');
+    if (slimSpan) slimSpan.style.color = mainHex;
 
     // Inject gradient into wordmark SVG
     var svg = document.getElementById('lamplight-wordmark');
