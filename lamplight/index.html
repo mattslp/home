@@ -228,11 +228,12 @@
       background-color: #0a0a0a;
       box-shadow: 0 4px 40px rgba(0,0,0,0.7), 0 1px 0 rgba(245,240,232,0.06);
       overflow: hidden;
-      transition: height 0.35s cubic-bezier(0.4,0,0.2,1);
+      transition: opacity 0.35s ease;
     }
 
     #lamplight-masthead.scrolled {
-      height: calc(4rem + env(safe-area-inset-top));
+      opacity: 0;
+      pointer-events: none;
     }
 
     /* Slim persistent bar */
@@ -270,19 +271,12 @@
       color: var(--gold, #cc9900);
     }
 
-    /* Wordmark fades out on scroll */
+    /* Wordmark fades with masthead */
     #lamplight-wordmark-wrap {
       width: 100%;
       color: var(--gold, #cc9900);
       display: block;
       line-height: 0;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    #lamplight-wordmark-wrap.scrolled {
-      opacity: 0;
-      transform: translateY(-6px);
-      pointer-events: none;
     }
 
     /* Noise texture layer */
@@ -961,7 +955,7 @@
   </div>
 
   <!-- Slim masthead bar — fixed, appears on scroll -->
-  <div id="lamplight-slim-bar"><span>The Lamp Light</span></div>
+  <div id="lamplight-slim-bar"><span>the lamp light</span></div>
 
   <div id="landing-inner" style="display:none">
     <div id="landing-list"></div>
@@ -1578,7 +1572,6 @@
         requestAnimationFrame(function() {
           var scrolled = window.scrollY > threshold;
           masthead.classList.toggle('scrolled', scrolled);
-          wordmark.classList.toggle('scrolled', scrolled);
           slimBar.classList.toggle('visible', scrolled);
           ticking = false;
         });
