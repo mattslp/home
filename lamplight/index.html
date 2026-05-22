@@ -247,7 +247,7 @@
       transform: translateY(-6px);
       transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: none;
-      z-index: 2;
+      z-index: 3;
     }
 
     #lamplight-slim-bar.visible {
@@ -301,7 +301,11 @@
 
     #lamplight-masthead > * {
       position: relative;
-      z-index: 1;
+      z-index: 2;
+    }
+
+    #lamplight-slim-bar {
+      z-index: 3 !important;
     }
 
 
