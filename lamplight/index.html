@@ -1285,11 +1285,15 @@
     // ── Cast & crew ───────────────────────────────────────────────────────────
     var showCast = cast.filter(function(c) { return c.show_id === slug; })
       .sort(function(a, b) {
-        function lastName(name) {
+        function nameParts(name) {
           var parts = (name || '').trim().split(/\s+/);
-          return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : parts[0].toLowerCase();
+          return {
+            last:  (parts.length > 1 ? parts[parts.length - 1] : parts[0]).toLowerCase(),
+            first: parts[0].toLowerCase()
+          };
         }
-        return lastName(a.name).localeCompare(lastName(b.name));
+        var pa = nameParts(a.name), pb = nameParts(b.name);
+        return pa.last.localeCompare(pb.last) || pa.first.localeCompare(pb.first);
       });
 
     var castMembers = showCast.filter(function(c) { return !c.type || c.type.toLowerCase() === 'cast'; });
