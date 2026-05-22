@@ -247,8 +247,7 @@
       align-items: center;
       justify-content: center;
       padding-top: env(safe-area-inset-top);
-      background: #0a0a0a;
-      box-shadow: 0 4px 40px rgba(0,0,0,0.7), 0 1px 0 rgba(245,240,232,0.06);
+      background: linear-gradient(to right, var(--gold, #cc9900), var(--accent, #cc9900));
       opacity: 0;
       transform: translateY(-6px);
       transition: opacity 0.3s ease, transform 0.3s ease;
@@ -268,7 +267,7 @@
       font-variant: small-caps;
       font-size: 1rem;
       letter-spacing: 0.25em;
-      color: var(--gold, #cc9900);
+      color: var(--bg, #020202);
     }
 
     /* Wordmark fades with masthead */
@@ -1152,7 +1151,9 @@
     var title = document.getElementById('lamplight-wordmark-wrap');
     if (title) title.style.color = mainHex;
     var slimSpan = document.querySelector('#lamplight-slim-bar span');
-    if (slimSpan) slimSpan.style.color = mainHex;
+    if (slimSpan) slimSpan.style.color = 'var(--bg, #020202)';
+    var slimBar = document.getElementById('lamplight-slim-bar');
+    if (slimBar) slimBar.style.background = 'linear-gradient(to right, ' + mainHex + ', ' + accHex + ')';
 
     // Inject gradient into wordmark SVG
     var svg = document.getElementById('lamplight-wordmark');
