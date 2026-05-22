@@ -978,7 +978,7 @@
       </svg>
       <span id="footer-logo-label">Street Lamp</span>
     </a>
-    <a id="footer-lamplight" href="/lamplight">The Lamp Light</a>
+    <a id="footer-lamplight" href="/programs/lamplight">The Lamp Light</a>
   </div>
 
 </div>
@@ -1106,8 +1106,9 @@
   }
 
     var SHOWS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=0&single=true&output=csv';
-  var CAST_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1553402469&single=true&output=csv';
-  var ADS_CSV   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1398222407&single=true&output=csv';
+  var CAST_CSV     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1553402469&single=true&output=csv';
+  var ADS_CSV      = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1398222407&single=true&output=csv';
+  var SPONSORS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=1489816581&single=true&output=csv';
 
   var TIER_ORDER = ['Season Sponsor','Show Sponsor','Rights Sponsor','Music Sponsor','Costumes Sponsor','Props Sponsor'];
   var castData = {};
@@ -1206,11 +1207,15 @@
     fetchWithRetry(SHOWS_CSV).catch(function(e) { console.error('Shows CSV failed:', e); return ''; }),
     fetchWithRetry(CAST_CSV).catch(function(e) { console.error('Cast CSV failed:', e); return ''; }),
     fetchWithRetry(ADS_CSV).catch(function() { return ''; }),
+    fetchWithRetry(SPONSORS_CSV).catch(function() { return ''; }),
   ]).then(function(results) {
 
-    var shows = parseCSV(results[0]);
-    var cast  = parseCSV(results[1]);
-    var allAds = results[2] ? parseCSV(results[2]) : [];
+    var shows    = parseCSV(results[0]);
+    var cast     = parseCSV(results[1]);
+    var allAds   = results[2] ? parseCSV(results[2]) : [];
+    var globalSponsors = results[3] ? parseCSV(results[3]).filter(function(s) {
+      return s.name && (s.active || '').toLowerCase() === 'yes';
+    }) : [];
 
     // If shows is empty, the CSV fetch may have silently failed — retry once
     if (!shows.length && results[0] === '') {
@@ -1362,12 +1367,20 @@
 
     // Sponsors — from cast sheet sponsor rows OR from show.sponsors field
     var sponsorHtml = '';
-    if (sponsorRows.length) {
+    // Merge global sponsors (from sponsors sheet) + show-specific (from cast sheet with type=sponsor)
+    var allSponsorRows = globalSponsors.map(function(s) {
+      return { name: s.name, role: s.tier || 'Sponsor' };
+    }).concat(sponsorRows.map(function(s) {
+      return { name: s.name, role: s.role || 'Sponsor' };
+    }));
+
+    if (allSponsorRows.length) {
       var byTier = {};
-      sponsorRows.forEach(function(s) {
+      allSponsorRows.forEach(function(s) {
         var t = s.role || 'Sponsor';
         if (!byTier[t]) byTier[t] = [];
-        byTier[t].push(s.name);
+        // Avoid duplicates
+        if (byTier[t].indexOf(s.name) === -1) byTier[t].push(s.name);
       });
       var tiers = TIER_ORDER.filter(function(t) { return byTier[t]; })
         .concat(Object.keys(byTier).filter(function(t) { return TIER_ORDER.indexOf(t) === -1; }));
