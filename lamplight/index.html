@@ -1111,8 +1111,9 @@
       var grad = defs.querySelector('#ll-gradient') || (function() {
         var g = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
         g.id = 'll-gradient';
-        g.setAttribute('x1', '0%'); g.setAttribute('y1', '0%');
-        g.setAttribute('x2', '100%'); g.setAttribute('y2', '0%');
+        g.setAttribute('gradientUnits', 'userSpaceOnUse');
+        g.setAttribute('x1', '0'); g.setAttribute('y1', '0');
+        g.setAttribute('x2', '1818.87'); g.setAttribute('y2', '0');
         var s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
         s1.setAttribute('offset', '0%');
         var s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
@@ -1124,7 +1125,8 @@
       grad.querySelectorAll('stop')[0].setAttribute('stop-color', mainHex);
       grad.querySelectorAll('stop')[1].setAttribute('stop-color', accHex);
       svg.querySelectorAll('.cls-1').forEach(function(el) {
-        el.style.fill = 'url(#ll-gradient)';
+        el.setAttribute('fill', 'url(#ll-gradient)');
+        el.style.fill = '';
       });
     }
   }
