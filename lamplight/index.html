@@ -1103,6 +1103,30 @@
 
     var title = document.getElementById('lamplight-wordmark-wrap');
     if (title) title.style.color = mainHex;
+
+    // Inject gradient into wordmark SVG
+    var svg = document.getElementById('lamplight-wordmark');
+    if (svg) {
+      var defs = svg.querySelector('defs') || svg.insertBefore(document.createElementNS('http://www.w3.org/2000/svg', 'defs'), svg.firstChild);
+      var grad = defs.querySelector('#ll-gradient') || (function() {
+        var g = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+        g.id = 'll-gradient';
+        g.setAttribute('x1', '0%'); g.setAttribute('y1', '0%');
+        g.setAttribute('x2', '100%'); g.setAttribute('y2', '0%');
+        var s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        s1.setAttribute('offset', '0%');
+        var s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        s2.setAttribute('offset', '100%');
+        g.appendChild(s1); g.appendChild(s2);
+        defs.appendChild(g);
+        return g;
+      })();
+      grad.querySelectorAll('stop')[0].setAttribute('stop-color', mainHex);
+      grad.querySelectorAll('stop')[1].setAttribute('stop-color', accHex);
+      svg.querySelectorAll('.cls-1').forEach(function(el) {
+        el.style.fill = 'url(#ll-gradient)';
+      });
+    }
   }
 
     var SHOWS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQNTNLwNo7zaC5ZoQ8IPzp_FmJL8Li2DOqIR3-vvrTvV7LxUEVj7WxboFyKAPQBPlaktaWbRTx-h0/pub?gid=0&single=true&output=csv';
