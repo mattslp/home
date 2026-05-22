@@ -1125,8 +1125,8 @@
       grad.querySelectorAll('stop')[0].setAttribute('stop-color', mainHex);
       grad.querySelectorAll('stop')[1].setAttribute('stop-color', accHex);
       svg.querySelectorAll('.cls-1').forEach(function(el) {
-        el.setAttribute('fill', 'url(#ll-gradient)');
-        el.style.fill = '';
+        el.style.fill = 'url(#ll-gradient)';
+      });
       });
     }
   }
