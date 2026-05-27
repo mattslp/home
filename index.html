@@ -152,12 +152,6 @@
   #sl-hero.panel-open #sl-overlay {
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  /* Fade the overlay back in after the stage finishes returning */
-  #sl-hero:not(.panel-open) #sl-overlay {
-    transition: opacity 0.4s ease 0.25s;
   }
 
   #sl-logo {
@@ -1230,8 +1224,8 @@
     text-transform: uppercase;
     text-decoration: none;
     background: rgba(245,240,232,0.06);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     cursor: pointer;
     transition: background 0.25s, border-color 0.25s, color 0.25s;
     text-align: center;
