@@ -718,9 +718,14 @@
 
   // ── Format body text (|| = paragraph break) ───────────────
   function linkify(text) {
-    return text.replace(/(https?:\/\/[^\s<]+)/g, function(url) {
-      return '<a href="' + url + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;opacity:0.7;">' + url + '</a>';
-    });
+    // Emails first so they don't get partially caught by URL pattern
+    return text
+      .replace(/([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/g, function(email) {
+        return '<a href="mailto:' + email + '" style="color:inherit;text-decoration:underline;text-underline-offset:3px;opacity:0.7;">' + email + '</a>';
+      })
+      .replace(/(https?:\/\/[^\s<]+)/g, function(url) {
+        return '<a href="' + url + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px;opacity:0.7;">' + url + '</a>';
+      });
   }
 
   function formatBody(raw) {
