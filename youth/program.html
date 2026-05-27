@@ -429,6 +429,13 @@
   };
 
   /* ── CSV parser ── */
+  function driveThumb(raw, size) {
+    if (!raw) return '';
+    var m = raw.match(/\/file\/d\/([^\/\?&]+)/) || raw.match(/[?&]id=([^&]+)/) || raw.match(/\/d\/([^\/\?&]+)/);
+    if (m) return 'https://lh3.googleusercontent.com/d/' + m[1] + '=' + (size || 'w600');
+    return raw;
+  }
+
   function parseCSV(text) {
     const lines = text.trim().split('\n').filter(l => l.trim());
     const delim = lines[0].includes('\t') ? '\t' : ',';
@@ -500,7 +507,7 @@
     var showUrl = row.slug ? 'https://streetlamp.org/shows/?id=' + row.slug : row.url;
     var onclick = (!isSoon && showUrl) ? ' onclick="window.open(\'' + showUrl + '\',\'_blank\')" style="cursor:pointer"' : '';
     var imgWrap = row.image_url
-      ? '<div class="sl-card-img-wrap"><img class="sl-card-img" src="' + row.image_url + '" alt="' + row.name + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>'
+      ? '<div class="sl-card-img-wrap"><img class="sl-card-img" src="' + driveThumb(row.image_url, 'w600') + '" alt="' + row.name + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>'
       : '';
     var desc = row.description
       ? row.description.split('||').map(function(p, i) {
