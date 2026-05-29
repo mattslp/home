@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Street Lamp Admin</title>
+  <link rel="stylesheet" href="https://use.typekit.net/wby1ytb.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #020202;
+      --bg-card:    #0d0d0d;
+      --bg-input:   #111;
+      --text:       #f5f0e8;
+      --text-dim:   rgba(245,240,232,0.55);
+      --text-faint: rgba(245,240,232,0.25);
+      --rule:       rgba(245,240,232,0.08);
+      --gold:       #cc9900;
+      --magenta:    #cc3399;
+      --teal:       #00aa99;
+      --font:       'komet', 'Jost', sans-serif;
+    }
+
+    html, body { background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+
+    /* ── Auth screen ── */
+    #auth-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; gap: 24px; padding: 40px 24px;
+    }
+    #auth-screen svg { width: 48px; opacity: 0.4; }
+    #auth-screen h1 { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-dim); }
+    #auth-form { display: flex; gap: 0; width: 100%; max-width: 360px; }
+    #key-input {
+      flex: 1; background: var(--bg-input); border: 1px solid var(--rule); border-right: none;
+      color: var(--text); font-family: var(--font); font-size: 0.9rem; padding: 12px 16px; outline: none;
+      transition: border-color 0.2s;
+    }
+    #key-input:focus { border-color: rgba(245,240,232,0.25); }
+    #key-input::placeholder { color: var(--text-faint); }
+    #auth-submit {
+      background: var(--gold); border: none; color: #020202; font-family: var(--font);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+      padding: 12px 20px; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+    }
+    #auth-submit:hover { opacity: 0.85; }
+    #auth-error { font-size: 0.65rem; color: #cc3333; letter-spacing: 0.1em; display: none; }
+
+    /* ── Header ── */
+    #header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 32px; border-bottom: 1px solid var(--rule);
+      position: sticky; top: 0; background: var(--bg); z-index: 50;
+    }
+    #header-left { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    #header-left svg { width: 28px; }
+    #header-title { font-size: 0.5rem; font-weight: 600; letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-dim); }
+    #btn-logout { background: none; border: 1px solid var(--rule); color: var(--text-faint); font-family: var(--font); font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 6px 12px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    #btn-logout:hover { border-color: var(--text-faint); color: var(--text-dim); }
+
+    /* ── Tabs ── */
+    #tabs { display: flex; border-bottom: 1px solid var(--rule); padding: 0 32px; }
+    .tab { padding: 15px 0; margin-right: 32px; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-faint); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+    .tab:hover { color: var(--text-dim); }
+    .tab.active { color: var(--text); border-bottom-color: var(--gold); }
+    .tab[data-sheet="auditions"].active { border-bottom-color: var(--magenta); }
+
+    /* ── Main ── */
+    #main { max-width: 1100px; margin: 0 auto; padding: 32px; }
+
+    /* ── Toolbar ── */
+    #toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+    #search { flex: 1; min-width: 200px; max-width: 360px; background: var(--bg-input); border: 1px solid var(--rule); color: var(--text); font-family: var(--font); font-size: 0.82rem; letter-spacing: 0.04em; padding: 11px 14px; outline: none; transition: border-color 0.2s; }
+    #search:focus { border-color: rgba(245,240,232,0.25); }
+    #search::placeholder { color: var(--text-faint); }
+    #btn-add { padding: 11px 24px; background: var(--gold); color: #020202; font-family: var(--font); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; border: none; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+    #btn-add:hover { opacity: 0.85; }
+
+    /* ── Table ── */
+    #table-wrap { overflow-x: auto; border: 1px solid var(--rule); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { padding: 12px 16px; text-align: left; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); background: var(--bg-card); border-bottom: 1px solid var(--rule); white-space: nowrap; }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--rule); color: var(--text); vertical-align: top; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(245,240,232,0.02); }
+    td.name-cell { font-weight: 500; }
+    td.active-cell span { font-size: 0.5rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; padding: 3px 8px; }
+    .badge-yes  { background: rgba(0,170,153,0.15); color: var(--teal); }
+    .badge-soon { background: rgba(204,153,0,0.15); color: var(--gold); }
+    .badge-no   { background: rgba(245,240,232,0.06); color: var(--text-faint); }
+    td.actions-cell { white-space: nowrap; text-align: right; }
+    .btn-edit, .btn-delete { background: none; border: 1px solid var(--rule); color: var(--text-faint); font-family: var(--font); font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 5px 10px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .btn-edit { margin-right: 6px; }
+    .btn-edit:hover  { border-color: var(--gold); color: var(--gold); }
+    .btn-delete:hover { border-color: #cc3333; color: #cc3333; }
+
+    /* ── Empty/loading ── */
+    #table-msg { padding: 48px 32px; text-align: center; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); }
+
+    /* ── Modal ── */
+    #modal-overlay { position: fixed; inset: 0; background: rgba(2,2,2,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 24px; }
+    #modal-overlay.open { opacity: 1; pointer-events: all; }
+    #modal { background: #0d0d0d; border: 1px solid rgba(245,240,232,0.12); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; transform: translateY(16px); transition: transform 0.25s ease; -webkit-overflow-scrolling: touch; }
+    #modal-overlay.open #modal { transform: translateY(0); }
+    #modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: #0d0d0d; z-index: 1; }
+    #modal-title { font-size: 0.55rem; font-weight: 600; letter-spacing: 0.35em; text-transform: uppercase; color: var(--text); }
+    #modal-close { background: none; border: none; color: var(--text-dim); font-size: 1.1rem; cursor: pointer; padding: 4px 8px; transition: color 0.2s; }
+    #modal-close:hover { color: var(--text); }
+    #modal-body { padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+    input, select, textarea { background: var(--bg-input); border: 1px solid var(--rule); color: var(--text); font-family: var(--font); font-size: 0.88rem; padding: 11px 13px; outline: none; width: 100%; transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: rgba(245,240,232,0.25); }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+    select option { background: #111; }
+    .field-hint { font-size: 0.55rem; color: var(--text-faint); letter-spacing: 0.05em; line-height: 1.5; }
+    #modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid var(--rule); }
+    .btn-cancel { background: none; border: 1px solid var(--rule); color: var(--text-dim); font-family: var(--font); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .btn-cancel:hover { border-color: var(--text-dim); color: var(--text); }
+    #btn-save { background: var(--gold); border: none; color: #020202; font-family: var(--font); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; padding: 10px 24px; cursor: pointer; transition: opacity 0.2s; }
+    #btn-save:hover { opacity: 0.85; }
+    #btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Toast ── */
+    #toast { position: fixed; bottom: 32px; right: 32px; background: #1a1a1a; border: 1px solid var(--rule); color: var(--text); font-size: 0.65rem; letter-spacing: 0.1em; padding: 12px 20px; z-index: 200; opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.error { border-color: #cc3333; color: #ff6666; }
+
+    /* ── Confirm ── */
+    #confirm-overlay { position: fixed; inset: 0; background: rgba(2,2,2,0.85); z-index: 150; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    #confirm-overlay.open { opacity: 1; pointer-events: all; }
+    #confirm-box { background: #0d0d0d; border: 1px solid rgba(245,240,232,0.12); padding: 32px; max-width: 400px; width: 90%; text-align: center; }
+    #confirm-box p { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 24px; line-height: 1.6; }
+    #confirm-box strong { color: var(--text); }
+    .confirm-btns { display: flex; gap: 12px; justify-content: center; }
+    #btn-confirm-cancel { background: none; border: 1px solid var(--rule); color: var(--text-dim); font-family: var(--font); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; }
+    #btn-confirm-delete { background: #cc3333; border: none; color: #fff; font-family: var(--font); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; padding: 10px 20px; cursor: pointer; }
+
+    @media (max-width: 600px) {
+      #header, #tabs, #main { padding: 16px; }
+      #main { padding-top: 24px; }
+      #modal-body { grid-template-columns: 1fr; }
+      .field.full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth screen -->
+<div id="auth-screen">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+    <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+    <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+    <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+  </svg>
+  <h1>Street Lamp Admin</h1>
+  <div id="auth-form">
+    <input id="key-input" type="password" placeholder="Access key" autocomplete="current-password">
+    <button id="auth-submit">Enter</button>
+  </div>
+  <span id="auth-error">Incorrect key</span>
+</div>
+
+<!-- App (hidden until authed) -->
+<div id="app" style="display:none">
+
+  <div id="header">
+    <a id="header-left" href="https://streetlamp.org" target="_blank">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1210">
+        <path fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+        <path fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+        <path fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
+      </svg>
+      <span id="header-title">Street Lamp Admin</span>
+    </a>
+    <button id="btn-logout">Sign Out</button>
+  </div>
+
+  <div id="tabs">
+    <div class="tab active" data-sheet="events">Events</div>
+    <div class="tab" data-sheet="auditions">Auditions</div>
+  </div>
+
+  <div id="main">
+    <div id="toolbar">
+      <input id="search" type="text" placeholder="Search…">
+      <button id="btn-add">+ Add Event</button>
+    </div>
+    <div id="table-wrap">
+      <div id="table-msg">Loading…</div>
+      <table id="data-table" style="display:none">
+        <thead id="table-head"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div id="modal-header">
+      <span id="modal-title"></span>
+      <button id="modal-close">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div id="modal-footer">
+      <button class="btn-cancel" id="btn-cancel">Cancel</button>
+      <button id="btn-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div id="confirm-overlay">
+  <div id="confirm-box">
+    <p>Delete <strong id="confirm-name"></strong>?<br>This cannot be undone.</p>
+    <div class="confirm-btns">
+      <button id="btn-confirm-cancel">Cancel</button>
+      <button id="btn-confirm-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+var API_URL = 'https://script.google.com/macros/s/AKfycbz8YNawYisH6ljHZrn5hgfw95VIqK7FFs64_kOXfQ1NIulY3AdC6D79b0k-niBjdA6gVQ/exec';
+var KEY     = '';
+
+// ── Schema ────────────────────────────────────────────────────────────────────
+var SCHEMA = {
+  events: {
+    tableColumns: ['name', 'company', 'dates', 'start_date', 'end_date', 'active'],
+    fields: [
+      { key: 'name',        label: 'Show Name',        type: 'text',     full: true },
+      { key: 'url',         label: 'Tickets URL',       type: 'url',      full: true },
+      { key: 'label',       label: 'Label',             type: 'select',   options: [{v:'',l:'— none —'},{v:'Rising Sun',l:'Rising Sun'},{v:'Kennett Square',l:'Kennett Square'},{v:'Off-Site',l:'Off-Site'}] },
+      { key: 'company',     label: 'Company',           type: 'select',   options: [{v:'',l:'— none —'},{v:'slp',l:'SLP'},{v:'slct',l:'SLCT'}] },
+      { key: 'dates',       label: 'Display Dates',     type: 'text' },
+      { key: 'description', label: 'Short Description', type: 'textarea', full: true },
+      { key: 'image_url',   label: 'Image URL',         type: 'url',      full: true },
+      { key: 'start_date',  label: 'Start Date',        type: 'date' },
+      { key: 'end_date',    label: 'End Date',          type: 'date' },
+      { key: 'active',      label: 'Active',            type: 'select',   options: [{v:'yes',l:'yes'},{v:'no',l:'no'}] },
+    ]
+  },
+  auditions: {
+    tableColumns: ['name', 'company', 'dates', 'start_date', 'end_date', 'active'],
+    fields: [
+      { key: 'name',               label: 'Show Name',           type: 'text',     full: true },
+      { key: 'url',                label: 'Audition Info URL',   type: 'url',      full: true },
+      { key: 'label',              label: 'Label',               type: 'select',   options: [{v:'',l:'— none —'},{v:'Rising Sun',l:'Rising Sun'},{v:'Kennett Square',l:'Kennett Square'},{v:'Off-Site',l:'Off-Site'}] },
+      { key: 'company',            label: 'Company',             type: 'select',   options: [{v:'',l:'— none —'},{v:'slp',l:'SLP'},{v:'slct',l:'SLCT'}] },
+      { key: 'dates',              label: 'Audition Dates',      type: 'text' },
+      { key: 'description',        label: 'Short Description',   type: 'textarea', full: true },
+      { key: 'long_description',   label: 'Long Description',    type: 'textarea', full: true, hint: 'Use || for paragraph breaks' },
+      { key: 'character_breakdown',label: 'Character Breakdown', type: 'textarea', full: true, rows: 8, hint: 'One character per line: CHARACTER NAME: Description of the role' },
+      { key: 'image_url',          label: 'Image URL',           type: 'url',      full: true },
+      { key: 'director',           label: 'Director',            type: 'text' },
+      { key: 'music_director',     label: 'Music Director',      type: 'text' },
+      { key: 'choreographer',      label: 'Choreographer',       type: 'text' },
+      { key: 'rehearsal_info',     label: 'Rehearsal Info',      type: 'textarea', full: true },
+      { key: 'start_date',         label: 'Start Date',          type: 'date' },
+      { key: 'end_date',           label: 'End Date',            type: 'date' },
+      { key: 'active',             label: 'Active',              type: 'select',   options: [{v:'yes',l:'yes'},{v:'soon',l:'soon'},{v:'no',l:'no'}] },
+    ]
+  }
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var state = { sheet: 'events', headers: [], rows: [], filtered: [], editIndex: null };
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function initAuth() {
+  // Check URL param or sessionStorage
+  var params = new URLSearchParams(window.location.search);
+  var urlKey = params.get('key');
+  if (urlKey) {
+    sessionStorage.setItem('sl_admin_key', urlKey);
+    // Clean key from URL without reload
+    var url = window.location.pathname;
+    window.history.replaceState({}, '', url);
+  }
+  var stored = sessionStorage.getItem('sl_admin_key');
+  if (stored) { KEY = stored; showApp(); return; }
+  showAuthScreen();
+}
+
+function showAuthScreen() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  setupTabs();
+  setupModal();
+  setupSearch();
+  document.getElementById('btn-logout').addEventListener('click', function() {
+    sessionStorage.removeItem('sl_admin_key');
+    KEY = '';
+    showAuthScreen();
+  });
+  loadSheet('events');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initAuth();
+
+  document.getElementById('auth-submit').addEventListener('click', tryAuth);
+  document.getElementById('key-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') tryAuth();
+  });
+});
+
+function tryAuth() {
+  var val = document.getElementById('key-input').value.trim();
+  if (!val) return;
+  // Validate against API
+  document.getElementById('auth-submit').textContent = '…';
+  fetch(API_URL + '?action=getRows&sheet=events&key=' + encodeURIComponent(val))
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      document.getElementById('auth-submit').textContent = 'Enter';
+      if (res.error === 'UNAUTHORIZED') {
+        document.getElementById('auth-error').style.display = 'block';
+        document.getElementById('key-input').value = '';
+        return;
+      }
+      KEY = val;
+      sessionStorage.setItem('sl_admin_key', val);
+      document.getElementById('auth-error').style.display = 'none';
+      showApp();
+    })
+    .catch(function() {
+      document.getElementById('auth-submit').textContent = 'Enter';
+      showError('Could not connect to server');
+    });
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+function api(payload, onSuccess, onError) {
+  var isGet = payload.action === 'getRows';
+  var url   = API_URL + (isGet ? '?action=getRows&sheet=' + payload.sheet + '&key=' + encodeURIComponent(KEY) : '');
+  var opts  = isGet
+    ? { method: 'GET' }
+    : { method: 'POST', body: JSON.stringify(Object.assign({ key: KEY }, payload)) };
+
+  fetch(url, opts)
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res && res.error) { (onError || showError)(res.error); return; }
+      onSuccess(res);
+    })
+    .catch(function(err) { (onError || showError)(err.message || 'Request failed'); });
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+function loadSheet(sheet) {
+  state.sheet = sheet;
+  setMsg('Loading…');
+  hideTable();
+  api({ action: 'getRows', sheet: sheet }, function(res) {
+    state.headers = res.headers;
+    state.rows    = res.rows;
+    applyFilter();
+    renderTable();
+  });
+}
+
+// ── Filter ────────────────────────────────────────────────────────────────────
+function setupSearch() {
+  document.getElementById('search').addEventListener('input', function() {
+    applyFilter(); renderTable();
+  });
+}
+
+function applyFilter() {
+  var q = document.getElementById('search').value.toLowerCase().trim();
+  state.filtered = q
+    ? state.rows.filter(function(r) { return Object.values(r).some(function(v) { return v.toLowerCase().includes(q); }); })
+    : state.rows;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function setupTabs() {
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      var sheet = tab.dataset.sheet;
+      document.getElementById('btn-add').textContent = '+ Add ' + (sheet === 'events' ? 'Event' : 'Audition');
+      document.getElementById('search').value = '';
+      loadSheet(sheet);
+    });
+  });
+  document.getElementById('btn-add').addEventListener('click', function() { openEdit(null); });
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function renderTable() {
+  var schema = SCHEMA[state.sheet];
+  var cols   = schema.tableColumns.filter(function(c) { return state.headers.includes(c); });
+  if (!state.filtered.length) { setMsg(state.rows.length ? 'No results.' : 'No rows yet.'); hideTable(); return; }
+
+  document.getElementById('table-head').innerHTML = '<tr>'
+    + cols.map(function(c) { return '<th>' + c.replace(/_/g,' ') + '</th>'; }).join('')
+    + '<th style="text-align:right">Actions</th></tr>';
+
+  document.getElementById('table-body').innerHTML = state.filtered.map(function(row) {
+    var realIndex = state.rows.indexOf(row);
+    return '<tr>'
+      + cols.map(function(c) {
+          var v = row[c] || '';
+          if (c === 'active') {
+            var cls = v === 'yes' ? 'badge-yes' : v === 'soon' ? 'badge-soon' : 'badge-no';
+            return '<td class="active-cell"><span class="' + cls + '">' + (v||'—') + '</span></td>';
+          }
+          if (c === 'name') return '<td class="name-cell" title="' + esc(v) + '">' + esc(v) + '</td>';
+          if (c === 'start_date' || c === 'end_date') {
+            var d = '';
+            if (v) {
+              var parsed = new Date(v);
+              if (!isNaN(parsed)) {
+                d = parsed.getFullYear() + '-' + String(parsed.getMonth()+1).padStart(2,'0') + '-' + String(parsed.getDate()).padStart(2,'0');
+              } else { d = v.split(' ')[0].split('T')[0]; }
+            }
+            return '<td>' + esc(d) + '</td>';
+          }
+          return '<td title="' + esc(v) + '">' + esc(v) + '</td>';
+        }).join('')
+      + '<td class="actions-cell">'
+        + '<button class="btn-edit" onclick="openEdit(' + realIndex + ')">Edit</button>'
+        + '<button class="btn-delete" onclick="confirmDelete(' + realIndex + ')">Delete</button>'
+      + '</td></tr>';
+  }).join('');
+
+  showTable();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function setupModal() {
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('btn-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+  document.getElementById('btn-save').addEventListener('click', saveRow);
+}
+
+function openEdit(index) {
+  state.editIndex = index;
+  var isNew  = index === null;
+  var schema = SCHEMA[state.sheet];
+  var row    = isNew ? {} : (state.rows[index] || {});
+
+  document.getElementById('modal-title').textContent = (isNew ? 'Add ' : 'Edit ') + (state.sheet === 'events' ? 'Event' : 'Audition');
+  document.getElementById('btn-save').style.background = state.sheet === 'auditions' ? 'var(--magenta)' : 'var(--gold)';
+  document.getElementById('btn-save').style.color = state.sheet === 'auditions' ? '#fff' : '#020202';
+
+  document.getElementById('modal-body').innerHTML = schema.fields.map(function(f) {
+    var val = row[f.key] || '';
+    if (f.key === 'character_breakdown') val = breakdownToEditor(val);
+    var inputHtml;
+    if (f.type === 'select') {
+      inputHtml = '<select name="' + f.key + '">'
+        + f.options.map(function(o) {
+            var v = typeof o === 'object' ? o.v : o;
+            var l = typeof o === 'object' ? o.l : (o || '— none —');
+            return '<option value="' + v + '"' + (val === v ? ' selected' : '') + '>' + l + '</option>';
+          }).join('') + '</select>';
+    } else if (f.type === 'textarea') {
+      inputHtml = '<textarea name="' + f.key + '" rows="' + (f.rows || 3) + '">' + esc(val) + '</textarea>';
+    } else {
+      inputHtml = '<input type="' + (f.type || 'text') + '" name="' + f.key + '" value="' + esc(val) + '">';
+    }
+    return '<div class="field' + (f.full ? ' full' : '') + '">'
+      + '<label>' + f.label + '</label>' + inputHtml
+      + (f.hint ? '<span class="field-hint">' + f.hint + '</span>' : '')
+      + '</div>';
+  }).join('');
+
+  // Hidden slug for auditions — auto-generated from name
+  if (state.sheet === 'auditions') {
+    var slugInput = document.createElement('input');
+    slugInput.type = 'hidden'; slugInput.name = 'slug';
+    slugInput.value = isNew ? '' : (row['slug'] || '');
+    document.getElementById('modal-body').appendChild(slugInput);
+    var nameEl = document.querySelector('#modal-body [name="name"]');
+    if (nameEl) nameEl.addEventListener('input', function() {
+      document.querySelector('#modal-body [name="slug"]').value = makeSlug(nameEl.value);
+    });
+  }
+
+  document.getElementById('modal-overlay').classList.add('open');
+  var first = document.querySelector('#modal-body input:not([type=hidden]), #modal-body textarea');
+  if (first) setTimeout(function() { first.focus(); }, 50);
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+function saveRow() {
+  var btn    = document.getElementById('btn-save');
+  var schema = SCHEMA[state.sheet];
+  var row    = {};
+  document.querySelectorAll('#modal-body [name]').forEach(function(el) {
+    var val = el.value;
+    if (el.name === 'character_breakdown') val = breakdownToSheet(val);
+    row[el.name] = val;
+  });
+  state.headers.forEach(function(h) { if (!(h in row)) row[h] = ''; });
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  var payload = state.editIndex === null
+    ? { action: 'addRow',    sheet: state.sheet, row: row }
+    : { action: 'updateRow', sheet: state.sheet, row: row, index: state.editIndex };
+
+  api(payload, function() {
+    btn.disabled = false; btn.textContent = 'Save';
+    closeModal(); showToast('Saved ✓'); loadSheet(state.sheet);
+  }, function(err) {
+    btn.disabled = false; btn.textContent = 'Save'; showError(err);
+  });
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+var pendingDelete = null;
+function confirmDelete(index) {
+  pendingDelete = index;
+  document.getElementById('confirm-name').textContent = (state.rows[index] || {}).name || 'this row';
+  document.getElementById('confirm-overlay').classList.add('open');
+  document.getElementById('btn-confirm-cancel').onclick = function() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+  };
+  document.getElementById('btn-confirm-delete').onclick = function() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+    api({ action: 'deleteRow', sheet: state.sheet, index: pendingDelete }, function() {
+      showToast('Deleted'); loadSheet(state.sheet);
+    });
+  };
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function breakdownToEditor(raw) {
+  return raw ? raw.split('||').map(function(s) { return s.trim(); }).filter(Boolean).join('\n') : '';
+}
+function breakdownToSheet(text) {
+  return text ? text.split('\n').map(function(s) { return s.trim(); }).filter(Boolean).join('||') : '';
+}
+function makeSlug(name) {
+  return name.replace(/[^a-zA-Z0-9\s]/g,'').trim().split(/\s+/).slice(0,4).join('-').toLowerCase();
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showTable() { document.getElementById('table-msg').style.display='none'; document.getElementById('data-table').style.display=''; }
+function hideTable() { document.getElementById('data-table').style.display='none'; }
+function setMsg(m)   { var e=document.getElementById('table-msg'); e.textContent=m; e.style.display=''; }
+function showToast(msg, isErr) {
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show' + (isErr ? ' error' : '');
+  setTimeout(function() { el.className=''; }, 3000);
+}
+function showError(msg) { showToast(msg || 'Something went wrong', true); }
+</script>
+</body>
+</html>
