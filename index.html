@@ -154,6 +154,35 @@
     fill: transparent;
   }
 
+  /* ── Rainbow curtain sweep (June) ──
+     A wide gradient rect, clipped to the curtain shapes, slides across once and
+     fades out — revealing the cream curtains beneath. CSS (not SMIL) so it runs
+     smoothly on mobile, and opacity starts at 0 so nothing flashes before it begins. */
+  #sl-rainbow-sweep {
+    opacity: 0;
+    transform: translateX(-500px);
+    animation:
+      sl-rainbow-move 2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s 1 both,
+      sl-rainbow-fade 2.6s linear 0.3s 1 both;
+  }
+
+  @keyframes sl-rainbow-move {
+    from { transform: translateX(-500px); }
+    to   { transform: translateX(500px); }
+  }
+
+  @keyframes sl-rainbow-fade {
+    0%   { opacity: 0; }
+    18%  { opacity: 0.7; }
+    60%  { opacity: 0.7; }
+    100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* Skip the motion; just settle on the cream curtains. */
+    #sl-rainbow-sweep { animation: none; opacity: 0; }
+  }
+
   #sl-rule {
     width: 120px;
     height: 1px;
@@ -1438,12 +1467,16 @@
 
   <div id="sl-overlay">
     <svg id="sl-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500" aria-label="Street Lamp">
-      <!-- Rainbow gradient defs for curtain sweep -->
+      <!-- Rainbow defs: a static ROYGBIV band + a clip of the (open) curtain shapes.
+           The sweep is done by CSS-translating a wide rect through this clip — far more
+           reliable across browsers (esp. mobile) than SMIL-animating a gradient. -->
       <defs>
-        <!-- One continuous ROYGBIV band spanning both curtains, in user space.
-             spreadMethod="reflect" keeps edges filled while it sweeps. -->
+        <clipPath id="sl-rainbow-clip">
+          <path d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
+          <path d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
+        </clipPath>
         <linearGradient id="sl-rainbow" gradientUnits="userSpaceOnUse"
-          x1="150" y1="0" x2="1350" y2="0" spreadMethod="reflect">
+          x1="0" y1="0" x2="1500" y2="0" spreadMethod="reflect">
           <stop offset="0"    stop-color="#ff5e5e"/>
           <stop offset="0.16" stop-color="#ff9f43"/>
           <stop offset="0.33" stop-color="#ffd23f"/>
@@ -1451,11 +1484,6 @@
           <stop offset="0.66" stop-color="#1ba3e2"/>
           <stop offset="0.83" stop-color="#7b5bff"/>
           <stop offset="1"    stop-color="#f15bb5"/>
-          <!-- Sweep the whole band sideways once -->
-          <animateTransform attributeName="gradientTransform" type="translate"
-            from="-500 0" to="500 0"
-            begin="0.3s" dur="2s" fill="freeze"
-            calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
         </linearGradient>
       </defs>
 
@@ -1478,24 +1506,15 @@
       </g>
 
       <!-- ══ RAINBOW MODE (June / Pride) — curtains rest open, ROYGBIV sweep washes over then fades ══
-           Hidden by default; the seasonal script reveals it during June. -->
+           Hidden by default; the seasonal script reveals it during June.
+           The cream curtains stay put; a wide gradient rect (clipped to the curtain
+           shapes) is CSS-translated across them and fades out, settling to the cream. -->
       <g id="sl-mode-rainbow" style="display:none">
         <path class="sl-curtain" fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
-        <path fill="url(#sl-rainbow)" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z">
-          <animate attributeName="opacity"
-            values="0; 0.7; 0.7; 0"
-            keyTimes="0; 0.18; 0.6; 1"
-            begin="0.3s" dur="2.6s" fill="freeze"
-            calcMode="spline" keySplines="0.4 0 0.2 1; 0 0 1 1; 0.4 0 0.2 1"/>
-        </path>
         <path class="sl-curtain" fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
-        <path fill="url(#sl-rainbow)" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z">
-          <animate attributeName="opacity"
-            values="0; 0.7; 0.7; 0"
-            keyTimes="0; 0.18; 0.6; 1"
-            begin="0.3s" dur="2.6s" fill="freeze"
-            calcMode="spline" keySplines="0.4 0 0.2 1; 0 0 1 1; 0.4 0 0.2 1"/>
-        </path>
+        <g clip-path="url(#sl-rainbow-clip)">
+          <rect id="sl-rainbow-sweep" x="-1500" y="0" width="3000" height="1500" fill="url(#sl-rainbow)"/>
+        </g>
       </g>
       <path id="sl-lamp-body" fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
       <!-- Wordmark -->
