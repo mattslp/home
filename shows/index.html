@@ -865,8 +865,9 @@
         btn.rel = 'noopener';
         btn.style.display = 'inline-block';
         btn.style.width = 'fit-content';
+        var isTicketleap = /ticketleap\.com/i.test(regUrl);
         var isAuditionUrl = /audition/i.test(regUrl);
-        btn.textContent = isAuditionUrl ? 'Click Here to Submit Audition' : 'Click Here to Sign Up';
+        btn.textContent = isTicketleap ? 'Click Here to Register' : isAuditionUrl ? 'Click Here to Submit Audition' : 'Click Here to Sign Up';
         if (cls) btn.classList.add(locClass || cls);
         regWrap.appendChild(btn);
       }
