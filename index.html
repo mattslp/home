@@ -121,12 +121,18 @@
     justify-content: center;
     padding-bottom: 5vh;
     z-index: 10;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s ease, opacity 0.5s ease;
+    /* Note: opacity is intentionally NOT transitioned here. When a panel closes
+       and the overlay returns to opacity:1, snapping (rather than fading) avoids a
+       backdrop-filter "blink" on the buttons — a browser disables backdrop-filter
+       while an ancestor's opacity is <1, so a fade would render them blur-less until
+       it completes. The fade-OUT on open is restored in the .panel-open rule below. */
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s ease;
   }
 
   #sl-hero.panel-open #sl-overlay {
     opacity: 0;
     pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s ease, opacity 0.5s ease;
   }
 
   #sl-logo {
