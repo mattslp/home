@@ -186,7 +186,8 @@ body {
         <div class="field"><label for="sl_pronouns">Preferred Pronouns <span class="opt">(optional)</span></label><input type="text" id="sl_pronouns" placeholder="e.g. she/her, he/him, they/them"></div>
         <div class="row"><div class="field"><label for="sl_email">Email <span class="req">*</span></label><input type="email" id="sl_email" placeholder="you@example.com" required><div class="err-msg">Please enter a valid email.</div></div>
         <div class="field"><label for="sl_phone">Phone <span class="req">*</span></label><input type="tel" id="sl_phone" placeholder="(555) 555-5555" required><div class="err-msg">Please enter your phone number.</div></div></div>
-        <div class="field"><label for="sl_age">Age <span class="opt">(optional)</span></label><input type="number" id="sl_age" min="4" max="120" placeholder="e.g. 15"></div>
+        <div class="row"><div class="field"><label for="sl_age">Age <span class="opt">(optional)</span></label><input type="number" id="sl_age" min="4" max="120" placeholder="e.g. 15"></div>
+        <div class="field"><label for="sl_tshirtSize">T-Shirt Size <span class="opt">(optional)</span></label><input type="text" id="sl_tshirtSize" placeholder="e.g. Adult M"></div></div>
         <div class="row"><div class="field"><label for="sl_height">Height <span class="opt">(optional)</span></label><input type="text" id="sl_height" placeholder="e.g. 5'6&quot;"></div>
         <div class="field"><label for="sl_hairColor">Hair Color <span class="opt">(optional)</span></label><input type="text" id="sl_hairColor" placeholder="e.g. Brown"></div></div>
         <div class="field"><label for="sl_alterHair">Are you willing to alter your hair style/color? <span class="opt">(optional)</span></label><select id="sl_alterHair"><option value="" selected>Select</option><option value="Yes">Yes</option><option value="No">No</option><option value="Maybe">Maybe / Depends</option></select></div>
@@ -379,6 +380,7 @@ body {
       email:document.getElementById('sl_email').value.trim(),
       phone:document.getElementById('sl_phone').value.trim(),
       age:document.getElementById('sl_age').value.trim(),
+      tshirtSize:document.getElementById('sl_tshirtSize').value.trim(),
       height:document.getElementById('sl_height').value.trim(),
       hairColor:document.getElementById('sl_hairColor').value.trim(),
       alterHair:document.getElementById('sl_alterHair').value,
