@@ -160,7 +160,8 @@ body {
 
 <div class="container">
 
-  <!-- TYPE SELECTOR -->
+  <!-- TYPE SELECTOR (commented out — defaulting to virtual) -->
+  <!--
   <div id="typeSelector" class="type-selector">
     <img src="auditions.svg" alt="Street Lamp Auditions" class="logo-img" style="max-width:280px;margin:0 auto 32px;display:block;">
     <div class="type-buttons">
@@ -174,10 +175,11 @@ body {
       </button>
     </div>
   </div>
+  -->
 
-  <!-- FORM (hidden until type selected) -->
-  <div id="formWrapper" style="display:none;">
-    <button class="back-btn" onclick="goBack()">&larr; Back</button>
+  <!-- FORM (defaults to virtual) -->
+  <div id="formWrapper">
+    <!-- <button class="back-btn" onclick="goBack()">&larr; Back</button> -->
     <div class="form-header"><img src="auditions.svg" alt="Street Lamp Auditions" class="logo-img" style="max-width:150px;margin:0 auto 12px;display:block;"></div>
     <div id="slMsg" class="message"></div>
     <form id="slForm" novalidate>
@@ -253,7 +255,7 @@ body {
 (function() {
   var APPS_SCRIPT_URL = 'https://script.google.com/a/macros/streetlamp.org/s/AKfycbzdPHLpGNRG5ORBCneZH2TGmzM0Hi2xJnhDKkXM3sn0IbvzD18CWUDpZ_AuTPTvpie5/exec';
   var selectedFile = null, MAX_SIZE = 50 * 1024 * 1024;
-  var auditionType = '';
+  var auditionType = 'virtual'; // defaulting to virtual
 
   // ── Load open shows into dropdown ───────────────────
   (function loadShows() {
@@ -280,7 +282,8 @@ body {
     document.head.appendChild(s);
   })();
 
-  // ── Type selection ──────────────────────────────────
+  // ── Type selection (commented out — defaulting to virtual) ──
+  /*
   window.goBack = function() {
     var formWrapper = document.getElementById('formWrapper');
     var typeSelector = document.getElementById('typeSelector');
@@ -318,6 +321,11 @@ body {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 250);
   };
+  */
+
+  // Show video section by default (virtual mode)
+  document.getElementById('videoSection').style.display = '';
+  document.getElementById('notesSection').style.display = 'none';
 
   // ── DOM refs ────────────────────────────────────────
   var form=document.getElementById('slForm'),submitBtn=document.getElementById('slSubmitBtn'),globalMsg=document.getElementById('slMsg'),uploadArea=document.getElementById('slUploadArea'),fileInput=document.getElementById('slFileInput'),filePrev=document.getElementById('slFilePreview'),fileNameEl=document.getElementById('slFileName'),fileSizeEl=document.getElementById('slFileSize'),fileRemove=document.getElementById('slFileRemove'),progressC=document.getElementById('slProgress'),progFill=document.getElementById('slProgressFill'),progText=document.getElementById('slProgressText'),successEl=document.getElementById('slSuccess'),resetLink=document.getElementById('slResetLink');
