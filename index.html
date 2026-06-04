@@ -131,13 +131,6 @@
     fill: transparent;
   }
 
-  /* ── Rainbow curtains (June) ──
-     Gradient-filled copies of the curtains fade in over the cream ones, the gradient
-     colors flow sideways, then everything fades back out to the cream. The fade is a
-     plain opacity animation (works everywhere); the color flow is a stop-color
-     animation (well supported, incl. mobile). If the flow ever fails to run, a static
-     rainbow spread still fades in and out — so there's always *something* visible.
-     Held off until JS adds .sl-rainbow-go to #sl-logo, so it starts once visible. */
   .sl-rainbow-fill {
     opacity: 0;
   }
@@ -146,8 +139,6 @@
     animation: sl-rb-fade 2.8s ease 0.2s 1 both;
   }
 
-  /* Color flow: each stop cycles through the spectrum, phase-offset so the band
-     reads as a full rainbow that scrolls sideways. */
   #sl-logo.sl-rainbow-go .sl-rb-stop {
     animation: sl-rb-hue 2s linear 2 both;
   }
@@ -334,14 +325,12 @@
     #sl-youth-locations.open { max-height: 400px; }
   }
 
-  /* Reveal class */
   #sl-hero.revealed #sl-rule,
   #sl-hero.revealed #sl-cta-group {
     opacity: 1;
     transform: translateY(0);
   }
 
-  /* Loading shimmer on tiles */
   .sl-tile::before {
     content: '';
     position: absolute;
@@ -357,12 +346,10 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Fallback if Drive photos fail — show colored tiles */
   .sl-tile.fallback {
     opacity: 0.5;
   }
 
-  /* ── Event list ── */
   #sl-events-list {
     display: flex;
     flex-direction: column;
@@ -450,7 +437,6 @@
     padding: 8px 0;
   }
 
-  /* Skeleton loading rows — mimic .sl-event-link shape */
   .sl-skeleton-row {
     display: flex;
     align-items: center;
@@ -475,9 +461,6 @@
     100% { background-position: -200% 0; }
   }
 
-
-
-  /* ── Staff panel ── */
   #sl-staff-overlay {
     position: absolute;
     inset: 0;
@@ -560,7 +543,6 @@
     border-color: rgba(245,240,232,0.7);
   }
 
-  /* ── Support overlay ── */
   #sl-support-overlay {
     position: absolute;
     inset: 0;
@@ -686,7 +668,6 @@
   .sl-ov-tier:hover { border-color: rgba(245,240,232,0.22); }
   .sl-ov-tier[open] { border-color: rgba(245,240,232,0.2); }
 
-  /* Remove default details marker */
   .sl-ov-tier summary { list-style: none; }
   .sl-ov-tier summary::-webkit-details-marker { display: none; }
 
@@ -765,7 +746,6 @@
     background: rgba(245,240,232,0.06);
   }
 
-  /* ── Sponsors section ── */
   #sl-sponsors-section {
     width: 100%;
     margin-top: 32px;
@@ -813,7 +793,6 @@
     color: rgba(245,240,232,0.7);
   }
 
-  /* Skeleton shimmer lines */
   .sl-sponsors-skeleton {
     display: flex;
     flex-direction: column;
@@ -844,7 +823,6 @@
     transition: opacity 0.3s ease;
   }
 
-  /* ── Social links ── */
   #sl-contact-header {
     display: flex;
     align-items: center;
@@ -873,7 +851,6 @@
     height: 20px;
   }
 
-  /* ── Contact overlay ── */
   #sl-contact-overlay {
     position: absolute;
     inset: 0;
@@ -1082,7 +1059,6 @@
     background: rgba(245,240,232,0.06);
   }
 
-  /* ── Story overlay ── */
   #sl-story-overlay {
     position: absolute;
     inset: 0;
@@ -1267,7 +1243,6 @@
     border-color: rgba(245,240,232,0.8);
   }
 
-  /* ── Box Office overlay ── */
   #sl-auditions-overlay {
     position: absolute;
     inset: 0;
@@ -1426,7 +1401,6 @@
     overflow-y: auto;
   }
 
-  /* ── Easter egg: confetti ── */
   .sl-confetti {
     position: fixed;
     top: -10px;
@@ -1441,14 +1415,11 @@
     100% { transform: translateY(110vh) rotate(720deg) translateX(var(--drift)); opacity: 0; }
   }
 
-
-  /* Suppress all transitions on initial page load */
   .no-transition * { transition: none !important; animation-delay: 0s !important; }
 
 </style>
 
 <script>
-  // Remove no-transition class after first paint settles
   requestAnimationFrame(function() {
     requestAnimationFrame(function() {
       document.body.classList.remove('no-transition');
@@ -1466,9 +1437,6 @@
 
   <div id="sl-overlay">
     <svg id="sl-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1500" aria-label="Street Lamp">
-      <!-- Rainbow defs: a static ROYGBIV band filling the curtain shapes directly
-           (gradient-filled <path>, which renders reliably everywhere). Motion comes
-           from CSS animating the stop colors; the core fade relies only on opacity. -->
       <defs>
         <linearGradient id="sl-rainbow" gradientUnits="userSpaceOnUse"
           x1="150" y1="0" x2="1350" y2="0" spreadMethod="reflect">
@@ -1481,10 +1449,6 @@
           <stop class="sl-rb-stop" offset="1"    stop-color="#f15bb5"/>
         </linearGradient>
       </defs>
-
-      <!-- ══ ORIGINAL MODE — curtains start closed and slide open ══
-           Visible by default (and the safe fallback if the date script never runs).
-           The seasonal script (search "SEASONAL ANIMATION") hides this during June. -->
       <g id="sl-mode-original">
         <path class="sl-curtain" fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-565.82c0,-242.15,0,-430.39,0,-500.08l0,-74.2l0,-44.44c0,-20.91,0,-64.17,0,-118.9c0,-63.61,0,-121.71,0,-172.68l0,-45.99h565.82Z">
           <animate attributeName="d"
@@ -1499,12 +1463,6 @@
             begin="0.8s" dur="1.6s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 0.2 1"/>
         </path>
       </g>
-
-      <!-- ══ RAINBOW MODE (June / Pride) — curtains rest open, ROYGBIV spread washes over then fades ══
-           Hidden by default; the seasonal script reveals it during June and adds
-           .sl-rainbow-go to #sl-logo to start the animation.
-           Cream curtains stay put; gradient-filled copies fade in over them, flow,
-           then fade back out — settling on the cream. -->
       <g id="sl-mode-rainbow" style="display:none">
         <path class="sl-curtain" fill="#f5f0e8" opacity="0.35" d="M1315.82,76.28v956.28h-259.08c0,-242.15,93.17,-430.39,133.23,-500.08l42.65,-74.2l-73.14,-44.44c-34.42,-20.91,-102.39,-64.17,-170.86,-118.9c-79.61,-63.61,-133.93,-121.71,-161.49,-172.68l-24.86,-45.99h513.55Z"/>
         <path class="sl-curtain" fill="#f5f0e8" opacity="0.35" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
@@ -1512,7 +1470,6 @@
         <path class="sl-rainbow-fill" fill="url(#sl-rainbow)" d="M184.18,1032.56h259.08c0,-242.17,-93.17,-430.39,-133.23,-500.07l-42.65,-74.2l73.14,-44.44c34.42,-20.91,102.39,-64.17,170.85,-118.89c79.61,-63.62,133.94,-121.72,161.5,-172.69l24.86,-45.98H184.18v956.28Z"/>
       </g>
       <path id="sl-lamp-body" fill="#f5f0e8" d="M793.98,1032.56h175.08c0-265.62,104.07-472.75,144.89-543.77-36.94-22.44-108.08-67.8-180.07-125.33-89.22-71.3-150.67-138.03-183.89-199.48-33.22,61.45-94.66,128.18-183.89,199.48-71.99,57.54-143.13,102.89-180.07,125.33,40.82,71.02,144.89,278.15,144.89,543.77h175.22v87.69H184.18v87.69h1131.65v-87.69h-521.85v-87.69ZM793.98,487.29l228.52,51.56c-40.21,86.81-94.02,231.4-108.22,406.03h-120.3v-457.58ZM585.72,944.88c-14.2-174.63-68.01-319.22-108.22-406.03l228.78-51.62-.13,457.64h-120.43Z"/>
-      <!-- Wordmark -->
       <g id="sl-wordmark" fill="#f5f0e8">
         <path d="M194.02,1383.57c4.76,3.02,9.68,5.31,14.76,6.88,5.08,1.57,9.97,2.35,14.67,2.35,1.97,0,3.67-.13,5.1-.39,1.42-.26,2.6-.64,3.53-1.13.93-.49,1.6-1.12,2-1.87.41-.75.61-1.62.61-2.61,0-1.62-.73-3.08-2.18-4.35-1.45-1.28-3.35-2.51-5.7-3.7-2.35-1.19-5.05-2.41-8.1-3.66-3.05-1.25-6.14-2.67-9.27-4.27-3.13-1.6-6.23-3.44-9.27-5.53-3.05-2.09-5.75-4.56-8.1-7.4-2.35-2.84-4.25-6.17-5.7-9.97-1.45-3.8-2.18-8.2-2.18-13.19,0-5.98,1.09-11.38,3.27-16.2,2.18-4.82,5.3-8.93,9.36-12.32,4.06-3.4,8.98-6.01,14.76-7.84,5.78-1.83,12.29-2.74,19.55-2.74s13.34.73,18.94,2.18c5.6,1.45,10.87,3.57,15.81,6.36l-8.17,29.61c-4.11-2.15-8.31-3.9-12.6-5.27-4.29-1.36-8.63-2.05-13.04-2.05-1.51,0-2.86.12-4.04.35s-2.19.58-3,1.04c-.81.47-1.43,1.04-1.87,1.74s-.65,1.51-.65,2.44c0,1.51.72,2.86,2.17,4.05,1.45,1.19,3.35,2.35,5.69,3.48,2.35,1.13,5.03,2.31,8.04,3.53,3.01,1.22,6.1,2.61,9.26,4.18,3.16,1.57,6.24,3.4,9.26,5.49,3.01,2.09,5.69,4.59,8.04,7.49,2.35,2.9,4.25,6.27,5.69,10.1,1.45,3.83,2.17,8.3,2.17,13.41,0,6.04-1.19,11.51-3.57,16.41-2.38,4.91-5.7,9.1-9.97,12.58-4.27,3.48-9.38,6.18-15.33,8.1-5.95,1.92-12.5,2.87-19.64,2.87-7.9,0-14.89-.87-20.99-2.61-6.1-1.74-11.76-4.32-16.98-7.75l7.66-29.78Z"/>
         <path d="M368.44,1329.84h-29.61v91.7h-38.32v-91.7h-29.61v-32.05h97.53v32.05Z"/>
@@ -1550,8 +1507,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Staff panel -->
   <div id="sl-staff-overlay">
     <button id="sl-staff-back" onclick="closeStaff()">
       <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
@@ -1562,8 +1517,6 @@
       <span class="sl-event-loading" id="sl-staff-loading">Loading...</span>
     </div>
   </div>
-
-  <!-- Support overlay -->
   <div id="sl-support-overlay">
     <button id="sl-support-back" onclick="closeSupport()">
       <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
@@ -1587,8 +1540,6 @@
     <p id="sl-support-tiers-heading">Sponsorship Levels</p>
     <div id="sl-support-tiers"></div>
   </div>
-
-  <!-- Contact overlay -->
   <div id="sl-contact-overlay">
     <button id="sl-contact-back" onclick="closeContact()">
       <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
@@ -1633,8 +1584,6 @@
       <p id="sl-contact-success-sub">Thanks for reaching out — we'll be in touch soon.</p>
     </div>
   </div>
-
-  <!-- Our Story overlay -->
   <div id="sl-story-overlay">
     <button id="sl-story-back" onclick="closeStory()">
       <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
@@ -1658,8 +1607,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Auditions overlay -->
   <div id="sl-auditions-overlay">
     <button id="sl-aud-back" onclick="closeAuditions()">
       <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
@@ -1670,8 +1617,6 @@
       <span class="sl-event-loading">Loading auditions...</span>
     </div>
   </div>
-
-  <!-- Box Office overlay -->
   <div id="sl-boxoffice-overlay">
     <button id="sl-bo-back" onclick="closeBoxOffice()">
       <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
@@ -1682,37 +1627,23 @@
       <span class="sl-event-loading">Loading events...</span>
     </div>
   </div>
-
 </section>
-
 <script>
 (function() {
-
-  /* ── CONFIG ── */
   const API_KEY     = 'AIzaSyCIQYPSLXBH6HuRJ5IWdldLy0bfZdqgNkY';
   const FOLDER_ID   = '19D6Hf1I_Q8exnD0_veAxajk6i00ApQI-';
-
-  // Folder names to exclude from the photo collage (case-insensitive)
-  // e.g. const EXCLUDED_FOLDERS = ['Headshots', 'Archive', 'Behind the Scenes'];
   const EXCLUDED_FOLDERS = ['American Idiot | SLCT 2025', 'American Idiot | SLCT 2022', 'Twisted | SLCT', 'Heathers | SLP 2018', 'Headshots'];
-  /* ──────────── */
-
-  const TILE_HEIGHT_FRAC = 0.31; // each row is ~31% of hero height
-  const SPEED_A = 0.45;  // px per frame, row A (left)
-  const SPEED_B = 0.38;  // px per frame, row B (right, reversed)
-  const SPEED_C = 0.42;  // px per frame, row C (left, different speed)
-  const MAX_PHOTOS = 60; // cap to avoid hammering the API
-
-  // Widths in px for tile variety — pattern repeats
+  const TILE_HEIGHT_FRAC = 0.31;
+  const SPEED_A = 0.45;
+  const SPEED_B = 0.38;
+  const SPEED_C = 0.42;
+  const MAX_PHOTOS = 60;
   const WIDTHS_A = [220, 180, 260, 200, 240, 170, 290, 210, 190, 250, 175, 230];
   const WIDTHS_B = [250, 195, 175, 265, 185, 245, 215, 180, 235, 200, 270, 190];
-
   let rowA, rowB, rowC, animFrame;
-  let allIds = []; // array of {id, folder}
+  let allIds = [];
   let posA = 0, posB = 0, posC = 0;
   let widthA = 0, widthB = 0, widthC = 0;
-
-  /* ── 1. Fetch all image files from the folder (handles shortcuts) ── */
   async function driveList(query, fields, pageSize = 200) {
     const params = new URLSearchParams({
       q: query,
@@ -1730,33 +1661,24 @@
     }
     return data.files || [];
   }
-
   async function fetchPhotos() {
-    // Level 1: get top-level subfolders (Productions + Community Theatre)
     const level1 = await driveList(
       `'${FOLDER_ID}' in parents and trashed=false`,
       'id,name,mimeType,shortcutDetails'
     );
     console.log(`Street Lamp: root contains ${level1.length} items`);
-
     const topFolders = level1.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
-
-    // Level 2: get contents of each top-level folder
     const level2Results = await Promise.all(topFolders.map(f =>
       driveList(
         `'${f.id}' in parents and trashed=false`,
         'id,name,mimeType,shortcutDetails'
       ).then(items => ({ name: f.name, id: f.id, items }))
     ));
-
-    // Collect photos per top-level folder separately so we can balance them
     const poolsPerFolder = [];
-
     for (const { name, items } of level2Results) {
       console.log(`Street Lamp: subfolder "${name}" contains ${items.length} items`);
       const folderFetches = [];
       const directImages  = [];
-
       for (const f of items) {
         if (f.mimeType === 'application/vnd.google-apps.shortcut') {
           const targetId = f.shortcutDetails?.targetId;
@@ -1767,49 +1689,35 @@
           directImages.push({ id: f.id, folder: name });
         }
       }
-
       const subResults = await Promise.all(folderFetches);
       const allForFolder = [...directImages];
       for (const objs of subResults) allForFolder.push(...objs);
-
       console.log(`Street Lamp: "${name}" total photos: ${allForFolder.length}`);
       if (allForFolder.length) poolsPerFolder.push(allForFolder);
     }
-
     if (!poolsPerFolder.length) return [];
-
-    // Balance: Productions gets 2x the photos of Community Theatre
-    // poolsPerFolder[0] = Productions, poolsPerFolder[1] = Community Theatre
-    // Find the smaller pool size, give Community Theatre that many, Productions 2x
     const minSize = Math.min(...poolsPerFolder.map(p => p.length));
     console.log(`Street Lamp: min pool size: ${minSize}`);
-
     const balanced = poolsPerFolder.flatMap(function(pool, i) {
-      // First pool (Productions) gets 2x, others get 1x
       const count = i === 0 ? Math.min(minSize * 2, pool.length) : minSize;
       return shuffle(pool).slice(0, count);
     });
     console.log(`Street Lamp: total balanced images: ${balanced.length}`);
     return balanced;
   }
-
   async function fetchImagesFromFolder(folderId, name = '') {
-    // Check against exclusion list
     if (EXCLUDED_FOLDERS.length && EXCLUDED_FOLDERS.some(ex => ex.toLowerCase() === name.toLowerCase())) {
       console.log(`Street Lamp: skipping excluded folder "${name}"`);
       return [];
     }
     try {
-      // Fetch both images and subfolders in this folder
       const items = await driveList(
         `'${folderId}' in parents and trashed=false`,
         'id,mimeType,name,shortcutDetails',
         200
       );
-
       const imageObjs = [];
       const subFetches = [];
-
       for (const f of items) {
         if (f.mimeType?.startsWith('image/')) {
           imageObjs.push({ id: f.id, folder: name });
@@ -1820,11 +1728,8 @@
           if (targetId) subFetches.push(fetchImagesFromFolder(targetId, f.name));
         }
       }
-
-      // Recurse into subfolders
       const subResults = await Promise.all(subFetches);
       for (const objs of subResults) imageObjs.push(...objs);
-
       console.log(`Street Lamp: folder "${name}" -> ${imageObjs.length} images (including subfolders)`);
       return imageObjs;
     } catch(e) {
@@ -1832,10 +1737,7 @@
       return [];
     }
   }
-
-  /* ── 2. Shuffle with no adjacent duplicates (same id or same folder) ── */
   function shuffle(arr) {
-    // Basic Fisher-Yates first
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -1846,14 +1748,12 @@
 
   function shuffleNoAdjacent(objs) {
     const shuffled = shuffle(objs);
-    // Make up to 3 passes trying to fix adjacencies
     for (let pass = 0; pass < 3; pass++) {
       let fixed = true;
       for (let i = 1; i < shuffled.length; i++) {
         const prev = shuffled[i - 1];
         const curr = shuffled[i];
         if (prev.id === curr.id || prev.folder === curr.folder) {
-          // Find a non-adjacent candidate to swap with
           let swapped = false;
           for (let j = i + 1; j < shuffled.length; j++) {
             const cand = shuffled[j];
@@ -1872,8 +1772,6 @@
     }
     return shuffled;
   }
-
-  /* ── 3. Build a row of tiles ── */
   function makeTile(obj, tileH) {
     const id     = typeof obj === 'object' ? obj.id     : obj;
     const folder = typeof obj === 'object' ? obj.folder : '';
@@ -1895,42 +1793,28 @@
   function buildRow(container, ids, widths, tileH) {
     container.innerHTML = '';
     const vpW      = window.innerWidth;
-    const tileStep = tileH + 10; // tile width + gap
-
-    // Figure out how many tiles fill the viewport
+    const tileStep = tileH + 10;
     const tilesPerVP = Math.ceil(vpW / tileStep) + 1;
-    // Use at least tilesPerVP tiles per copy, rounded to ids.length for clean repeat
     const copyLen = Math.ceil(tilesPerVP / ids.length) * ids.length;
-
-    // Build exactly 2 identical copies so the seam is perfect
     for (let copy = 0; copy < 2; copy++) {
       for (let i = 0; i < copyLen; i++) {
         container.appendChild(makeTile(ids[i % ids.length], tileH));
       }
     }
-
-    // Loop width = exactly one copy
     return copyLen * tileStep;
   }
-
-  /* ── 4. Animation loop ── */
   function animate() {
     posA -= SPEED_A;
     posB += SPEED_B;
     posC -= SPEED_C;
-
     if (posA < -widthA) posA = 0;
     if (posB > 0)       posB = -widthB;
     if (posC < -widthC) posC = 0;
-
     rowA.style.transform = `translateX(${posA}px)`;
     rowB.style.transform = `translateX(${posB}px)`;
     rowC.style.transform = `translateX(${posC}px)`;
-
     animFrame = requestAnimationFrame(animate);
   }
-
-  /* ── 5. Random tile image swap ── */
   function startTileSwapper() {
     if (!allIds.length) return;
 
@@ -2707,25 +2591,14 @@
   }
 
   window.addEventListener('hashchange', handleHash);
-
-  /* ── SEASONAL ANIMATION ───────────────────────────────────────────────
-     June (Pride month) → rainbow curtain sweep; rest of the year → the
-     original curtains-slide-open animation. Both versions live in the SVG
-     as #sl-mode-original (default/visible) and #sl-mode-rainbow (hidden).
-     We just toggle which group shows. This runs synchronously while the
-     logo is still faded out (opacity 0), so there's no visible flicker.
-     If this script never runs, the original animation shows by default. */
   (function() {
-    var isJune = new Date().getMonth() === 5; // 0=Jan … 5=June
-    if (!isJune) return; // original mode is already the default
+    var isJune = new Date().getMonth() === 5;
+    if (!isJune) return;
     var original = document.getElementById('sl-mode-original');
     var rainbow  = document.getElementById('sl-mode-rainbow');
     if (!original || !rainbow) return;
     original.style.display = 'none';
     rainbow.style.display  = '';
-    // Start the animation explicitly once the group is actually rendered. The class
-    // goes on #sl-logo (the gradient's ancestor) so the stop-color flow is reachable.
-    // Forcing a reflow first guarantees it runs rather than relying on the display flip.
     var logo = document.getElementById('sl-logo');
     if (logo) {
       requestAnimationFrame(function() {
@@ -2734,8 +2607,6 @@
       });
     }
   })();
-
-  // Fade logo in immediately, reveal buttons/rule/tagline after animation finishes
   (function() {
     var hero = document.getElementById('sl-hero');
     var logo = document.getElementById('sl-logo');
