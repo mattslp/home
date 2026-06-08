@@ -1601,9 +1601,9 @@
         </div>
       </div>
       <div id="sl-story-btns">
-        <a id="sl-story-staff-btn" href="https://streetlamp.org/staff" target="_blank" rel="noopener">Meet Our Staff</a>
-        <a id="sl-story-board-btn" href="https://streetlamp.org/board" target="_blank" rel="noopener">Board of Directors</a>
-        <a id="sl-story-productions-btn" href="https://streetlamp.org/pastproductions" target="_blank" rel="noopener">Past Productions</a>
+        <a id="sl-story-staff-btn" href="https://streetlamp.org/staff">Meet Our Staff</a>
+        <a id="sl-story-board-btn" href="https://streetlamp.org/board">Board of Directors</a>
+        <a id="sl-story-productions-btn" href="https://streetlamp.org/pastproductions">Past Productions</a>
       </div>
     </div>
   </div>
@@ -2090,7 +2090,7 @@
           var name = (cols[0] || '').replace(/^"|"$/g, '').trim();
           var url  = (cols[1] || '').replace(/^"|"$/g, '').trim();
           if (!name || name.toLowerCase() === 'name') return;
-          html += '<a class="sl-staff-link" href="' + (url || '#') + '" target="_blank" rel="noopener">' + name + '</a>';
+          html += '<a class="sl-staff-link" href="' + (url || '#')>' + name + '</a>';
         });
         container.innerHTML = html || '<span class="sl-event-empty">No links available</span>';
       } catch(err) {
@@ -2179,7 +2179,7 @@
 
       if (!buttons.length) { row.innerHTML = ''; return; }
       row.innerHTML = buttons.map(function(b) {
-        return '<a class="sl-support-cta-btn" href="' + (b.url||'#') + '" target="_blank" rel="noopener">' + b.name + '</a>';
+        return '<a class="sl-support-cta-btn" href="' + (b.url||'#') + b.name + '</a>';
       }).join('');
     } catch(e) {
       row.innerHTML = '';
@@ -2531,7 +2531,7 @@
         if (!events.length) return '';
         var h = '<p class="sl-venue-heading">' + heading + '</p>';
         events.forEach(function(e) {
-          h += '<a class="sl-event-link ' + cssClass + '" href="' + e.url + '" target="_blank" rel="noopener">';
+          h += '<a class="sl-event-link ' + cssClass + '" href="' + e.url;
           h += '<span>' + e.name + '</span>';
           h += '</a>';
         });
@@ -2738,7 +2738,7 @@
             h += '</span>';
           } else {
             var href = e.slug ? 'https://streetlamp.org/shows/?id=' + e.slug : (e.url || '#');
-            h += '<a class="sl-event-link ' + cssClass + '" href="' + href + '" target="_blank" rel="noopener">';
+            h += '<a class="sl-event-link ' + cssClass + '" href="' + href;
             h += '<span>' + e.name + '</span>';
             h += '</a>';
           }
