@@ -189,7 +189,7 @@ body {
         <div class="field"><label for="sl_pronouns">Preferred Pronouns <span class="opt">(optional)</span></label><input type="text" id="sl_pronouns" placeholder="e.g. she/her, he/him, they/them"></div>
         <div class="row"><div class="field"><label for="sl_email">Email <span class="req">*</span></label><input type="email" id="sl_email" placeholder="you@example.com" required><div class="err-msg">Please enter a valid email.</div></div>
         <div class="field"><label for="sl_phone">Phone <span class="req">*</span></label><input type="tel" id="sl_phone" placeholder="(555) 555-5555" required><div class="err-msg">Please enter your phone number.</div></div></div>
-        <div class="row"><div class="field"><label for="sl_age">Age <span class="opt">(optional)</span></label><input type="number" id="sl_age" min="4" max="120" placeholder="e.g. 15"></div>
+        <div class="row"><div class="field"><label for="sl_age">Age <span class="req">*</span></label><input type="number" id="sl_age" min="4" max="120" placeholder="e.g. 15" required><div class="err-msg">Please enter your age.</div></div>
         <div class="field"><label for="sl_tshirtSize">T-Shirt Size <span class="opt">(optional)</span></label><input type="text" id="sl_tshirtSize" placeholder="e.g. Adult M"></div></div>
         <div class="row"><div class="field"><label for="sl_height">Height <span class="opt">(optional)</span></label><input type="text" id="sl_height" placeholder="e.g. 5'6&quot;"></div>
         <div class="field"><label for="sl_hairColor">Hair Color <span class="opt">(optional)</span></label><input type="text" id="sl_hairColor" placeholder="e.g. Brown"></div></div>
@@ -206,7 +206,7 @@ body {
         <div class="field"><label for="sl_show">Show / Production <span class="req">*</span></label><select id="sl_show" required><option value="" disabled selected>Loading shows...</option></select><div class="err-msg">Please select a show.</div></div>
         <div class="row"><div class="field"><label for="sl_role1">1st Choice Role <span class="req">*</span></label><input type="text" id="sl_role1" placeholder="e.g. Annie" required><div class="err-msg">Please enter your first choice role.</div></div>
         <div class="field"><label for="sl_role2">2nd Choice Role <span class="opt">(optional)</span></label><input type="text" id="sl_role2" placeholder="e.g. Miss Hannigan"></div></div>
-        <div class="row"><div class="field"><label for="sl_considerOther">Would you consider other roles? <span class="req">*</span></label><select id="sl_considerOther" required><option value="" disabled selected>Select</option><option value="Yes">Yes</option><option value="No">No</option></select><div class="err-msg">Please select an option.</div></div>
+        <div class="row"><div class="field"><label for="sl_considerOther">Would you accept an ensemble role? <span class="req">*</span></label><select id="sl_considerOther" required><option value="" disabled selected>Select</option><option value="Yes">Yes</option><option value="No">No</option></select><div class="err-msg">Please select an option.</div></div>
         <div class="field"><label for="sl_anyGender">Would you consider playing a role of any gender? <span class="req">*</span></label><select id="sl_anyGender" required><option value="" disabled selected>Select</option><option value="Yes">Yes</option><option value="No">No</option></select><div class="err-msg">Please select an option.</div></div></div>
         <div class="field"><label for="sl_experience">Previous Experience <span class="req">*</span></label><textarea id="sl_experience" rows="3" placeholder="List any relevant theatre, singing, or dance experience..."></textarea><div class="err-msg">Please describe your experience.</div></div>
         <div class="field"><label for="sl_conflicts">Schedule Conflicts <span class="req">*</span></label><textarea id="sl_conflicts" rows="2" placeholder="List any dates you are unavailable for rehearsals or performances..."></textarea><div class="err-msg">Please list any conflicts, or write "None".</div></div>
@@ -359,7 +359,7 @@ body {
   function clearResume(){selectedResume=null;resumeInput.value='';resumePrev.classList.remove('active');resumeArea.style.display=''}
 
   // ── Validation ──────────────────────────────────────
-  var baseReqIds=['sl_fullName','sl_email','sl_phone','sl_location','sl_show','sl_role1','sl_considerOther','sl_anyGender','sl_experience','sl_conflicts'];
+  var baseReqIds=['sl_fullName','sl_email','sl_phone','sl_age','sl_location','sl_show','sl_role1','sl_considerOther','sl_anyGender','sl_experience','sl_conflicts'];
 
   function validate(){
     var ok=true;
