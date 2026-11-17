@@ -322,7 +322,7 @@
   function setCategory(name) {
     activeCat = name;
     [...filtersEl.children].forEach(b => b.setAttribute('aria-pressed', b.textContent === name ? 'true' : 'false'));
-    current = name === 'All' ? shuffle(all) : all.filter(p => p.cat === name);
+    current = shuffle(name === 'All' ? all : all.filter(p => p.cat === name));
     countEl.textContent = current.length + (current.length === 1 ? ' photo' : ' photos');
     resetGrid();
     renderBatch();
