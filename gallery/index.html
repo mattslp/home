@@ -219,6 +219,8 @@
   const API_KEY   = 'AIzaSyCIQYPSLXBH6HuRJ5IWdldLy0bfZdqgNkY';
   const FOLDER_ID = '19D6Hf1I_Q8exnD0_veAxajk6i00ApQI-';
   const EXCLUDED_FOLDERS = ['American Idiot | SLCT 2025', 'American Idiot | SLCT 2022', 'Twisted | SLCT', 'Heathers | SLP 2018', 'Headshots'];
+  // Folder names left out of the caption path (matched case-insensitively, at any level)
+  const HIDDEN_PATH_NAMES = ['Productions', 'Community Theatre'];
   const BATCH_SIZE = 48;           // photos added per scroll/click
   const THUMB_W    = 600;          // grid thumbnail width
   const FULL_W     = 2000;         // lightbox image width
@@ -231,6 +233,8 @@
 
   const excluded = new Set(EXCLUDED_FOLDERS.map(s => s.toLowerCase()));
   const isExcluded = name => excluded.has((name || '').toLowerCase());
+  const hidden = new Set(HIDDEN_PATH_NAMES.map(s => s.toLowerCase()));
+  const pathLabel = path => path.filter(n => !hidden.has((n || '').toLowerCase())).join(' / ');
   const visited = new Set();
 
   let all = [];          // every photo: {id, cat, sub, w, h}
@@ -263,13 +267,14 @@
   }
 
   // Walk a folder (and all subfolders), collecting images.
-  // cat = top-level album name, sub = the folder the photo actually lives in.
-  async function walk(folderId, cat, sub) {
+  // cat = top-level album name (used for the filter buttons),
+  // path = every folder name from the root down to this folder (used for captions).
+  async function walk(folderId, cat, path) {
     if (visited.has(folderId)) return [];
     visited.add(folderId);
     let items;
     try { items = await driveList(folderId); }
-    catch (e) { console.warn('Gallery: failed folder', sub, e); return []; }
+    catch (e) { console.warn('Gallery: failed folder', path.join(' / '), e); return []; }
 
     const out = [], jobs = [];
     for (const f of items) {
@@ -281,12 +286,12 @@
       }
       if (mime === FOLDER_MIME) {
         if (isExcluded(f.name)) continue;
-        jobs.push(walk(id, cat || f.name, f.name));
+        jobs.push(walk(id, cat || f.name, [...path, f.name]));
       } else if (mime && mime.startsWith('image/')) {
         const m = f.imageMediaMetadata || {};
         let w = m.width || 4, h = m.height || 3;
         if (m.rotation === 1 || m.rotation === 3) [w, h] = [h, w];   // sideways EXIF
-        out.push({ id, cat: cat || 'More', sub: sub || cat || 'More', w, h });
+        out.push({ id, cat: cat || 'More', label: pathLabel(path), w, h });
       }
     }
     for (const r of await Promise.all(jobs)) out.push(...r);
@@ -368,10 +373,10 @@
     tile.className = 'tile';
     tile.style.aspectRatio = p.w + ' / ' + p.h;
     tile.style.animationDelay = Math.min((index % BATCH_SIZE) * 25, 500) + 'ms';
-    tile.setAttribute('aria-label', 'Open photo from ' + p.sub);
+    tile.setAttribute('aria-label', p.label ? 'Open photo from ' + p.label : 'Open photo');
 
     const img = document.createElement('img');
-    img.alt = p.sub + ' photo';
+    img.alt = p.label ? p.label + ' photo' : 'Photo';
     img.loading = 'lazy';
     img.decoding = 'async';
     img.src = `https://lh3.googleusercontent.com/d/${p.id}=w${THUMB_W}`;
@@ -379,10 +384,12 @@
     img.onerror = () => { tile.style.display = 'none'; };
     tile.appendChild(img);
 
-    const cap = document.createElement('span');
-    cap.className = 'cap';
-    cap.textContent = p.sub;
-    tile.appendChild(cap);
+    if (p.label) {
+      const cap = document.createElement('span');
+      cap.className = 'cap';
+      cap.textContent = p.label;
+      tile.appendChild(cap);
+    }
 
     tile.addEventListener('click', () => openLightbox(index));
     cols[k].appendChild(tile);
@@ -423,14 +430,19 @@
     const p = current[lbIndex];
     lbImg.classList.remove('ready');
     lbSpin.style.display = '';
-    lbImg.alt = p.sub + ' photo';
+    lbImg.alt = p.label ? p.label + ' photo' : 'Photo';
     lbImg.onload = () => { lbImg.classList.add('ready'); lbSpin.style.display = 'none'; };
     lbImg.onerror = () => { lbSpin.textContent = 'Unable to load photo'; };
     lbSpin.textContent = 'Loading…';
     lbImg.src = `https://lh3.googleusercontent.com/d/${p.id}=w${FULL_W}`;
     lbMeta.innerHTML = '';
-    const b = document.createElement('b'); b.textContent = p.sub;
-    lbMeta.append(b, '  ·  ' + (lbIndex + 1) + ' / ' + current.length);
+    const counter = (lbIndex + 1) + ' / ' + current.length;
+    if (p.label) {
+      const b = document.createElement('b'); b.textContent = p.label;
+      lbMeta.append(b, '  ·  ' + counter);
+    } else {
+      lbMeta.textContent = counter;
+    }
     // warm the cache for neighbours
     [lbIndex + 1, lbIndex - 1].forEach(n => {
       const q = current[(n + current.length) % current.length];
@@ -490,10 +502,10 @@
           if (!id) continue;
         }
         if (mime === FOLDER_MIME) {
-          if (!isExcluded(f.name)) jobs.push(walk(id, f.name, f.name));
+          if (!isExcluded(f.name)) jobs.push(walk(id, f.name, [f.name]));
         } else if (mime && mime.startsWith('image/')) {
           const m = f.imageMediaMetadata || {};
-          jobs.push(Promise.resolve([{ id, cat: 'More', sub: 'More', w: m.width || 4, h: m.height || 3 }]));
+          jobs.push(Promise.resolve([{ id, cat: 'More', label: '', w: m.width || 4, h: m.height || 3 }]));
         }
       }
       all = (await Promise.all(jobs)).flat();
