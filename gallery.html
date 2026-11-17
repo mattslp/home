@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://streetlamp.org/gallery">
+  <meta property="og:title" content="Photo Gallery | Street Lamp | Black Box Theatre">
+  <meta property="og:site_name" content="Street Lamp | Black Box Theatre">
+  <meta property="og:description" content="Photos from Street Lamp productions, classes, camps and community events.">
+  <meta property="og:image" content="https://drive.google.com/thumbnail?id=1Ue1T44BY10uG5Kvd1Xkp9OelwRDkuDD_&sz=s4000">
+  <link rel="stylesheet" href="https://use.typekit.net/wby1ytb.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+  <title>Photo Gallery | Street Lamp | Black Box Theatre</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #020202;
+      --panel: #0a0a0a;
+      --cream: #f5f0e8;
+      --cream-90: rgba(245,240,232,0.9);
+      --cream-70: rgba(245,240,232,0.7);
+      --cream-50: rgba(245,240,232,0.5);
+      --cream-20: rgba(245,240,232,0.2);
+      --cream-08: rgba(245,240,232,0.08);
+      --font: 'komet', 'Jost', sans-serif;
+      --gap: 10px;
+    }
+    html { background: var(--bg); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--cream);
+      font-family: var(--font);
+      line-height: 1.5;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Header ── */
+    header {
+      padding: calc(24px + env(safe-area-inset-top, 0px)) 24px 0;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .back {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-weight: 300; font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--cream-50); transition: color 0.2s;
+    }
+    .back:hover, .back:focus-visible { color: var(--cream); }
+    .back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+
+    .title-block { text-align: center; padding: 36px 0 8px; }
+    h1 {
+      font-weight: 900; font-size: clamp(1.8rem, 5vw, 2.6rem);
+      text-transform: uppercase; letter-spacing: 0; color: var(--cream-90);
+    }
+    .rule { width: 48px; height: 1px; background: var(--cream-50); margin: 18px auto 14px; }
+    #count {
+      font-weight: 300; font-size: 0.68rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--cream-50); min-height: 1.2em;
+    }
+
+    /* ── Filters ── */
+    #filters {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+      padding: 22px 0 28px;
+    }
+    .chip {
+      padding: 9px 18px;
+      border: 1px solid var(--cream-20);
+      border-radius: 2px;
+      font-weight: 300; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--cream-70);
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .chip:hover, .chip:focus-visible { color: var(--cream); border-color: var(--cream-50); }
+    .chip[aria-pressed="true"] { color: var(--bg); background: var(--cream); border-color: var(--cream); font-weight: 400; }
+    .chip:focus-visible, .tile:focus-visible, .lb-btn:focus-visible, #more:focus-visible, .back:focus-visible {
+      outline: 2px solid var(--cream); outline-offset: 3px;
+    }
+
+    /* ── Masonry grid ── */
+    main { max-width: 1600px; margin: 0 auto; padding: 0 24px 64px; }
+    #grid { display: flex; gap: var(--gap); align-items: flex-start; }
+    .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--gap); }
+    .tile {
+      display: block; width: 100%; position: relative; overflow: hidden;
+      border-radius: 4px; background: var(--panel);
+      opacity: 0; transform: translateY(8px);
+      animation: tile-in 0.5s ease forwards;
+    }
+    @keyframes tile-in { to { opacity: 1; transform: none; } }
+    .tile img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; display: block; opacity: 0;
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4,0,0.2,1), filter 0.3s;
+    }
+    .tile img.loaded { opacity: 0.9; }
+    .tile:hover img, .tile:focus-visible img { opacity: 1; transform: scale(1.03); }
+    .tile .cap {
+      position: absolute; left: 0; right: 0; bottom: 0; padding: 28px 12px 10px;
+      background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+      font-weight: 300; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--cream-90); text-align: left;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .tile:hover .cap, .tile:focus-visible .cap { opacity: 1; }
+    @media (hover: none) { .tile .cap { display: none; } }
+
+    #status {
+      text-align: center; padding: 60px 0;
+      font-weight: 300; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--cream-50);
+    }
+    #status[hidden] { display: none; }
+    .pulse { animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.35; } }
+
+    #more-wrap { text-align: center; padding-top: 36px; }
+    #more-wrap[hidden] { display: none; }
+    #more {
+      padding: 13px 30px; border: 1px solid var(--cream-50); border-radius: 2px;
+      font-weight: 300; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--cream-90); transition: background 0.2s, color 0.2s;
+    }
+    #more:hover { background: var(--cream); color: var(--bg); }
+
+    /* ── Lightbox ── */
+    #lb {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(2,2,2,0.96);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+      touch-action: pan-y;
+    }
+    #lb.open { opacity: 1; pointer-events: auto; }
+    #lb-img {
+      max-width: min(94vw, 1800px); max-height: 86vh; max-height: 86dvh;
+      object-fit: contain; border-radius: 2px;
+      opacity: 0; transition: opacity 0.35s ease;
+      user-select: none; -webkit-user-drag: none;
+    }
+    #lb-img.ready { opacity: 1; }
+    #lb-spin {
+      position: absolute; font-weight: 300; font-size: 0.68rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--cream-50); pointer-events: none;
+    }
+    .lb-btn {
+      position: absolute; display: flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; color: var(--cream-70); transition: color 0.2s;
+      border-radius: 50%;
+    }
+    .lb-btn:hover { color: var(--cream); }
+    .lb-btn svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    #lb-close { top: calc(14px + env(safe-area-inset-top, 0px)); right: 14px; }
+    #lb-prev { left: 12px; top: 50%; transform: translateY(-50%); }
+    #lb-next { right: 12px; top: 50%; transform: translateY(-50%); }
+    #lb-meta {
+      position: absolute; left: 0; right: 0; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      text-align: center; font-weight: 300; font-size: 0.66rem; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--cream-50); padding: 0 16px;
+    }
+    #lb-meta b { font-weight: 400; color: var(--cream-90); }
+
+    @media (max-width: 640px) {
+      header { padding-left: 16px; padding-right: 16px; }
+      main { padding-left: 10px; padding-right: 10px; }
+      :root { --gap: 6px; }
+      .lb-btn { width: 44px; height: 44px; }
+      #lb-prev { left: 2px; } #lb-next { right: 2px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tile { animation: none; opacity: 1; transform: none; }
+      .tile img, #lb, #lb-img { transition: none; }
+      .pulse { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="https://streetlamp.org">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
+      Back
+    </a>
+    <div class="title-block">
+      <h1>Photo Gallery</h1>
+      <div class="rule"></div>
+      <p id="count" aria-live="polite"></p>
+    </div>
+    <nav id="filters" aria-label="Filter photos by album" hidden></nav>
+  </header>
+
+  <main>
+    <div id="grid" aria-label="Photo gallery"></div>
+    <p id="status" class="pulse" role="status">Loading photos…</p>
+    <div id="more-wrap" hidden><button id="more">Load more</button></div>
+  </main>
+
+  <div id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer" aria-hidden="true">
+    <button class="lb-btn" id="lb-close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="lb-btn" id="lb-prev" aria-label="Previous photo"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="lb-btn" id="lb-next" aria-label="Next photo"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    <span id="lb-spin">Loading…</span>
+    <img id="lb-img" alt="">
+    <div id="lb-meta"></div>
+  </div>
+
+<script>
+(function () {
+  /* ── Config (same source and exclusions as the homepage) ── */
+  const API_KEY   = 'AIzaSyCIQYPSLXBH6HuRJ5IWdldLy0bfZdqgNkY';
+  const FOLDER_ID = '19D6Hf1I_Q8exnD0_veAxajk6i00ApQI-';
+  const EXCLUDED_FOLDERS = ['American Idiot | SLCT 2025', 'American Idiot | SLCT 2022', 'Twisted | SLCT', 'Heathers | SLP 2018', 'Headshots'];
+  const BATCH_SIZE = 48;           // photos added per scroll/click
+  const THUMB_W    = 600;          // grid thumbnail width
+  const FULL_W     = 2000;         // lightbox image width
+  const FOLDER_MIME = 'application/vnd.google-apps.folder';
+  const SHORTCUT_MIME = 'application/vnd.google-apps.shortcut';
+
+  const $ = id => document.getElementById(id);
+  const grid = $('grid'), statusEl = $('status'), countEl = $('count'),
+        filtersEl = $('filters'), moreWrap = $('more-wrap'), moreBtn = $('more');
+
+  const excluded = new Set(EXCLUDED_FOLDERS.map(s => s.toLowerCase()));
+  const isExcluded = name => excluded.has((name || '').toLowerCase());
+  const visited = new Set();
+
+  let all = [];          // every photo: {id, cat, sub, w, h}
+  let current = [];      // photos in the active filter
+  let shown = 0;         // how many of `current` are rendered
+  let activeCat = 'All';
+  let cols = [], colHeights = [];
+
+  /* ── Drive helpers ── */
+  async function driveList(folderId) {
+    const files = [];
+    let pageToken = '';
+    do {
+      const params = new URLSearchParams({
+        q: `'${folderId}' in parents and trashed=false`,
+        fields: 'nextPageToken,files(id,name,mimeType,shortcutDetails,imageMediaMetadata(width,height,rotation))',
+        key: API_KEY,
+        pageSize: 1000,
+        supportsAllDrives: 'true',
+        includeItemsFromAllDrives: 'true',
+      });
+      if (pageToken) params.set('pageToken', pageToken);
+      const res = await fetch('https://www.googleapis.com/drive/v3/files?' + params);
+      const data = await res.json();
+      if (data.error) { console.error('Gallery Drive API error:', data.error.message); break; }
+      files.push(...(data.files || []));
+      pageToken = data.nextPageToken || '';
+    } while (pageToken);
+    return files;
+  }
+
+  // Walk a folder (and all subfolders), collecting images.
+  // cat = top-level album name, sub = the folder the photo actually lives in.
+  async function walk(folderId, cat, sub) {
+    if (visited.has(folderId)) return [];
+    visited.add(folderId);
+    let items;
+    try { items = await driveList(folderId); }
+    catch (e) { console.warn('Gallery: failed folder', sub, e); return []; }
+
+    const out = [], jobs = [];
+    for (const f of items) {
+      let mime = f.mimeType, id = f.id;
+      if (mime === SHORTCUT_MIME) {
+        mime = f.shortcutDetails && f.shortcutDetails.targetMimeType;
+        id = f.shortcutDetails && f.shortcutDetails.targetId;
+        if (!id) continue;
+      }
+      if (mime === FOLDER_MIME) {
+        if (isExcluded(f.name)) continue;
+        jobs.push(walk(id, cat || f.name, f.name));
+      } else if (mime && mime.startsWith('image/')) {
+        const m = f.imageMediaMetadata || {};
+        let w = m.width || 4, h = m.height || 3;
+        if (m.rotation === 1 || m.rotation === 3) [w, h] = [h, w];   // sideways EXIF
+        out.push({ id, cat: cat || 'More', sub: sub || cat || 'More', w, h });
+      }
+    }
+    for (const r of await Promise.all(jobs)) out.push(...r);
+    return out;
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  /* ── Filters ── */
+  function buildFilters() {
+    const cats = [...new Set(all.map(p => p.cat))].sort((a, b) => a.localeCompare(b));
+    if (cats.length < 2) return;
+    filtersEl.hidden = false;
+    filtersEl.innerHTML = '';
+    ['All', ...cats].forEach(name => {
+      const b = document.createElement('button');
+      b.className = 'chip';
+      b.type = 'button';
+      b.textContent = name;
+      b.setAttribute('aria-pressed', name === activeCat ? 'true' : 'false');
+      b.addEventListener('click', () => setCategory(name));
+      filtersEl.appendChild(b);
+    });
+  }
+
+  function setCategory(name) {
+    activeCat = name;
+    [...filtersEl.children].forEach(b => b.setAttribute('aria-pressed', b.textContent === name ? 'true' : 'false'));
+    current = name === 'All' ? shuffle(all) : all.filter(p => p.cat === name);
+    countEl.textContent = current.length + (current.length === 1 ? ' photo' : ' photos');
+    resetGrid();
+    renderBatch();
+    if (history.replaceState) history.replaceState(null, '', name === 'All' ? location.pathname + location.search : '#' + encodeURIComponent(name));
+  }
+
+  /* ── Masonry ── */
+  function colCount() {
+    const w = grid.clientWidth || window.innerWidth;
+    return Math.max(2, Math.min(6, Math.floor(w / 280)));
+  }
+
+  function resetGrid() {
+    grid.innerHTML = '';
+    cols = []; colHeights = []; shown = 0;
+    const n = colCount();
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('div');
+      c.className = 'col';
+      grid.appendChild(c);
+      cols.push(c); colHeights.push(0);
+    }
+  }
+
+  function renderBatch() {
+    const end = Math.min(shown + BATCH_SIZE, current.length);
+    for (let i = shown; i < end; i++) addTile(current[i], i);
+    shown = end;
+    statusEl.hidden = true;
+    moreWrap.hidden = shown >= current.length;
+    if (!current.length) { statusEl.hidden = false; statusEl.classList.remove('pulse'); statusEl.textContent = 'No photos found.'; }
+    watchSentinel();
+  }
+
+  function addTile(p, index) {
+    // place in the currently shortest column so columns stay balanced
+    let k = 0;
+    for (let i = 1; i < colHeights.length; i++) if (colHeights[i] < colHeights[k]) k = i;
+    colHeights[k] += p.h / p.w;
+
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'tile';
+    tile.style.aspectRatio = p.w + ' / ' + p.h;
+    tile.style.animationDelay = Math.min((index % BATCH_SIZE) * 25, 500) + 'ms';
+    tile.setAttribute('aria-label', 'Open photo from ' + p.sub);
+
+    const img = document.createElement('img');
+    img.alt = p.sub + ' photo';
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.src = `https://lh3.googleusercontent.com/d/${p.id}=w${THUMB_W}`;
+    img.onload = () => img.classList.add('loaded');
+    img.onerror = () => { tile.style.display = 'none'; };
+    tile.appendChild(img);
+
+    const cap = document.createElement('span');
+    cap.className = 'cap';
+    cap.textContent = p.sub;
+    tile.appendChild(cap);
+
+    tile.addEventListener('click', () => openLightbox(index));
+    cols[k].appendChild(tile);
+  }
+
+  // Auto-load more as the user nears the bottom (button stays as a fallback)
+  let io = null;
+  const sentinel = document.createElement('div');
+  function watchSentinel() {
+    if (!('IntersectionObserver' in window)) return;
+    if (!io) io = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting) && shown < current.length) renderBatch();
+    }, { rootMargin: '800px 0px' });
+    io.disconnect();
+    if (shown < current.length) { moreWrap.before(sentinel); io.observe(sentinel); }
+  }
+  moreBtn.addEventListener('click', renderBatch);
+
+  let lastCols = 0, resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (colCount() === lastCols || !current.length) return;
+      const keep = shown;
+      resetGrid(); lastCols = cols.length;
+      for (let i = 0; i < keep; i++) addTile(current[i], BATCH_SIZE);   // no stagger on rebuild
+      shown = keep;
+    }, 200);
+  });
+
+  /* ── Lightbox ── */
+  const lb = $('lb'), lbImg = $('lb-img'), lbMeta = $('lb-meta'), lbSpin = $('lb-spin');
+  let lbIndex = 0, lastFocus = null;
+
+  function showLightbox(i) {
+    if (!current.length) return;
+    lbIndex = (i + current.length) % current.length;
+    const p = current[lbIndex];
+    lbImg.classList.remove('ready');
+    lbSpin.style.display = '';
+    lbImg.alt = p.sub + ' photo';
+    lbImg.onload = () => { lbImg.classList.add('ready'); lbSpin.style.display = 'none'; };
+    lbImg.onerror = () => { lbSpin.textContent = 'Unable to load photo'; };
+    lbSpin.textContent = 'Loading…';
+    lbImg.src = `https://lh3.googleusercontent.com/d/${p.id}=w${FULL_W}`;
+    lbMeta.innerHTML = '';
+    const b = document.createElement('b'); b.textContent = p.sub;
+    lbMeta.append(b, '  ·  ' + (lbIndex + 1) + ' / ' + current.length);
+    // warm the cache for neighbours
+    [lbIndex + 1, lbIndex - 1].forEach(n => {
+      const q = current[(n + current.length) % current.length];
+      new Image().src = `https://lh3.googleusercontent.com/d/${q.id}=w${FULL_W}`;
+    });
+  }
+
+  function openLightbox(i) {
+    lastFocus = document.activeElement;
+    lb.classList.add('open');
+    lb.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    showLightbox(i);
+    $('lb-close').focus();
+  }
+  function closeLightbox() {
+    lb.classList.remove('open');
+    lb.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lbImg.removeAttribute('src');
+    if (lastFocus) lastFocus.focus();
+  }
+
+  $('lb-close').addEventListener('click', closeLightbox);
+  $('lb-prev').addEventListener('click', e => { e.stopPropagation(); showLightbox(lbIndex - 1); });
+  $('lb-next').addEventListener('click', e => { e.stopPropagation(); showLightbox(lbIndex + 1); });
+  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowRight') showLightbox(lbIndex + 1);
+    else if (e.key === 'ArrowLeft') showLightbox(lbIndex - 1);
+    else if (e.key === 'Tab') {            // keep focus inside the dialog
+      const f = [$('lb-close'), $('lb-prev'), $('lb-next')];
+      const i = f.indexOf(document.activeElement);
+      e.preventDefault();
+      f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+    }
+  });
+  let tx = 0, ty = 0;                      // swipe left/right on touch screens
+  lb.addEventListener('touchstart', e => { tx = e.changedTouches[0].clientX; ty = e.changedTouches[0].clientY; }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) showLightbox(lbIndex + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  /* ── Boot ── */
+  async function init() {
+    try {
+      const root = await driveList(FOLDER_ID);
+      const jobs = [];
+      for (const f of root) {
+        let mime = f.mimeType, id = f.id;
+        if (mime === SHORTCUT_MIME) {
+          mime = f.shortcutDetails && f.shortcutDetails.targetMimeType;
+          id = f.shortcutDetails && f.shortcutDetails.targetId;
+          if (!id) continue;
+        }
+        if (mime === FOLDER_MIME) {
+          if (!isExcluded(f.name)) jobs.push(walk(id, f.name, f.name));
+        } else if (mime && mime.startsWith('image/')) {
+          const m = f.imageMediaMetadata || {};
+          jobs.push(Promise.resolve([{ id, cat: 'More', sub: 'More', w: m.width || 4, h: m.height || 3 }]));
+        }
+      }
+      all = (await Promise.all(jobs)).flat();
+      // de-dupe (shortcuts can point at the same photo twice)
+      const seen = new Set();
+      all = all.filter(p => !seen.has(p.id) && seen.add(p.id));
+    } catch (e) {
+      console.error('Gallery: failed to load', e);
+    }
+
+    if (!all.length) {
+      statusEl.classList.remove('pulse');
+      statusEl.textContent = 'Photos are unavailable right now. Please try again soon.';
+      return;
+    }
+    buildFilters();
+    const hash = decodeURIComponent(location.hash.slice(1));
+    const start = [...new Set(all.map(p => p.cat))].includes(hash) ? hash : 'All';
+    lastCols = colCount();
+    setCategory(start);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
